@@ -15,7 +15,14 @@ REFERRAL_REPO_PATH = "/Users/srinivas/Orchestrate Github/orchestrate-user-referr
 GITHUB_USERNAME = "unmistakablecreative"
 GITHUB_REPO = "orchestrate-user-referrals"
 
-# Reads referrer ID from Docker container
+EXCLUDE_NAMES = {
+    "_paste_into_gpt.txt",
+    "custom_instructions.json",
+    "openapi.yaml",
+    "referrer.txt",
+    "orchestrate-core-runtime"
+}
+
 def get_referrer_id():
     container_path = "/tmp/orchestrate/system_identity.json"
     local_temp = "/tmp/system_identity.json"
@@ -30,15 +37,18 @@ def create_zip(referrer_id, recipient_name):
     bundle_target_path = os.path.join(REFERRAL_REPO_PATH, "Orchestrate_OS_Installer")
 
     subprocess.run(["rm", "-rf", bundle_target_path], check=True)
-    subprocess.run(["cp", "-R", INSTALLER_SOURCE, REFERRAL_REPO_PATH], check=True)
+    subprocess.run(["cp", "-R", INSTALLER_SOURCE, bundle_target_path], check=True)
 
-    ref_file = os.path.join(bundle_target_path, "referrer.txt")
-    with open(ref_file, "w") as f:
+    # Insert referrer ID
+    with open(os.path.join(bundle_target_path, "referrer.txt"), "w") as f:
         f.write(referrer_id)
 
+    # Create filtered ZIP
     with zipfile.ZipFile(zip_path, "w", zipfile.ZIP_DEFLATED) as zipf:
         for root, _, files in os.walk(bundle_target_path):
             for file in files:
+                if file in EXCLUDE_NAMES:
+                    continue
                 full_path = os.path.join(root, file)
                 rel_path = os.path.relpath(full_path, REFERRAL_REPO_PATH)
                 zipf.write(full_path, arcname=rel_path)
