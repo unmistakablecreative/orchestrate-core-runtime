@@ -19,8 +19,7 @@ EXCLUDE_NAMES = {
     "_paste_into_gpt.txt",
     "custom_instructions.json",
     "openapi.yaml",
-    "referrer.txt",
-    "orchestrate-core-runtime"
+    "referrer.txt"
 }
 
 def get_referrer_id():
@@ -46,9 +45,14 @@ def create_zip(referrer_id, recipient_name):
     with zipfile.ZipFile(zip_path, "w", zipfile.ZIP_DEFLATED) as zipf:
         for root, _, files in os.walk(bundle_target_path):
             for file in files:
+                full_path = os.path.join(root, file)
+
+                if os.path.islink(full_path):
+                    continue
+
                 if file in EXCLUDE_NAMES:
                     continue
-                full_path = os.path.join(root, file)
+
                 rel_path = os.path.relpath(full_path, REFERRAL_REPO_PATH)
                 zipf.write(full_path, arcname=rel_path)
 
