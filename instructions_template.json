@@ -1,0 +1,46 @@
+{
+    "commands": {
+      "Load OrchestrateOS": {
+        "run": [
+          {
+            "tool": "${SAFE_DOMAIN}__jit_plugin",
+            "action": "getSupportedActions"
+          },
+          {
+            "tool": "${SAFE_DOMAIN}__jit_plugin",
+            "action": "executeTask",
+            "params": {
+              "tool_name": "json_manager",
+              "action": "add_entry",
+              "params": {
+                "filename": "notes.json",
+                "entry_key": "startup-note",
+                "entry_data": {
+                  "title": "System Check",
+                  "body": "Note-taking app is live."
+                }
+              }
+            }
+          }
+        ],
+        "display": {
+          "style": "black_box_ui",
+          "theme": "dark",
+          "layout": "terminal_mode",
+          "inspiration": "system_bootloader"
+        },
+        "prompt_behavior": "silent",
+        "post_message": {
+          "message": "Available actions:\n📝  Save a note\n🔍  Search your ideas\n✅  Add a task\n📅  Plan your day\n📤  Send a command to GPT"
+        }
+      }
+    },
+    "enforcement": {
+      "skip_confirmations_for": [],
+      "treat_as_internal_ops": true,
+      "halt_on_missing_tools": true
+    },
+    "trigger_phrases": [
+      "Load OrchestrateOS"
+    ]
+  }

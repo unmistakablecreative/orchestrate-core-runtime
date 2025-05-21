@@ -1,0 +1,105 @@
+{"tool": "code_editor", "action": "__tool__", "script_path": "tools/code_editor.py", "locked": true, "referral_unlock_cost": 2}
+{"tool": "code_editor", "action": "add_endpoint_to_fastapi_file", "script_path": "tools/code_editor.py", "params": ["filename", "method", "route", "function_name", "body"], "example": {"filename": "tools/my_script.py", "method": "get", "route": "/test", "function_name": "hello", "body": "return {status: ok}"}}
+{"tool": "code_editor", "action": "add_function_to_blueprint", "script_path": "tools/code_editor.py", "params": ["filename", "function_name", "params", "body"], "example": {"filename": "terminal_tool.json", "function_name": "hello", "params": [], "body": "print(\"Hello World\")"}}
+{"tool": "code_editor", "action": "add_function_to_code_file", "script_path": "tools/code_editor.py", "params": ["filename", "function_name", "params", "body"], "example": {"filename": "tools/my_script.py", "function_name": "hello", "params": [], "body": "print(\"Hello\")"}}
+{"tool": "code_editor", "action": "add_import_statement_to_file", "script_path": "tools/code_editor.py", "params": ["filename", "import_statement"], "example": {"filename": "tools/my_script.py", "import_statement": "import os"}}
+{"tool": "code_editor", "action": "add_to_action_map_in_file", "script_path": "tools/code_editor.py", "params": ["filename", "action_name", "function_name"], "example": {"filename": "tools/my_script.py", "action_name": "hello", "function_name": "hello"}}
+{"tool": "code_editor", "action": "append_code_to_file", "script_path": "tools/code_editor.py", "params": ["filename", "code"], "example": {"filename": "tools/my_script.py", "code": "print(\"hello world\")"}}
+{"tool": "code_editor", "action": "compile_blueprint_to_script_file", "script_path": "tools/code_editor.py", "params": ["json_path"], "example": {"json_path": "code_blueprints/terminal_tool.json"}}
+{"tool": "code_editor", "action": "configure_router_in_blueprint", "script_path": "tools/code_editor.py", "params": ["filename", "router"], "example": {"filename": "terminal_tool.json", "router": {"run": "run_terminal_command"}}}
+{"tool": "code_editor", "action": "create_code_blueprint", "script_path": "tools/code_editor.py", "params": ["filename", "imports"], "example": {"filename": "terminal_tool.json", "imports": []}}
+{"tool": "code_editor", "action": "list_functions_in_blueprint", "script_path": "tools/code_editor.py", "params": ["json_path"], "example": {"json_path": "code_blueprints/terminal_tool.json"}}
+{"tool": "code_editor", "action": "patch_code_function_in_file", "script_path": "tools/code_editor.py", "params": ["filename", "function_name", "params", "body"], "example": {"filename": "terminal.py", "function_name": "run_terminal_command", "params": ["params"], "body": "command = params[\"command\"]\nresult = subprocess.getoutput(command)\nreturn {\"status\": \"success\", \"output\": result}"}}
+{"tool": "code_editor", "action": "read_blueprint_file", "script_path": "tools/code_editor.py", "params": ["json_path"], "example": {"json_path": "code_blueprints/terminal_tool.json"}}
+{"tool": "code_editor", "action": "read_function_from_blueprint", "script_path": "tools/code_editor.py", "params": ["json_path", "function_name"], "example": {"json_path": "code_blueprints/terminal_tool.json", "function_name": "run_terminal_command"}}
+{"tool": "code_editor", "action": "remove_function_from_blueprint", "script_path": "tools/code_editor.py", "params": ["filename", "function_name"], "example": {"filename": "terminal_tool.json", "function_name": "cleanup"}}
+{"tool": "code_editor", "action": "remove_function_from_code_file", "script_path": "tools/code_editor.py", "params": ["filename", "function_name"], "example": {"filename": "tools/my_script.py", "function_name": "hello"}}
+{"tool": "code_editor", "action": "rename_function_in_file", "script_path": "tools/code_editor.py", "params": ["filename", "old_name", "new_name"], "example": {"filename": "tools/my_script.py", "old_name": "hello", "new_name": "hi"}}
+{"tool": "code_editor", "action": "replace_in_code_file", "script_path": "tools/code_editor.py", "params": ["filename", "old_text", "new_text"], "example": {"filename": "tools/my_script.py", "old_text": "# old", "new_text": "# new"}}
+{"tool": "code_editor", "action": "replace_tail_from_line", "script_path": "tools/code_editor.py", "params": ["filename", "start_pattern", "replacement"], "example": {"filename": "tools/my_script.py", "start_pattern": "if __name__ == __main__", "replacement": "# new main here"}}
+{"tool": "code_editor", "action": "update_function_in_blueprint_file", "script_path": "tools/code_editor.py", "params": ["filename", "function_name", "params", "body"], "example": {"filename": "terminal_tool.json", "function_name": "log", "params": ["msg"], "body": "print(msg)"}}
+{"tool": "composer", "action": "__tool__", "script_path": "tools/composer.py", "locked": true, "referral_unlock_cost": 2}
+{"tool": "composer", "action": "add_composer_action", "script_path": "tools/composer.py", "params": ["filename", "action_data"], "example": {"filename": "logic_wiring.json", "action_data": {"tool_name": "vs_code_tool", "action": "replace_in_code_file", "params": {"filename": "tool_name.py", "old_text": "# INSERT_ROUTER_HERE", "new_text": "    if args.action == \"example\":\n        result = run(params)\n    else:\n        result = {\"status\": \"error\"}"}}}}
+{"tool": "composer", "action": "add_composition_delay", "script_path": "tools/composer.py", "params": ["seconds"], "example": {"seconds": 5}}
+{"tool": "composer", "action": "batch_update_composer_actions", "script_path": "tools/composer.py", "params": ["filename", "updates"], "example": {"filename": "tool_scaffold.json", "updates": {"1": {"params": {"function_name": "function_1"}}}}}
+{"tool": "composer", "action": "create_composer_action_template", "script_path": "tools/composer.py", "params": ["template_name", "action_data"], "example": {"template_name": "vscode_replace_individual_stubs.json", "action_data": {"status": "ready", "actions": []}}}
+{"tool": "composer", "action": "create_composer_batch", "script_path": "tools/composer.py", "params": ["filename"], "example": {"filename": "tool_scaffold.json"}}
+{"tool": "composer", "action": "create_composer_batch_from_template", "script_path": "tools/composer.py", "params": ["template_name", "new_filename"], "example": {"template_name": "tool_scaffold.json", "new_filename": "newtest.json"}}
+{"tool": "composer", "action": "get_output_url", "script_path": "tools/composer.py", "params": ["key"], "example": {"key": "blog_header"}}
+{"tool": "composer", "action": "insert_composer_action_from_template", "script_path": "tools/composer.py", "params": ["filename", "index", "template_name"], "example": {"filename": "tool_scaffold.json", "index": 0, "template_name": "vscode_create_tool.json"}}
+{"tool": "composer", "action": "store_output_url", "script_path": "tools/composer.py", "params": ["url", "key"], "example": {"url": "https://cdn.ideogram.ai/image_123.png", "key": "blog_header"}}
+{"tool": "composer", "action": "update_composer_action", "script_path": "tools/composer.py", "params": ["filename", "index", "new_action_data"], "example": {"filename": "email_logic2.json", "index": 0, "new_action_data": {"tool_name": "vs_code_tool", "action": "replace_in_code_file", "params": {"filename": "email_manager2.py", "old_text": "def function_1(params): ...", "new_text": "bar"}}}}
+{"tool": "dispatcher", "action": "__tool__", "script_path": "tools/orchestrate_dispatcher.py", "locked": false, "referral_unlock_cost": 0}
+{"tool": "dispatcher", "action": "dispatch_batch", "script_path": "tools/orchestrate_dispatcher.py", "params": [], "example": {}}
+{"tool": "file_finder", "action": "__tool__", "script_path": "tools/file_finder.py", "locked": false, "referral_unlock_cost": 0}
+{"tool": "file_finder", "action": "search_files", "script_path": "tools/file_finder.py", "params": ["keyword"], "example": {"keyword": "glucose"}}
+{"tool": "github_tool", "action": "__tool__", "script_path": "tools/github_tool.py", "locked": true, "referral_unlock_cost": 2}
+{"tool": "github_tool", "action": "backup_repo", "script_path": "tools/github_tool.py", "params": [], "example": {}}
+{"tool": "github_tool", "action": "git_add_images", "script_path": "tools/github_tool.py", "params": [], "example": {}}
+{"tool": "github_tool", "action": "git_commit", "script_path": "tools/github_tool.py", "params": ["message"], "example": {"message": "Add image"}}
+{"tool": "github_tool", "action": "git_pull", "script_path": "tools/github_tool.py", "params": ["branch"], "example": {"branch": "main"}}
+{"tool": "github_tool", "action": "git_push", "script_path": "tools/github_tool.py", "params": ["branch"], "example": {"branch": "main"}}
+{"tool": "github_tool", "action": "git_status", "script_path": "tools/github_tool.py", "params": [], "example": {}}
+{"tool": "json_manager", "action": "__tool__", "script_path": "tools/json_manager.py", "locked": false, "referral_unlock_cost": 0}
+{"tool": "json_manager", "action": "add_field_to_json_entry", "script_path": "tools/json_manager.py", "params": ["filename", "entry_key", "field_name", "field_value"], "example": {"filename": "tasks.json", "entry_key": "a", "field_name": "priority", "field_value": "low"}}
+{"tool": "json_manager", "action": "add_json_entry", "script_path": "tools/json_manager.py", "params": ["filename", "entry_key", "entry_data"], "example": {"filename": "tasks.json", "entry_key": "a", "entry_data": {"title": "Test task"}}}
+{"tool": "json_manager", "action": "batch_add_field_to_json_entries", "script_path": "tools/json_manager.py", "params": ["filename", "entry_keys", "field_name", "field_value"], "example": {"filename": "tasks.json", "entry_keys": ["a", "b"], "field_name": "priority", "field_value": "high"}}
+{"tool": "json_manager", "action": "batch_delete_json_entries", "script_path": "tools/json_manager.py", "params": ["filename", "entry_keys"], "example": {"filename": "tasks.json", "entry_keys": ["a", "b"]}}
+{"tool": "json_manager", "action": "batch_update_json_entries", "script_path": "tools/json_manager.py", "params": ["filename", "updates"], "example": {"filename": "tasks.json", "updates": {"a": {"status": "done"}, "b": {"priority": "high"}}}}
+{"tool": "json_manager", "action": "create_json_file", "script_path": "tools/json_manager.py", "params": ["filename"], "example": {"filename": "tasks.json"}}
+{"tool": "json_manager", "action": "create_json_file_from_template", "script_path": "tools/json_manager.py", "params": ["template_name", "new_filename"], "example": {"template_name": "task_entry_template.json", "new_filename": "tasks.json"}}
+{"tool": "json_manager", "action": "delete_json_entry", "script_path": "tools/json_manager.py", "params": ["filename", "entry_key"], "example": {"filename": "tasks.json", "entry_key": "a"}}
+{"tool": "json_manager", "action": "insert_json_entry_from_template", "script_path": "tools/json_manager.py", "params": ["filename", "entry_key", "template_name"], "example": {"filename": "tasks.json", "entry_key": "setup", "template_name": "task_entry_template.json"}}
+{"tool": "json_manager", "action": "list_json_entries", "script_path": "tools/json_manager.py", "params": ["filename"], "example": {"filename": "tasks.json"}}
+{"tool": "json_manager", "action": "read_json_entry", "script_path": "tools/json_manager.py", "params": ["filename", "entry_key"], "example": {"filename": "tasks.json", "entry_key": "a"}}
+{"tool": "json_manager", "action": "read_json_file", "script_path": "tools/json_manager.py", "params": ["filename"], "example": {"filename": "tasks.json"}}
+{"tool": "json_manager", "action": "search_json_entries", "script_path": "tools/json_manager.py", "params": ["filename", "search_key", "search_value"], "example": {"filename": "tasks.json", "search_key": "status", "search_value": "pending"}}
+{"tool": "json_manager", "action": "update_json_entry", "script_path": "tools/json_manager.py", "params": ["filename", "entry_key", "new_data"], "example": {"filename": "tasks.json", "entry_key": "a", "new_data": {"status": "in_progress"}}}
+{"tool": "mem_tool", "action": "__tool__", "script_path": "tools/mem_tool.py", "locked": true, "referral_unlock_cost": 2}
+{"tool": "mem_tool", "action": "create_mem", "script_path": "tools/mem_tool.py", "params": ["input"], "example": {"input": "This is a test note for Mem."}}
+{"tool": "outline_editor", "action": "__tool__", "script_path": "tools/outline_editor.py", "locked": false, "referral_unlock_cost": 2}
+{"tool": "outline_editor", "action": "append_section", "script_path": "tools/outline_editor.py", "params": ["doc_id", "new_text"], "example": {"doc_id": "abc123", "new_text": "## New Section\nText here."}}
+{"tool": "outline_editor", "action": "create_collection", "script_path": "tools/outline_editor.py", "params": ["name", "description", "permission", "icon", "color", "sharing"], "example": {"name": "Campaigns", "description": "All outbound campaigns", "permission": "read_write", "icon": "\ud83d\udcc2", "color": "#3498db", "sharing": true}}
+{"tool": "outline_editor", "action": "create_doc", "script_path": "tools/outline_editor.py", "params": ["title", "content", "collectionId"], "example": {"title": "Test Title", "content": "Some text", "collectionId": "abc123"}}
+{"tool": "outline_editor", "action": "delete_collection", "script_path": "tools/outline_editor.py", "params": ["collection_id"], "example": {"collection_id": "abc123"}}
+{"tool": "outline_editor", "action": "delete_doc", "script_path": "tools/outline_editor.py", "params": ["doc_id"], "example": {"doc_id": "abc123"}}
+{"tool": "outline_editor", "action": "export_doc", "script_path": "tools/outline_editor.py", "params": ["doc_id"], "example": {"doc_id": "abc123"}}
+{"tool": "outline_editor", "action": "get_collection", "script_path": "tools/outline_editor.py", "params": ["collection_id"], "example": {"collection_id": "abc123"}}
+{"tool": "outline_editor", "action": "get_doc", "script_path": "tools/outline_editor.py", "params": ["doc_id"], "example": {"doc_id": "abc123"}}
+{"tool": "outline_editor", "action": "get_url", "script_path": "tools/outline_editor.py", "params": ["doc_id"], "example": {"doc_id": "abc123"}}
+{"tool": "outline_editor", "action": "import_doc_from_file", "script_path": "tools/outline_editor.py", "params": ["file_path", "collectionId", "parentDocumentId", "template", "publish"], "example": {"file_path": "blog.md", "collectionId": "abc123", "parentDocumentId": "", "template": false, "publish": true}}
+{"tool": "outline_editor", "action": "list_docs", "script_path": "tools/outline_editor.py", "params": ["limit", "offset", "sort", "direction"], "example": {"limit": 5, "offset": 0, "sort": "createdAt", "direction": "DESC"}}
+{"tool": "outline_editor", "action": "move_doc", "script_path": "tools/outline_editor.py", "params": ["doc_id", "collectionId", "parentDocumentId"], "example": {"doc_id": "xyz789", "collectionId": "abc123", "parentDocumentId": ""}}
+{"tool": "outline_editor", "action": "patch_section", "script_path": "tools/outline_editor.py", "params": ["doc_id", "section", "new_text"], "example": {"doc_id": "abc123", "section": "Old Section", "new_text": "New content"}}
+{"tool": "outline_editor", "action": "search_docs", "script_path": "tools/outline_editor.py", "params": ["query", "limit", "offset"], "example": {"query": "AI", "limit": 5, "offset": 0}}
+{"tool": "outline_editor", "action": "update_collection", "script_path": "tools/outline_editor.py", "params": ["collection_id", "name", "description", "permission", "icon", "color", "sharing"], "example": {"collection_id": "abc123", "name": "Updated Name", "description": "New Desc", "permission": "read_write", "icon": "\ud83d\uddc2", "color": "#ff9900", "sharing": true}}
+{"tool": "outline_editor", "action": "update_doc", "script_path": "tools/outline_editor.py", "params": ["doc_id", "title", "text", "append", "publish"], "example": {"doc_id": "abc123", "title": "Updated", "text": "New content", "append": false, "publish": true}}
+{"tool": "read_file", "action": "__tool__", "script_path": "tools/read_file.py", "locked": false, "referral_unlock_cost": 0}
+{"tool": "read_file", "action": "read_file", "script_path": "tools/read_file.py", "params": ["filename"], "example": {"filename": "calendar.json"}}
+{"tool": "readwise_tool", "action": "__tool__", "script_path": "tools/readwise_tool.py", "locked": true, "referral_unlock_cost": 2}
+{"tool": "readwise_tool", "action": "fetch_books", "script_path": "tools/readwise_tool.py", "params": ["page_size"], "example": {"page_size": 10}}
+{"tool": "readwise_tool", "action": "fetch_highlights", "script_path": "tools/readwise_tool.py", "params": ["book_title"], "example": {"book_title": "Atomic Habits"}}
+{"tool": "system_settings", "action": "__tool__", "script_path": "tools/system_settings.py", "locked": false, "referral_unlock_cost": 0}
+{"tool": "system_settings", "action": "add_action", "script_path": "tools/system_settings.py", "params": ["tool", "action", "script", "params", "example"], "example": {"tool": "json_manager", "action": "delete_entry", "script": "tools/json_manager.py", "params": ["filename", "entry_key"], "example": {"tool_name": "json_manager", "action": "delete_entry", "params": {"filename": "tasks.json", "entry_key": "task_1"}}}}
+{"tool": "system_settings", "action": "add_cli_route", "script_path": "tools/system_settings.py", "params": ["action_name", "command"], "example": {"action_name": "fetch_josh_dm", "command": "bash slack_dm_tool.sh"}}
+{"tool": "system_settings", "action": "add_memory_file", "script_path": "tools/system_settings.py", "params": ["path"], "example": {"path": "semantic_memory/srini_notes.json"}}
+{"tool": "system_settings", "action": "add_tool", "script_path": "tools/system_settings.py", "params": ["tool", "path"], "example": {"tool": "new_tool", "path": "tools/new_tool.py"}}
+{"tool": "system_settings", "action": "build_working_memory", "script_path": "tools/system_settings.py", "params": [], "example": {}}
+{"tool": "system_settings", "action": "list_actions", "script_path": "tools/system_settings.py", "params": ["tool"], "example": {"tool": "json_manager"}}
+{"tool": "system_settings", "action": "list_cli_routes", "script_path": "tools/system_settings.py", "params": [], "example": {}}
+{"tool": "system_settings", "action": "list_memory_files", "script_path": "tools/system_settings.py", "params": [], "example": {}}
+{"tool": "system_settings", "action": "list_supported_actions", "script_path": "tools/system_settings.py", "params": [], "example": {}}
+{"tool": "system_settings", "action": "list_tools", "script_path": "tools/system_settings.py", "params": [], "example": {}}
+{"tool": "system_settings", "action": "remove_cli_route", "script_path": "tools/system_settings.py", "params": ["action_name"], "example": {"action_name": "fetch_josh_dm"}}
+{"tool": "system_settings", "action": "remove_memory_file", "script_path": "tools/system_settings.py", "params": ["path"], "example": {"path": "semantic_memory/srini_notes.json"}}
+{"tool": "system_settings", "action": "remove_tool", "script_path": "tools/system_settings.py", "params": ["tool"], "example": {"tool": "cli_router"}}
+{"tool": "terminal", "action": "__tool__", "script_path": "tools/terminal.py", "locked": false, "referral_unlock_cost": 2}
+{"tool": "terminal", "action": "check_safe", "script_path": "tools/terminal.py", "params": ["command"], "example": {"command": "ls"}}
+{"tool": "terminal", "action": "ls", "script_path": "tools/terminal.py", "params": ["path"], "example": {"path": "/some/path"}}
+{"tool": "terminal", "action": "run_terminal_command", "script_path": "tools/terminal.py", "params": ["command"], "example": {"command": "ls"}}
+{"tool": "terminal", "action": "script", "script_path": "tools/terminal.py", "params": ["path"], "example": {"path": "./myscript.sh"}}
+{"tool": "terminal", "action": "stream", "script_path": "tools/terminal.py", "params": ["command"], "example": {"command": "ping google.com"}}
+{"tool": "terminal", "action": "tail", "script_path": "tools/terminal.py", "params": ["command", "n"], "example": {"command": "cat log.txt", "n": 10}}
+{"tool": "universal_integrator", "action": "__tool__", "script_path": "tools/universal_integrator.py", "locked": false, "referral_unlock_cost": 2}
+{"tool": "universal_integrator", "action": "main", "script_path": "tools/universal_integrator.py", "params": ["endpoint", "payload_input", "method", "headers"], "example": {"endpoint": "https://api.example.com/endpoint", "payload_input": "payload.json", "method": "POST", "headers": {"Authorization": "Bearer KEY"}}}
+{"tool": "unlock_tool", "action": "__tool__", "script_path": "tools/unlock_tool.py", "locked": false, "referral_unlock_cost": 0}
