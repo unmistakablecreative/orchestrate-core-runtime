@@ -4,6 +4,9 @@ from fastapi.staticfiles import StaticFiles
 from datetime import datetime
 import subprocess, json, os, logging
 
+# === BASE DIR ===
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+
 from tools import json_manager
 from tools.smart_json_dispatcher import orchestrate_write
 from system_guard import validate_action, ContractViolation
