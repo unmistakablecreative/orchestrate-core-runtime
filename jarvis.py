@@ -13,10 +13,9 @@ app = FastAPI()
 
 app.mount(
     "/semantic_memory",
-    StaticFiles(directory="semantic_memory"),
+    StaticFiles(directory="/app/semantic_memory"),
     name="semantic_memory"
 )
-
 
 SYSTEM_REGISTRY = f"{BASE_DIR}/system_settings.ndjson"
 WORKING_MEMORY_PATH = f"{BASE_DIR}/data/working_memory.json"
