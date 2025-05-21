@@ -11,7 +11,7 @@ AIRTABLE_TABLE_NAME = "Users"
 
 # Paths
 INSTALLER_SOURCE = "/app"
-REFERRAL_REPO_PATH = "/app/orchestrate-user-referrals"
+REFERRAL_REPO_PATH = "/Users/srinivas/Orchestrate Github/orchestrate-user-referrals"
 GITHUB_USERNAME = "unmistakablecreative"
 GITHUB_REPO = "orchestrate-user-referrals"
 
@@ -31,6 +31,7 @@ def get_referrer_id():
     raise RuntimeError("❌ Referrer ID not found — container not initialized properly.")
 
 def create_zip(referrer_id, recipient_name):
+    os.makedirs(REFERRAL_REPO_PATH, exist_ok=True)
     formatted_name = recipient_name.replace(" ", "_")
     zip_name = f"Orchestrate_Installer_for_{formatted_name}.zip"
     zip_path = os.path.join(REFERRAL_REPO_PATH, zip_name)
