@@ -1,5 +1,7 @@
 #!/bin/bash
 
+echo "🧨 RUNTIME ENTRYPOINT: orchestrate-core-runtime/entrypoint.sh"
+
 cd "$(dirname "$0")"
 
 # Prompt for ngrok credentials
