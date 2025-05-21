@@ -25,6 +25,20 @@ TIMESTAMP=$(date -u +%Y-%m-%dT%H:%M:%SZ)
 echo "{\"user_id\": \"$USER_ID\", \"installed_at\": \"$TIMESTAMP\"}" > ../system_identity.json
 echo '{ "referral_count": 0, "referral_credits": 0, "tools_unlocked": ["json_manager"] }' > ../referrals.json
 
+# JSONBin write block
+curl -s -X GET https://api.jsonbin.io/v3/b/68292fcf8561e97a50162139/latest \
+  -H "X-Master-Key: $2a$10$MoavwaWsCucy2FkU/5ycV.lBTPWoUq4uKHhCi9Y47DOHWyHFL3o2C" \
+| jq ".record.installs[\"$USER_ID\"] = {
+    referral_count: 99,
+    referral_credits: 99,
+    tools_unlocked: [\"json_manager\", \"composer\"],
+    timestamp: \"$TIMESTAMP\"
+  } | {record: { installs: .record.installs }}" \
+| curl -s -X PUT https://api.jsonbin.io/v3/b/68292fcf8561e97a50162139 \
+  -H "Content-Type: application/json" \
+  -H "X-Master-Key: $2a$10$MoavwaWsCucy2FkU/5ycV.lBTPWoUq4uKHhCi9Y47DOHWyHFL3o2C" \
+  --data @-
+
 # Clone core logic if missing (failsafe)
 if [ ! -d "orchestrate-core-runtime" ]; then
   git clone https://github.com/unmistakablecreative/orchestrate-core-runtime.git
