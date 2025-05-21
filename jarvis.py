@@ -10,13 +10,13 @@ from system_guard import validate_action, ContractViolation
 
 # === Init ===
 app = FastAPI()
-BASE_DIR = os.path.abspath(os.path.dirname(__file__))
 
 app.mount(
     "/semantic_memory",
-    StaticFiles(directory=os.path.join(BASE_DIR, "semantic_memory")),
+    StaticFiles(directory="semantic_memory"),
     name="semantic_memory"
 )
+
 
 SYSTEM_REGISTRY = f"{BASE_DIR}/system_settings.ndjson"
 WORKING_MEMORY_PATH = f"{BASE_DIR}/data/working_memory.json"
