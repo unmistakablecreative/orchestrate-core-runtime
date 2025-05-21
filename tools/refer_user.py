@@ -1,8 +1,8 @@
 import requests
 import json
 import os
-import subprocess
 import zipfile
+import subprocess
 
 # Airtable config
 AIRTABLE_API_KEY = "patoUXMeRPzU1ufwc.7e4c9e54adc2679be441927970bcd0e69481e2e48b225a7cecfb193cebf2bad6"
@@ -10,8 +10,8 @@ AIRTABLE_BASE_ID = "appHggDD1APShGNiZ"
 AIRTABLE_TABLE_NAME = "Users"
 
 # Paths
-INSTALLER_SOURCE = "/Users/srinivas/Orchestrate Github/Orchestrate_OS_Installer"
-REFERRAL_REPO_PATH = "/Users/srinivas/Orchestrate Github/orchestrate-user-referrals"
+INSTALLER_SOURCE = "/app"
+REFERRAL_REPO_PATH = "/app/orchestrate-user-referrals"
 GITHUB_USERNAME = "unmistakablecreative"
 GITHUB_REPO = "orchestrate-user-referrals"
 
@@ -25,10 +25,10 @@ EXCLUDE_NAMES = {
 
 def get_referrer_id():
     container_path = "/tmp/orchestrate/system_identity.json"
-    local_temp = "/tmp/system_identity.json"
-    subprocess.run(["docker", "cp", f"orchestrate_instance:{container_path}", local_temp], check=True)
-    with open(local_temp, "r") as f:
-        return json.load(f)["user_id"]
+    if os.path.exists(container_path):
+        with open(container_path, "r") as f:
+            return json.load(f)["user_id"]
+    raise RuntimeError("❌ Referrer ID not found — container not initialized properly.")
 
 def create_zip(referrer_id, recipient_name):
     formatted_name = recipient_name.replace(" ", "_")
@@ -39,11 +39,9 @@ def create_zip(referrer_id, recipient_name):
     subprocess.run(["rm", "-rf", bundle_target_path], check=True)
     subprocess.run(["cp", "-R", INSTALLER_SOURCE, bundle_target_path], check=True)
 
-    # Insert referrer ID
     with open(os.path.join(bundle_target_path, "referrer.txt"), "w") as f:
         f.write(referrer_id)
 
-    # Create filtered ZIP
     with zipfile.ZipFile(zip_path, "w", zipfile.ZIP_DEFLATED) as zipf:
         for root, _, files in os.walk(bundle_target_path):
             for file in files:
