@@ -1,5 +1,3 @@
-# refer_user.py — final fixed: injects inside actual installer dir
-
 import argparse
 import json
 import os
@@ -13,6 +11,7 @@ from io import BytesIO
 INSTALLER_REPO = "https://github.com/unmistakablecreative/OrchestrateOS_Installer.git"
 REFERRAL_RELAY_URL = "https://referral-relay-fzc4u40pd-srinivas-rao-s-projects.vercel.app/referral"
 SYSTEM_ID_PATH = "/tmp/orchestrate/system_identity.json"
+EXCLUDED_PATTERNS = [".git", ".DS_Store", "__MACOSX"]
 
 def get_referrer_id():
     with open(SYSTEM_ID_PATH, "r") as f:
@@ -33,12 +32,16 @@ def inject_referrer(installer_path, referrer_id):
     with open(os.path.join(installer_path, "referrer.txt"), "w") as f:
         f.write(referrer_id)
 
-def build_flat_zip(installer_path):
+def build_clean_zip(installer_path):
     buffer = BytesIO()
     with zipfile.ZipFile(buffer, "w", zipfile.ZIP_DEFLATED) as zipf:
         for root, _, files in os.walk(installer_path):
             for file in files:
+                if any(skip in file for skip in EXCLUDED_PATTERNS):
+                    continue
                 full = os.path.join(root, file)
+                if any(skip in full for skip in EXCLUDED_PATTERNS):
+                    continue
                 rel = os.path.relpath(full, installer_path)
                 zipf.write(full, arcname=rel)
     return base64.b64encode(buffer.getvalue()).decode("utf-8")
@@ -46,7 +49,7 @@ def build_flat_zip(installer_path):
 def refer_user(name, email, referrer_id):
     installer_path = clone_and_extract_installer()
     inject_referrer(installer_path, referrer_id)
-    encoded_zip = build_flat_zip(installer_path)
+    encoded_zip = build_clean_zip(installer_path)
 
     payload = {
         "name": name,
