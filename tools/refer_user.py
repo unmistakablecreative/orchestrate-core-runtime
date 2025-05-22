@@ -35,7 +35,6 @@ def upload_to_gofile(installer_path):
                 full_path = os.path.join(root, file)
                 arcname = os.path.relpath(full_path, installer_path)
                 zipf.write(full_path, arcname=arcname)
-
     with open(tmp_zip.name, "rb") as f:
         r = requests.post("https://store1.gofile.io/uploadFile", files={"file": f})
         r.raise_for_status()
