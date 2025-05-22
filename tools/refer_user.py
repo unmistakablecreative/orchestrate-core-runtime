@@ -44,13 +44,13 @@ def upload_to_gofile(installer_path):
 def refer_user(name, email, referrer_id):
     path = clone_and_extract_installer()
     inject_referrer(path, referrer_id)
-    bundle_url = upload_to_gofile(path)
+    installer_link = upload_to_gofile(path)
 
     payload = {
         "name": name,
         "email": email,
         "referrer_id": referrer_id,
-        "bundle_url": bundle_url
+        "installer_link": installer_link
     }
 
     r = requests.post(REFERRAL_RELAY_URL, json=payload)
