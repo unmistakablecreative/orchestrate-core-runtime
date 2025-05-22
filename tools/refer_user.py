@@ -1,4 +1,4 @@
-# refer_user.py — final version with installer pulled from GitHub
+# refer_user.py — Final corrected version with flat zip structure
 
 import argparse
 import json
@@ -28,20 +28,20 @@ def inject_referrer(installer_path, referrer_id):
     with open(ref_path, "w") as f:
         f.write(referrer_id)
 
-def build_zip(installer_path):
+def build_flat_zip(installer_path):
     buffer = BytesIO()
     with zipfile.ZipFile(buffer, "w", zipfile.ZIP_DEFLATED) as zipf:
         for root, _, files in os.walk(installer_path):
             for file in files:
                 full = os.path.join(root, file)
-                rel = os.path.relpath(full, installer_path)
+                rel = os.path.relpath(full, installer_path)  # flatten
                 zipf.write(full, arcname=rel)
     return base64.b64encode(buffer.getvalue()).decode("utf-8")
 
 def refer_user(name, email, referrer_id):
     installer_path = clone_installer()
     inject_referrer(installer_path, referrer_id)
-    encoded_zip = build_zip(installer_path)
+    encoded_zip = build_flat_zip(installer_path)
 
     payload = {
         "name": name,
