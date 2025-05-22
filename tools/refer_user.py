@@ -1,5 +1,3 @@
-# refer_user.py — final fixed: injects inside actual installer dir
-
 import argparse
 import json
 import os
@@ -21,11 +19,9 @@ def get_referrer_id():
 def clone_and_extract_installer():
     clone_dir = tempfile.mkdtemp()
     subprocess.run(["git", "clone", INSTALLER_REPO, clone_dir], check=True)
-
     zip_path = os.path.join(clone_dir, "Orchestrate_OS_Installer.zip")
     extract_path = os.path.join(clone_dir, "unzipped")
     os.makedirs(extract_path, exist_ok=True)
-
     subprocess.run(["unzip", zip_path, "-d", extract_path], check=True)
     return os.path.join(extract_path, "Orchestrate_OS_Installer")
 
@@ -38,6 +34,8 @@ def build_flat_zip(installer_path):
     with zipfile.ZipFile(buffer, "w", zipfile.ZIP_DEFLATED) as zipf:
         for root, _, files in os.walk(installer_path):
             for file in files:
+                if file.startswith(".") or "__MACOSX" in root or file.endswith((".nib", ".DS_Store")):
+                    continue
                 full = os.path.join(root, file)
                 rel = os.path.relpath(full, installer_path)
                 zipf.write(full, arcname=rel)
