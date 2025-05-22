@@ -27,28 +27,30 @@ def inject_referrer(installer_path, referrer_id):
     with open(os.path.join(installer_path, "referrer.txt"), "w") as f:
         f.write(referrer_id)
 
-def upload_zip(installer_path):
+def upload_to_gofile(installer_path):
     tmp_zip = tempfile.NamedTemporaryFile(delete=False, suffix=".zip")
     with zipfile.ZipFile(tmp_zip.name, "w", zipfile.ZIP_DEFLATED) as zipf:
         for root, _, files in os.walk(installer_path):
             for file in files:
-                full = os.path.join(root, file)
-                arcname = os.path.relpath(full, installer_path)
-                zipf.write(full, arcname=arcname)
-    with open(tmp_zip.name, 'rb') as f:
-        r = requests.post("https://file.io", files={"file": f})
-    return r.json()["link"]
+                full_path = os.path.join(root, file)
+                arcname = os.path.relpath(full_path, installer_path)
+                zipf.write(full_path, arcname=arcname)
+
+    with open(tmp_zip.name, "rb") as f:
+        r = requests.post("https://store1.gofile.io/uploadFile", files={"file": f})
+        r.raise_for_status()
+        return r.json()["data"]["downloadPage"]
 
 def refer_user(name, email, referrer_id):
     path = clone_and_extract_installer()
     inject_referrer(path, referrer_id)
-    download_url = upload_zip(path)
+    bundle_url = upload_to_gofile(path)
 
     payload = {
         "name": name,
         "email": email,
         "referrer_id": referrer_id,
-        "bundle_url": download_url
+        "bundle_url": bundle_url
     }
 
     r = requests.post(REFERRAL_RELAY_URL, json=payload)
