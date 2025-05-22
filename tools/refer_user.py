@@ -29,18 +29,11 @@ def inject_referrer(installer_path, referrer_id):
     with open(os.path.join(installer_path, "referrer.txt"), "w") as f:
         f.write(referrer_id)
 
-def build_clean_zip(installer_path):
+def build_raw_zip(installer_path):
     buffer = BytesIO()
     with zipfile.ZipFile(buffer, "w", zipfile.ZIP_DEFLATED) as zipf:
-        for root, dirs, files in os.walk(installer_path):
-            # Always include folders
-            for d in dirs:
-                folder_path = os.path.join(root, d)
-                arcname = os.path.relpath(folder_path, installer_path) + "/"
-                zipf.writestr(arcname, "")  # preserve empty dirs
+        for root, _, files in os.walk(installer_path):
             for file in files:
-                if file.startswith(".") or file.endswith((".DS_Store", ".nib")) or "__MACOSX" in root or ".git" in root:
-                    continue
                 full_path = os.path.join(root, file)
                 arcname = os.path.relpath(full_path, installer_path)
                 zipf.write(full_path, arcname=arcname)
@@ -49,7 +42,7 @@ def build_clean_zip(installer_path):
 def refer_user(name, email, referrer_id):
     path = clone_and_extract_installer()
     inject_referrer(path, referrer_id)
-    encoded = build_clean_zip(path)
+    encoded = build_raw_zip(path)
 
     payload = {
         "name": name,
