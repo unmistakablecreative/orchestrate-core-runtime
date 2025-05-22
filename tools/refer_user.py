@@ -3,10 +3,8 @@ import json
 import os
 import subprocess
 import zipfile
-import base64
 import requests
 import tempfile
-from io import BytesIO
 
 INSTALLER_REPO = "https://github.com/unmistakablecreative/OrchestrateOS_Installer.git"
 REFERRAL_RELAY_URL = "https://referral-relay-fzc4u40pd-srinivas-rao-s-projects.vercel.app/referral"
@@ -29,26 +27,28 @@ def inject_referrer(installer_path, referrer_id):
     with open(os.path.join(installer_path, "referrer.txt"), "w") as f:
         f.write(referrer_id)
 
-def build_raw_zip(installer_path):
-    buffer = BytesIO()
-    with zipfile.ZipFile(buffer, "w", zipfile.ZIP_DEFLATED) as zipf:
+def upload_zip(installer_path):
+    tmp_zip = tempfile.NamedTemporaryFile(delete=False, suffix=".zip")
+    with zipfile.ZipFile(tmp_zip.name, "w", zipfile.ZIP_DEFLATED) as zipf:
         for root, _, files in os.walk(installer_path):
             for file in files:
-                full_path = os.path.join(root, file)
-                arcname = os.path.relpath(full_path, installer_path)
-                zipf.write(full_path, arcname=arcname)
-    return base64.b64encode(buffer.getvalue()).decode("utf-8")
+                full = os.path.join(root, file)
+                arcname = os.path.relpath(full, installer_path)
+                zipf.write(full, arcname=arcname)
+    with open(tmp_zip.name, 'rb') as f:
+        r = requests.post("https://file.io", files={"file": f})
+    return r.json()["link"]
 
 def refer_user(name, email, referrer_id):
     path = clone_and_extract_installer()
     inject_referrer(path, referrer_id)
-    encoded = build_raw_zip(path)
+    download_url = upload_zip(path)
 
     payload = {
         "name": name,
         "email": email,
         "referrer_id": referrer_id,
-        "bundle": encoded
+        "bundle_url": download_url
     }
 
     r = requests.post(REFERRAL_RELAY_URL, json=payload)
