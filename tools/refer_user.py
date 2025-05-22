@@ -12,7 +12,7 @@ SYSTEM_ID_PATH = "/tmp/orchestrate/system_identity.json"
 
 def get_referrer_id():
     with open(SYSTEM_ID_PATH, "r") as f:
-        return json.load(f)["user_id"]
+        return json.load(f)["Referrer ID"]
 
 def clone_and_extract_installer():
     tmpdir = tempfile.mkdtemp()
@@ -46,10 +46,10 @@ def refer_user(name, email, referrer_id):
     installer_link = upload_to_gofile(path)
 
     payload = {
-        "name": name,
-        "email": email,
-        "referrer_id": referrer_id,
-        "installer_link": installer_link
+        "Name": name,
+        "Email": email,
+        "Referrer ID": referrer_id,
+        "Installer Link": installer_link
     }
 
     r = requests.post(REFERRAL_RELAY_URL, json=payload)
