@@ -19,11 +19,9 @@ def get_referrer_id():
 def clone_and_extract_installer():
     tmpdir = tempfile.mkdtemp()
     subprocess.run(["git", "clone", INSTALLER_REPO, tmpdir], check=True)
-
     zip_path = os.path.join(tmpdir, "Orchestrate_OS_Installer.zip")
     extract_dir = os.path.join(tmpdir, "unzipped")
     os.makedirs(extract_dir, exist_ok=True)
-
     subprocess.run(["unzip", zip_path, "-d", extract_dir], check=True)
     return os.path.join(extract_dir, "Orchestrate_OS_Installer")
 
@@ -34,11 +32,14 @@ def inject_referrer(installer_path, referrer_id):
 def build_clean_zip(installer_path):
     buffer = BytesIO()
     with zipfile.ZipFile(buffer, "w", zipfile.ZIP_DEFLATED) as zipf:
-        for root, _, files in os.walk(installer_path):
-            if ".git" in root or "__MACOSX" in root:
-                continue
+        for root, dirs, files in os.walk(installer_path):
+            # Always include folders
+            for d in dirs:
+                folder_path = os.path.join(root, d)
+                arcname = os.path.relpath(folder_path, installer_path) + "/"
+                zipf.writestr(arcname, "")  # preserve empty dirs
             for file in files:
-                if file.startswith(".") or file.endswith((".DS_Store", ".nib")):
+                if file.startswith(".") or file.endswith((".DS_Store", ".nib")) or "__MACOSX" in root or ".git" in root:
                     continue
                 full_path = os.path.join(root, file)
                 arcname = os.path.relpath(full_path, installer_path)
@@ -69,5 +70,4 @@ if __name__ == "__main__":
     parser.add_argument("--name", required=True)
     parser.add_argument("--email", required=True)
     args = parser.parse_args()
-
     refer_user(args.name, args.email, get_referrer_id())
