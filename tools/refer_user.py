@@ -12,7 +12,7 @@ SYSTEM_ID_PATH = "/tmp/orchestrate/system_identity.json"
 
 def get_referrer_id():
     with open(SYSTEM_ID_PATH, "r") as f:
-        return json.load(f)["Referrer ID"]
+        return json.load(f)["user_id"]
 
 def clone_and_extract_installer():
     tmpdir = tempfile.mkdtemp()
