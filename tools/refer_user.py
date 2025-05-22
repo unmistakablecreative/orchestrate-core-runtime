@@ -28,14 +28,14 @@ def inject_referrer(installer_path, referrer_id):
         f.write(referrer_id)
 
 def upload_to_gofile(installer_path):
-    tmp_zip = tempfile.NamedTemporaryFile(delete=False, suffix=".zip")
-    with zipfile.ZipFile(tmp_zip.name, "w", zipfile.ZIP_DEFLATED) as zipf:
+    zip_path = os.path.join(tempfile.gettempdir(), "Orchestrate_Installer.zip")
+    with zipfile.ZipFile(zip_path, "w", zipfile.ZIP_DEFLATED) as zipf:
         for root, _, files in os.walk(installer_path):
             for file in files:
                 full_path = os.path.join(root, file)
                 arcname = os.path.relpath(full_path, installer_path)
                 zipf.write(full_path, arcname=arcname)
-    with open(tmp_zip.name, "rb") as f:
+    with open(zip_path, "rb") as f:
         r = requests.post("https://store1.gofile.io/uploadFile", files={"file": f})
         r.raise_for_status()
         return r.json()["data"]["downloadPage"]
