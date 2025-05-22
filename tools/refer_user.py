@@ -17,40 +17,44 @@ def get_referrer_id():
         return json.load(f)["user_id"]
 
 def clone_and_extract_installer():
-    clone_dir = tempfile.mkdtemp()
-    subprocess.run(["git", "clone", INSTALLER_REPO, clone_dir], check=True)
-    zip_path = os.path.join(clone_dir, "Orchestrate_OS_Installer.zip")
-    extract_path = os.path.join(clone_dir, "unzipped")
-    os.makedirs(extract_path, exist_ok=True)
-    subprocess.run(["unzip", zip_path, "-d", extract_path], check=True)
-    return os.path.join(extract_path, "Orchestrate_OS_Installer")
+    tmpdir = tempfile.mkdtemp()
+    subprocess.run(["git", "clone", INSTALLER_REPO, tmpdir], check=True)
+
+    zip_path = os.path.join(tmpdir, "Orchestrate_OS_Installer.zip")
+    extract_dir = os.path.join(tmpdir, "unzipped")
+    os.makedirs(extract_dir, exist_ok=True)
+
+    subprocess.run(["unzip", zip_path, "-d", extract_dir], check=True)
+    return os.path.join(extract_dir, "Orchestrate_OS_Installer")
 
 def inject_referrer(installer_path, referrer_id):
     with open(os.path.join(installer_path, "referrer.txt"), "w") as f:
         f.write(referrer_id)
 
-def build_flat_zip(installer_path):
+def build_clean_zip(installer_path):
     buffer = BytesIO()
     with zipfile.ZipFile(buffer, "w", zipfile.ZIP_DEFLATED) as zipf:
         for root, _, files in os.walk(installer_path):
+            if ".git" in root or "__MACOSX" in root:
+                continue
             for file in files:
-                if file.startswith(".") or "__MACOSX" in root or file.endswith((".nib", ".DS_Store")):
+                if file.startswith(".") or file.endswith((".DS_Store", ".nib")):
                     continue
-                full = os.path.join(root, file)
-                rel = os.path.relpath(full, installer_path)
-                zipf.write(full, arcname=rel)
+                full_path = os.path.join(root, file)
+                arcname = os.path.relpath(full_path, installer_path)
+                zipf.write(full_path, arcname=arcname)
     return base64.b64encode(buffer.getvalue()).decode("utf-8")
 
 def refer_user(name, email, referrer_id):
-    installer_path = clone_and_extract_installer()
-    inject_referrer(installer_path, referrer_id)
-    encoded_zip = build_flat_zip(installer_path)
+    path = clone_and_extract_installer()
+    inject_referrer(path, referrer_id)
+    encoded = build_clean_zip(path)
 
     payload = {
         "name": name,
         "email": email,
         "referrer_id": referrer_id,
-        "bundle": encoded_zip
+        "bundle": encoded
     }
 
     r = requests.post(REFERRAL_RELAY_URL, json=payload)
@@ -66,5 +70,4 @@ if __name__ == "__main__":
     parser.add_argument("--email", required=True)
     args = parser.parse_args()
 
-    referrer_id = get_referrer_id()
-    refer_user(args.name, args.email, referrer_id)
+    refer_user(args.name, args.email, get_referrer_id())
