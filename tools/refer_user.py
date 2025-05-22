@@ -1,3 +1,5 @@
+# refer_user.py — final fixed: injects inside actual installer dir
+
 import argparse
 import json
 import os
@@ -21,14 +23,14 @@ def clone_and_extract_installer():
     subprocess.run(["git", "clone", INSTALLER_REPO, clone_dir], check=True)
 
     zip_path = os.path.join(clone_dir, "Orchestrate_OS_Installer.zip")
-    extracted_path = os.path.join(clone_dir, "unzipped")
-    os.makedirs(extracted_path, exist_ok=True)
+    extract_path = os.path.join(clone_dir, "unzipped")
+    os.makedirs(extract_path, exist_ok=True)
 
-    subprocess.run(["unzip", zip_path, "-d", extracted_path], check=True)
-    return extracted_path
+    subprocess.run(["unzip", zip_path, "-d", extract_path], check=True)
+    return os.path.join(extract_path, "Orchestrate_OS_Installer")
 
-def inject_referrer(path, referrer_id):
-    with open(os.path.join(path, "referrer.txt"), "w") as f:
+def inject_referrer(installer_path, referrer_id):
+    with open(os.path.join(installer_path, "referrer.txt"), "w") as f:
         f.write(referrer_id)
 
 def build_flat_zip(installer_path):
@@ -42,9 +44,9 @@ def build_flat_zip(installer_path):
     return base64.b64encode(buffer.getvalue()).decode("utf-8")
 
 def refer_user(name, email, referrer_id):
-    extracted = clone_and_extract_installer()
-    inject_referrer(extracted, referrer_id)
-    encoded_zip = build_flat_zip(extracted)
+    installer_path = clone_and_extract_installer()
+    inject_referrer(installer_path, referrer_id)
+    encoded_zip = build_flat_zip(installer_path)
 
     payload = {
         "name": name,
