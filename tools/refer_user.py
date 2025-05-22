@@ -1,5 +1,3 @@
-# refer_user.py — Final corrected version with flat zip structure
-
 import argparse
 import json
 import os
@@ -18,14 +16,19 @@ def get_referrer_id():
     with open(SYSTEM_ID_PATH, "r") as f:
         return json.load(f)["user_id"]
 
-def clone_installer():
-    target_dir = tempfile.mkdtemp()
-    subprocess.run(["git", "clone", INSTALLER_REPO, target_dir], check=True)
-    return target_dir
+def clone_and_extract_installer():
+    clone_dir = tempfile.mkdtemp()
+    subprocess.run(["git", "clone", INSTALLER_REPO, clone_dir], check=True)
 
-def inject_referrer(installer_path, referrer_id):
-    ref_path = os.path.join(installer_path, "referrer.txt")
-    with open(ref_path, "w") as f:
+    zip_path = os.path.join(clone_dir, "Orchestrate_OS_Installer.zip")
+    extracted_path = os.path.join(clone_dir, "unzipped")
+    os.makedirs(extracted_path, exist_ok=True)
+
+    subprocess.run(["unzip", zip_path, "-d", extracted_path], check=True)
+    return extracted_path
+
+def inject_referrer(path, referrer_id):
+    with open(os.path.join(path, "referrer.txt"), "w") as f:
         f.write(referrer_id)
 
 def build_flat_zip(installer_path):
@@ -34,14 +37,14 @@ def build_flat_zip(installer_path):
         for root, _, files in os.walk(installer_path):
             for file in files:
                 full = os.path.join(root, file)
-                rel = os.path.relpath(full, installer_path)  # flatten
+                rel = os.path.relpath(full, installer_path)
                 zipf.write(full, arcname=rel)
     return base64.b64encode(buffer.getvalue()).decode("utf-8")
 
 def refer_user(name, email, referrer_id):
-    installer_path = clone_installer()
-    inject_referrer(installer_path, referrer_id)
-    encoded_zip = build_flat_zip(installer_path)
+    extracted = clone_and_extract_installer()
+    inject_referrer(extracted, referrer_id)
+    encoded_zip = build_flat_zip(extracted)
 
     payload = {
         "name": name,
