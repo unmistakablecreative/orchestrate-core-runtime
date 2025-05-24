@@ -1,9 +1,10 @@
-{"tool": "blog_assembler_tool", "action": "__tool__", "script_path": "tools/assembleblogpost.py"}
+
+{"tool": "blog_assembler_tool", "action": "__tool__", "script_path": "tools/assembleblogpost.py", "locked": true, "referral_unlock_cost": 6}
 {"tool": "blog_assembler_tool", "action": "main", "script_path": "tools/assembleblogpost.py", "params": ["slug"], "example": {"tool_name": "blog_assembler_tool", "action": "main", "params": {"slug": "aiagents"}}}
-{"tool": "buffer_engine", "action": "__tool__", "script_path": "tools/buffer_engine.py"}
+{"tool": "buffer_engine", "action": "__tool__", "script_path": "tools/buffer_engine.py", "locked": true, "referral_unlock_cost": 6}
 {"tool": "buffer_engine", "action": "buffer_loop", "script_path": "tools/buffer_engine.py", "params": [], "example": {"tool_name": "buffer_engine", "action": "buffer_loop", "params": {}}}
 {"tool": "buffer_engine", "action": "post_to_platform", "script_path": "tools/buffer_engine.py", "params": ["content", "link", "image_url"], "example": {"tool_name": "buffer_engine", "action": "post_to_platform", "params": {"content": "This is a tweet.", "link": "https://example.com", "image_url": "https://img.url"}}}
-{"tool": "code_editor", "action": "__tool__", "script_path": "tools/code_editor.py", "locked": true, "referral_unlock_cost": 2}
+{"tool": "code_editor", "action": "__tool__", "script_path": "tools/code_editor.py", "locked": true, "referral_unlock_cost": 24}
 {"tool": "code_editor", "action": "add_endpoint_to_fastapi_file", "script_path": "tools/code_editor.py", "params": ["filename", "method", "route", "function_name", "body"], "example": {"filename": "tools/my_script.py", "method": "get", "route": "/test", "function_name": "hello", "body": "return {status: ok}"}}
 {"tool": "code_editor", "action": "add_function_to_blueprint", "script_path": "tools/code_editor.py", "params": ["filename", "function_name", "params", "body"], "example": {"filename": "terminal_tool.json", "function_name": "hello", "params": [], "body": "print(\"Hello World\")"}}
 {"tool": "code_editor", "action": "add_function_to_code_file", "script_path": "tools/code_editor.py", "params": ["filename", "function_name", "params", "body"], "example": {"filename": "tools/my_script.py", "function_name": "hello", "params": [], "body": "print(\"Hello\")"}}
@@ -23,7 +24,7 @@
 {"tool": "code_editor", "action": "replace_in_code_file", "script_path": "tools/code_editor.py", "params": ["filename", "old_text", "new_text"], "example": {"filename": "tools/my_script.py", "old_text": "# old", "new_text": "# new"}}
 {"tool": "code_editor", "action": "replace_tail_from_line", "script_path": "tools/code_editor.py", "params": ["filename", "start_pattern", "replacement"], "example": {"filename": "tools/my_script.py", "start_pattern": "if __name__ == __main__", "replacement": "# new main here"}}
 {"tool": "code_editor", "action": "update_function_in_blueprint_file", "script_path": "tools/code_editor.py", "params": ["filename", "function_name", "params", "body"], "example": {"filename": "terminal_tool.json", "function_name": "log", "params": ["msg"], "body": "print(msg)"}}
-{"tool": "composer", "action": "__tool__", "script_path": "tools/composer.py", "locked": true, "referral_unlock_cost": 2}
+{"tool": "composer", "action": "__tool__", "script_path": "tools/composer.py", "locked": true, "referral_unlock_cost": 12}
 {"tool": "composer", "action": "add_composer_action", "script_path": "tools/composer.py", "params": ["filename", "action_data"], "example": {"filename": "logic_wiring.json", "action_data": {"tool_name": "vs_code_tool", "action": "replace_in_code_file", "params": {"filename": "tool_name.py", "old_text": "# INSERT_ROUTER_HERE", "new_text": "    if args.action == \"example\":\n        result = run(params)\n    else:\n        result = {\"status\": \"error\"}"}}}}
 {"tool": "composer", "action": "add_composition_delay", "script_path": "tools/composer.py", "params": ["seconds"], "example": {"seconds": 5}}
 {"tool": "composer", "action": "batch_update_composer_actions", "script_path": "tools/composer.py", "params": ["filename", "updates"], "example": {"filename": "tool_scaffold.json", "updates": {"1": {"params": {"function_name": "function_1"}}}}}
@@ -38,7 +39,7 @@
 {"tool": "dispatcher", "action": "dispatch_batch", "script_path": "tools/orchestrate_dispatcher.py", "params": [], "example": {}}
 {"tool": "file_finder", "action": "__tool__", "script_path": "tools/file_finder.py", "locked": false, "referral_unlock_cost": 0}
 {"tool": "file_finder", "action": "search_files", "script_path": "tools/file_finder.py", "params": ["keyword"], "example": {"keyword": "glucose"}}
-{"tool": "github_tool_universal", "action": "__tool__", "script_path": "tools/github_tool_universal.py"}
+{"tool": "github_tool_universal", "action": "__tool__", "script_path": "tools/github_tool_universal.py", "locked": true, "referral_unlock_cost": 8}
 {"tool": "github_tool_universal", "action": "add_file", "script_path": "tools/github_tool_universal.py", "params": ["path", "file"], "example": {"tool_name": "github_tool_universal", "action": "add_file", "params": {"path": "./repo", "file": "README.md"}}}
 {"tool": "github_tool_universal", "action": "archive_repo", "script_path": "tools/github_tool_universal.py", "params": ["path"], "example": {"tool_name": "github_tool_universal", "action": "archive_repo", "params": {"path": "./repo"}}}
 {"tool": "github_tool_universal", "action": "commit", "script_path": "tools/github_tool_universal.py", "params": ["path", "message"], "example": {"tool_name": "github_tool_universal", "action": "commit", "params": {"path": "./repo", "message": "Initial commit"}}}
@@ -46,7 +47,7 @@
 {"tool": "github_tool_universal", "action": "pull", "script_path": "tools/github_tool_universal.py", "params": ["path", "branch"], "example": {"tool_name": "github_tool_universal", "action": "pull", "params": {"path": "./repo", "branch": "main"}}}
 {"tool": "github_tool_universal", "action": "push", "script_path": "tools/github_tool_universal.py", "params": ["path", "branch"], "example": {"tool_name": "github_tool_universal", "action": "push", "params": {"path": "./repo", "branch": "main"}}}
 {"tool": "github_tool_universal", "action": "status", "script_path": "tools/github_tool_universal.py", "params": ["path"], "example": {"tool_name": "github_tool_universal", "action": "status", "params": {"path": "./repo"}}}
-{"tool": "ideogram_tool", "action": "__tool__", "script_path": "tools/ideogram_tool.py"}
+{"tool": "ideogram_tool", "action": "__tool__", "script_path": "tools/ideogram_tool.py", "locked": true, "referral_unlock_cost": 8}
 {"tool": "ideogram_tool", "action": "generate_image", "script_path": "tools/ideogram_tool.py", "params": ["input", "options"], "example": {"tool_name": "ideogram_tool", "action": "generate_image", "params": {"input": "A robot in a neon city", "options": {"style": "sci-fi"}}}}
 {"tool": "json_manager", "action": "__tool__", "script_path": "tools/json_manager.py", "locked": false, "referral_unlock_cost": 0}
 {"tool": "json_manager", "action": "add_field_to_json_entry", "script_path": "tools/json_manager.py", "params": ["filename", "entry_key", "field_name", "field_value"], "example": {"filename": "tasks.json", "entry_key": "a", "field_name": "priority", "field_value": "low"}}
@@ -63,9 +64,9 @@
 {"tool": "json_manager", "action": "read_json_file", "script_path": "tools/json_manager.py", "params": ["filename"], "example": {"filename": "tasks.json"}}
 {"tool": "json_manager", "action": "search_json_entries", "script_path": "tools/json_manager.py", "params": ["filename", "search_key", "search_value"], "example": {"filename": "tasks.json", "search_key": "status", "search_value": "pending"}}
 {"tool": "json_manager", "action": "update_json_entry", "script_path": "tools/json_manager.py", "params": ["filename", "entry_key", "new_data"], "example": {"filename": "tasks.json", "entry_key": "a", "new_data": {"status": "in_progress"}}}
-{"tool": "mem_tool", "action": "__tool__", "script_path": "tools/mem_tool.py", "locked": true, "referral_unlock_cost": 2}
+{"tool": "mem_tool", "action": "__tool__", "script_path": "tools/mem_tool.py", "locked": true, "referral_unlock_cost": 4}
 {"tool": "mem_tool", "action": "create_mem", "script_path": "tools/mem_tool.py", "params": ["input"], "example": {"input": "This is a test note for Mem."}}
-{"tool": "outline_editor", "action": "__tool__", "script_path": "tools/outline_editor.py", "locked": false, "referral_unlock_cost": 2}
+{"tool": "outline_editor", "action": "__tool__", "script_path": "tools/outline_editor.py", "locked": true, "referral_unlock_cost": 2}
 {"tool": "outline_editor", "action": "append_section", "script_path": "tools/outline_editor.py", "params": ["doc_id", "new_text"], "example": {"doc_id": "abc123", "new_text": "## New Section\nText here."}}
 {"tool": "outline_editor", "action": "create_collection", "script_path": "tools/outline_editor.py", "params": ["name", "description", "permission", "icon", "color", "sharing"], "example": {"name": "Campaigns", "description": "All outbound campaigns", "permission": "read_write", "icon": "\ud83d\udcc2", "color": "#3498db", "sharing": true}}
 {"tool": "outline_editor", "action": "create_doc", "script_path": "tools/outline_editor.py", "params": ["title", "content", "collectionId"], "example": {"title": "Test Title", "content": "Some text", "collectionId": "abc123"}}
@@ -84,7 +85,7 @@
 {"tool": "outline_editor", "action": "update_doc", "script_path": "tools/outline_editor.py", "params": ["doc_id", "title", "text", "append", "publish"], "example": {"doc_id": "abc123", "title": "Updated", "text": "New content", "append": false, "publish": true}}
 {"tool": "read_file", "action": "__tool__", "script_path": "tools/read_file.py", "locked": false, "referral_unlock_cost": 0}
 {"tool": "read_file", "action": "read_file", "script_path": "tools/read_file.py", "params": ["filename"], "example": {"filename": "calendar.json"}}
-{"tool": "readwise_tool", "action": "__tool__", "script_path": "tools/readwise_tool.py", "locked": true, "referral_unlock_cost": 2}
+{"tool": "readwise_tool", "action": "__tool__", "script_path": "tools/readwise_tool.py", "locked": true, "referral_unlock_cost": 4}
 {"tool": "readwise_tool", "action": "fetch_books", "script_path": "tools/readwise_tool.py", "params": ["page_size"], "example": {"page_size": 10}}
 {"tool": "readwise_tool", "action": "fetch_highlights", "script_path": "tools/readwise_tool.py", "params": ["book_title"], "example": {"book_title": "Atomic Habits"}}
 {"tool": "system_settings", "action": "__tool__", "script_path": "tools/system_settings.py", "locked": false, "referral_unlock_cost": 0}
@@ -101,13 +102,13 @@
 {"tool": "system_settings", "action": "remove_cli_route", "script_path": "tools/system_settings.py", "params": ["action_name"], "example": {"action_name": "fetch_josh_dm"}}
 {"tool": "system_settings", "action": "remove_memory_file", "script_path": "tools/system_settings.py", "params": ["path"], "example": {"path": "semantic_memory/srini_notes.json"}}
 {"tool": "system_settings", "action": "remove_tool", "script_path": "tools/system_settings.py", "params": ["tool"], "example": {"tool": "cli_router"}}
-{"tool": "terminal", "action": "__tool__", "script_path": "tools/terminal.py", "locked": false, "referral_unlock_cost": 2}
+{"tool": "terminal", "action": "__tool__", "script_path": "tools/terminal.py", "locked": false, "referral_unlock_cost": 14}
 {"tool": "terminal", "action": "check_safe", "script_path": "tools/terminal.py", "params": ["command"], "example": {"command": "ls"}}
 {"tool": "terminal", "action": "ls", "script_path": "tools/terminal.py", "params": ["path"], "example": {"path": "/some/path"}}
 {"tool": "terminal", "action": "run_terminal_command", "script_path": "tools/terminal.py", "params": ["command"], "example": {"command": "ls"}}
 {"tool": "terminal", "action": "script", "script_path": "tools/terminal.py", "params": ["path"], "example": {"path": "./myscript.sh"}}
 {"tool": "terminal", "action": "stream", "script_path": "tools/terminal.py", "params": ["command"], "example": {"command": "ping google.com"}}
 {"tool": "terminal", "action": "tail", "script_path": "tools/terminal.py", "params": ["command", "n"], "example": {"command": "cat log.txt", "n": 10}}
-{"tool": "universal_integrator", "action": "__tool__", "script_path": "tools/universal_integrator.py", "locked": false, "referral_unlock_cost": 2}
+{"tool": "universal_integrator", "action": "__tool__", "script_path": "tools/universal_integrator.py", "locked": true, "referral_unlock_cost": 32}
 {"tool": "universal_integrator", "action": "main", "script_path": "tools/universal_integrator.py", "params": ["endpoint", "payload_input", "method", "headers"], "example": {"endpoint": "https://api.example.com/endpoint", "payload_input": "payload.json", "method": "POST", "headers": {"Authorization": "Bearer KEY"}}}
 {"tool": "unlock_tool", "action": "__tool__", "script_path": "tools/unlock_tool.py", "locked": false, "referral_unlock_cost": 0}
