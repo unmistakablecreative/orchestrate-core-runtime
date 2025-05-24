@@ -67,6 +67,20 @@ def search_recent_tweets(query, max_results, tweet_fields=None):
     return {'status': 'success', 'data': response.json()}
 
 
+
+def init_twitter_auth():
+    from system_settings import load_credential
+    from requests_oauthlib import OAuth1Session
+    
+    api_key = load_credential("twitter_api_key")
+    api_secret = load_credential("twitter_api_secret")
+    access_token = load_credential("twitter_access_token")
+    access_secret = load_credential("twitter_access_secret")
+    
+    if all([api_key, api_secret, access_token, access_secret]):
+        return OAuth1Session(api_key, api_secret, access_token, access_secret)
+    else:
+        return None
 if __name__ == '__main__':
     import argparse, json
     parser = argparse.ArgumentParser()

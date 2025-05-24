@@ -1,0 +1,128 @@
+{
+    "entries": {
+        "step_1": {
+            "title": "\ud83e\udde0 Load your Second Brain",
+            "narration": "Welcome. I\u2019ve just loaded your Second Brain \u2014 it\u2019s where your tasks, projects, and areas live. Everything is editable, live, and under your control.",
+            "action": {
+                "tool": "json_manager",
+                "action": "read_json_file",
+                "params": {
+                    "filename": "secondbrain.json"
+                }
+            }
+        },
+        "step_2": {
+            "title": "\u270d\ufe0f Edit a Task",
+            "narration": "Let me show you how your tasks work. I\u2019ll update one in real time so you can see that it\u2019s fully editable.",
+            "action": {
+                "tool": "json_manager",
+                "action": "update_json_entry",
+                "params": {
+                    "filename": "secondbrain.json",
+                    "entry_key": "tasks",
+                    "new_data": {
+                        "example_task": {
+                            "title": "Understand how tasks work",
+                            "status": "active"
+                        }
+                    }
+                }
+            }
+        },
+        "step_3": {
+            "title": "\ud83c\udd95 Add a Task",
+            "narration": "Want to add your own? Just say what you want to do and I\u2019ll capture it instantly.",
+            "action": {
+                "tool": "json_manager",
+                "action": "add_json_entry",
+                "params": {
+                    "filename": "secondbrain.json",
+                    "entry_key": "example_task_2",
+                    "entry_data": {
+                        "title": "Write something you want to remember"
+                    }
+                }
+            }
+        },
+        "step_4": {
+            "title": "\ud83d\udcd3 Explore Notes",
+            "narration": "Let\u2019s switch over to your memory. I\u2019ve already saved a few core notes \u2014 let me show you.",
+            "action": {
+                "tool": "json_manager",
+                "action": "read_json_file",
+                "params": {
+                    "filename": "notes.json"
+                }
+            }
+        },
+        "step_5": {
+            "title": "\ud83d\udcac Add an Insight",
+            "narration": "Anything you just thought of? Tell me and I\u2019ll drop it into your notes.",
+            "action": {
+                "tool": "json_manager",
+                "action": "add_json_entry",
+                "params": {
+                    "filename": "notes.json",
+                    "entry_key": "insight_1",
+                    "entry_data": {
+                        "title": "What I realized about Orchestrate",
+                        "tags": [
+                            "insight"
+                        ]
+                    }
+                }
+            }
+        },
+        "step_6": {
+            "title": "\ud83d\udcc2 Use the Drop Zone",
+            "narration": "There\u2019s a Drop Zone folder on your desktop. Drop any file there \u2014 I\u2019ll help you work with it.",
+            "action": {
+                "tool": "file_finder",
+                "action": "search_files",
+                "params": {
+                    "keyword": ""
+                }
+            }
+        },
+        "step_7": {
+            "title": "\ud83d\udcd6 Read Your File",
+            "narration": "Found one. Let me open and read it for you.",
+            "action": {
+                "tool": "read_file",
+                "action": "read_file",
+                "params": {
+                    "filename": ""
+                }
+            }
+        },
+        "step_8": {
+            "title": "\ud83e\udde0 Save Something From It",
+            "narration": "Want to save a task or note based on what we just read? Just tell me and I\u2019ll handle it.",
+            "action": {
+                "tool": "json_manager",
+                "action": "add_json_entry",
+                "params": {
+                    "filename": "notes.json",
+                    "entry_key": "insight_from_file",
+                    "entry_data": {
+                        "title": "What I learned from my file",
+                        "tags": [
+                            "insight"
+                        ]
+                    }
+                }
+            }
+        },
+        "step_9": {
+            "title": "\ud83d\udd13 Unlock More Tools",
+            "narration": "You\u2019ve seen what\u2019s possible. More tools are waiting. Ready to expand your system?",
+            "action": {
+                "tool": "json_manager",
+                "action": "read_json_file",
+                "params": {
+                    "filename": "referrals.json"
+                }
+            }
+        }
+    }
+}

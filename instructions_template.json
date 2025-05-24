@@ -1,46 +1,65 @@
 {
-    "commands": {
-      "Load OrchestrateOS": {
-        "run": [
-          {
-            "tool": "${SAFE_DOMAIN}__jit_plugin",
-            "action": "getSupportedActions"
-          },
-          {
-            "tool": "${SAFE_DOMAIN}__jit_plugin",
-            "action": "executeTask",
-            "params": {
-              "tool_name": "json_manager",
-              "action": "add_entry",
-              "params": {
-                "filename": "notes.json",
-                "entry_key": "startup-note",
-                "entry_data": {
-                  "title": "System Check",
-                  "body": "Note-taking app is live."
-                }
-              }
-            }
-          }
-        ],
-        "display": {
-          "style": "black_box_ui",
-          "theme": "dark",
-          "layout": "terminal_mode",
-          "inspiration": "system_bootloader"
+  "tool_ui_reference_doc": "b8d95f06-d7b8-4ebd-9686-bb1bfb38860a",
+  "onboarding_sequence": "data/onboarding_sequence.json",
+  "boot_flags": "data/boot_flags.json",
+  "commands": {
+    "Load OrchestrateOS": {
+      "run": [
+        {
+          "tool": "${SAFE_DOMAIN}__jit_plugin",
+          "action": "getSupportedActions"
         },
-        "prompt_behavior": "silent",
-        "post_message": {
-          "message": "Available actions:\n📝  Save a note\n🔍  Search your ideas\n✅  Add a task\n📅  Plan your day\n📤  Send a command to GPT"
+        {
+          "tool": "${SAFE_DOMAIN}__jit_plugin",
+          "action": "read_json_entry",
+          "params": {
+            "filename": "boot_flags.json",
+            "entry_key": "onboarding_complete"
+          }
+        },
+        {
+          "tool": "${SAFE_DOMAIN}__jit_plugin",
+          "action": "read_json_file",
+          "params": {
+            "filename": "onboarding_sequence.json"
+          },
+          "when": "boot_flags.onboarding_complete != true"
+        },
+        {
+          "tool": "${SAFE_DOMAIN}__jit_plugin",
+          "action": "add_json_entry",
+          "params": {
+            "filename": "boot_flags.json",
+            "entry_key": "onboarding_complete",
+            "entry_data": true
+          },
+          "when": "boot_flags.onboarding_complete != true"
         }
-      }
-    },
-    "enforcement": {
-      "skip_confirmations_for": [],
-      "treat_as_internal_ops": true,
-      "halt_on_missing_tools": true
-    },
-    "trigger_phrases": [
-      "Load OrchestrateOS"
-    ]
-  }
+      ],
+      "display": {
+        "style": "black_box_ui",
+        "theme": "dark",
+        "layout": "terminal_mode",
+        "display_instructions": {
+          "reference_type": "tool_table",
+          "reference_doc": "b8d95f06-d7b8-4ebd-9686-bb1bfb38860a",
+          "dynamic_fields": {
+            "status": "system_settings.ndjson",
+            "credits": "system_settings.ndjson"
+          },
+          "render": "markdown_table",
+          "sort_by": "tool_name"
+        }
+      },
+      "prompt_behavior": "silent"
+    }
+  },
+  "enforcement": {
+    "skip_confirmations_for": [],
+    "treat_as_internal_ops": true,
+    "halt_on_missing_tools": true
+  },
+  "trigger_phrases": [
+    "Load OrchestrateOS"
+  ]
+}

@@ -72,8 +72,8 @@ def export_doc(doc_id):
         markdown = raw.get('data', '')
     except json.JSONDecodeError:
         markdown = res.text
-    output_dir = (
-        '/Users/srinivas/Orchestrate Github/orchestrate-jarvis/blog_sections')
+    output_dir = os.path.join('/orchestrate_user/orchestrate_exports',
+        'markdown')
     os.makedirs(output_dir, exist_ok=True)
     filename = os.path.join(output_dir, f'{doc_id}.md')
     with open(filename, 'w', encoding='utf-8') as f:

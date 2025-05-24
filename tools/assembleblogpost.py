@@ -57,11 +57,29 @@ def write_final(output_path, content):
         f'Final blog post written to {output_path}', 'path': output_path}
 
 
-def main():
-    manifest = load_manifest('manifest.json')
-    content = assemble_post(manifest)
-    result = write_final('compiled_posts/final.md', content)
-    return result
+def main(slug):
+    md_dir = '/orchestrate_user/orchestrate_exports/markdown'
+    manifest_path = os.path.join(md_dir, f'manifest_{slug}.json')
+    md_files = sorted([os.path.join(md_dir, f) for f in os.listdir(md_dir) if
+        f.startswith(f'blog_{slug}') and f.endswith('.md')])
+    manifest = []
+    if os.path.exists(manifest_path):
+        with open(manifest_path, 'r') as f:
+            manifest = json.load(f)
+    sections = []
+    for path in md_files:
+        with open(path, 'r') as f:
+            content = f.read()
+        image_url = None
+        if manifest:
+            match = next((entry for entry in manifest if entry.get('file') ==
+                os.path.basename(path)), {})
+            image_url = match.get('image_url')
+        if image_url:
+            content = inject_image(content, image_url)
+        sections.append(content)
+    output = '\n\n'.join(sections)
+    return write_final(f'compiled_posts/{slug}.md', output)
 
 
 if __name__ == '__main__':

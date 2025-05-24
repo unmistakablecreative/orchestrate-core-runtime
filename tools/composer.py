@@ -365,7 +365,7 @@ def create_composer_batch(params):
     filename = params.get('filename')
     if not filename:
         return {'status': 'error', 'message': "Missing 'filename' parameter."}
-    full_path = f'compositions/{filename}'
+    full_path = os.path.join(os.getcwd(), 'compositions', filename)
     default_payload = {'status': 'ready', 'actions': []}
     try:
         with open(full_path, 'w') as f:

@@ -53,7 +53,8 @@ DEFAULT_TEMPLATE_DIR = (
 
 def load_actions(params):
     filename = params.get('filename')
-    folder_path = params.get('template_dir', DEFAULT_TEMPLATE_DIR)
+    folder_path = params.get('template_dir', os.path.join(os.getcwd(),
+        'compositions'))
     try:
         if filename:
             filepath = os.path.join(folder_path, filename)

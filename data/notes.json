@@ -1,0 +1,28 @@
+{
+  "onboarding_intro": {
+    "title": "Orchestrate isn't ChatGPT",
+    "description": "You’re running your own system. It reads files, executes tools, and saves real memory.",
+    "tags": ["intro", "system"],
+    "backlinks": []
+  },
+  "task_vs_note": {
+    "title": "Tasks vs Notes",
+    "description": "Tasks go in `tasks.json` and have a title, status, and optional description. Notes are looser — any insight, quote, or idea can live here.",
+    "tags": ["structure", "workflow"]
+  },
+  "memory_design": {
+    "title": "How memory works",
+    "description": "Your memory files are just structured JSON. You can update them live — no save button needed.",
+    "tags": ["memory", "json", "insight"]
+  },
+  "dropzone_power": {
+    "title": "Use the Drop Zone",
+    "description": "Any file dropped there becomes readable. You can log notes from it, pull tasks, or store key learnings.",
+    "tags": ["file", "dropzone"]
+  },
+  "tool_calls": {
+    "title": "Every tool is callable",
+    "description": "Each Orchestrate tool is just a script. You can run any one with a sentence — it’s real execution, not simulation.",
+    "tags": ["tools", "execution"]
+  }
+}
