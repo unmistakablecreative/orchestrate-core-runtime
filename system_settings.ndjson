@@ -1,3 +1,8 @@
+{"tool": "blog_assembler_tool", "action": "__tool__", "script_path": "tools/assembleblogpost.py"}
+{"tool": "blog_assembler_tool", "action": "main", "script_path": "tools/assembleblogpost.py", "params": ["slug"], "example": {"tool_name": "blog_assembler_tool", "action": "main", "params": {"slug": "aiagents"}}}
+{"tool": "buffer_engine", "action": "__tool__", "script_path": "tools/buffer_engine.py"}
+{"tool": "buffer_engine", "action": "buffer_loop", "script_path": "tools/buffer_engine.py", "params": [], "example": {"tool_name": "buffer_engine", "action": "buffer_loop", "params": {}}}
+{"tool": "buffer_engine", "action": "post_to_platform", "script_path": "tools/buffer_engine.py", "params": ["content", "link", "image_url"], "example": {"tool_name": "buffer_engine", "action": "post_to_platform", "params": {"content": "This is a tweet.", "link": "https://example.com", "image_url": "https://img.url"}}}
 {"tool": "code_editor", "action": "__tool__", "script_path": "tools/code_editor.py", "locked": true, "referral_unlock_cost": 2}
 {"tool": "code_editor", "action": "add_endpoint_to_fastapi_file", "script_path": "tools/code_editor.py", "params": ["filename", "method", "route", "function_name", "body"], "example": {"filename": "tools/my_script.py", "method": "get", "route": "/test", "function_name": "hello", "body": "return {status: ok}"}}
 {"tool": "code_editor", "action": "add_function_to_blueprint", "script_path": "tools/code_editor.py", "params": ["filename", "function_name", "params", "body"], "example": {"filename": "terminal_tool.json", "function_name": "hello", "params": [], "body": "print(\"Hello World\")"}}
@@ -33,13 +38,16 @@
 {"tool": "dispatcher", "action": "dispatch_batch", "script_path": "tools/orchestrate_dispatcher.py", "params": [], "example": {}}
 {"tool": "file_finder", "action": "__tool__", "script_path": "tools/file_finder.py", "locked": false, "referral_unlock_cost": 0}
 {"tool": "file_finder", "action": "search_files", "script_path": "tools/file_finder.py", "params": ["keyword"], "example": {"keyword": "glucose"}}
-{"tool": "github_tool", "action": "__tool__", "script_path": "tools/github_tool.py", "locked": true, "referral_unlock_cost": 2}
-{"tool": "github_tool", "action": "backup_repo", "script_path": "tools/github_tool.py", "params": [], "example": {}}
-{"tool": "github_tool", "action": "git_add_images", "script_path": "tools/github_tool.py", "params": [], "example": {}}
-{"tool": "github_tool", "action": "git_commit", "script_path": "tools/github_tool.py", "params": ["message"], "example": {"message": "Add image"}}
-{"tool": "github_tool", "action": "git_pull", "script_path": "tools/github_tool.py", "params": ["branch"], "example": {"branch": "main"}}
-{"tool": "github_tool", "action": "git_push", "script_path": "tools/github_tool.py", "params": ["branch"], "example": {"branch": "main"}}
-{"tool": "github_tool", "action": "git_status", "script_path": "tools/github_tool.py", "params": [], "example": {}}
+{"tool": "github_tool_universal", "action": "__tool__", "script_path": "tools/github_tool_universal.py"}
+{"tool": "github_tool_universal", "action": "add_file", "script_path": "tools/github_tool_universal.py", "params": ["path", "file"], "example": {"tool_name": "github_tool_universal", "action": "add_file", "params": {"path": "./repo", "file": "README.md"}}}
+{"tool": "github_tool_universal", "action": "archive_repo", "script_path": "tools/github_tool_universal.py", "params": ["path"], "example": {"tool_name": "github_tool_universal", "action": "archive_repo", "params": {"path": "./repo"}}}
+{"tool": "github_tool_universal", "action": "commit", "script_path": "tools/github_tool_universal.py", "params": ["path", "message"], "example": {"tool_name": "github_tool_universal", "action": "commit", "params": {"path": "./repo", "message": "Initial commit"}}}
+{"tool": "github_tool_universal", "action": "init_repo", "script_path": "tools/github_tool_universal.py", "params": ["path"], "example": {"tool_name": "github_tool_universal", "action": "init_repo", "params": {"path": "./repo"}}}
+{"tool": "github_tool_universal", "action": "pull", "script_path": "tools/github_tool_universal.py", "params": ["path", "branch"], "example": {"tool_name": "github_tool_universal", "action": "pull", "params": {"path": "./repo", "branch": "main"}}}
+{"tool": "github_tool_universal", "action": "push", "script_path": "tools/github_tool_universal.py", "params": ["path", "branch"], "example": {"tool_name": "github_tool_universal", "action": "push", "params": {"path": "./repo", "branch": "main"}}}
+{"tool": "github_tool_universal", "action": "status", "script_path": "tools/github_tool_universal.py", "params": ["path"], "example": {"tool_name": "github_tool_universal", "action": "status", "params": {"path": "./repo"}}}
+{"tool": "ideogram_tool", "action": "__tool__", "script_path": "tools/ideogram_tool.py"}
+{"tool": "ideogram_tool", "action": "generate_image", "script_path": "tools/ideogram_tool.py", "params": ["input", "options"], "example": {"tool_name": "ideogram_tool", "action": "generate_image", "params": {"input": "A robot in a neon city", "options": {"style": "sci-fi"}}}}
 {"tool": "json_manager", "action": "__tool__", "script_path": "tools/json_manager.py", "locked": false, "referral_unlock_cost": 0}
 {"tool": "json_manager", "action": "add_field_to_json_entry", "script_path": "tools/json_manager.py", "params": ["filename", "entry_key", "field_name", "field_value"], "example": {"filename": "tasks.json", "entry_key": "a", "field_name": "priority", "field_value": "low"}}
 {"tool": "json_manager", "action": "add_json_entry", "script_path": "tools/json_manager.py", "params": ["filename", "entry_key", "entry_data"], "example": {"filename": "tasks.json", "entry_key": "a", "entry_data": {"title": "Test task"}}}
