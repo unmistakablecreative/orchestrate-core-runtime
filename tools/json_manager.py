@@ -8,7 +8,7 @@ def insert_json_entry_from_template(params):
     filename = os.path.basename(params['filename'])
     entry_key = params['entry_key']
     template_name = params['template_name']
-    data_dir = '/app/data'
+    data_dir = os.path.join(os.getcwd(), 'data')
     template_path = os.path.join(data_dir, template_name)
     filepath = os.path.join(data_dir, filename)
     if not os.path.exists(template_path):
@@ -31,7 +31,7 @@ def insert_json_entry_from_template(params):
 def create_json_file_from_template(params):
     template_name = params['template_name']
     new_filename = os.path.basename(params['new_filename'])
-    data_dir = '/app/data'
+    data_dir = os.path.join(os.getcwd(), 'data')
     template_path = os.path.join(data_dir, template_name)
     new_file_path = os.path.join(data_dir, new_filename)
     if not os.path.exists(template_path):
@@ -50,7 +50,7 @@ def batch_add_field_to_json_entries(params):
     entry_keys = params['entry_keys']
     field_name = params['field_name']
     field_value = params['field_value']
-    filepath = os.path.join('/app/data', filename)
+    filepath = os.path.join(os.getcwd(), 'data', filename)
     if not os.path.exists(filepath):
         return {'status': 'error', 'message': '❌ File not found.'}
     with open(filepath, 'r', encoding='utf-8') as f:
@@ -71,7 +71,7 @@ def add_field_to_json_entry(params):
     entry_key = params['entry_key']
     field_name = params['field_name']
     field_value = params['field_value']
-    filepath = os.path.join('/app/data', filename)
+    filepath = os.path.join(os.getcwd(), 'data', filename)
     if not os.path.exists(filepath):
         return {'status': 'error', 'message': '❌ File not found.'}
     with open(filepath, 'r', encoding='utf-8') as f:
@@ -89,7 +89,7 @@ def search_json_entries(params):
     import os, json
     filename = os.path.basename(params['filename'])
     keyword = params.get('search_value', '').lower()
-    filepath = os.path.join('/app/data', filename)
+    filepath = os.path.join(os.getcwd(), 'data', filename)
     if not os.path.exists(filepath):
         return {'status': 'error', 'message': f'❌ File not found: {filename}'}
     with open(filepath, 'r', encoding='utf-8') as f:
@@ -105,7 +105,7 @@ def search_json_entries(params):
 
 def list_json_entries(params):
     filename = os.path.basename(params['filename'])
-    filepath = os.path.join('/app/data', filename)
+    filepath = os.path.join(os.getcwd(), 'data', filename)
     if not os.path.exists(filepath):
         return {'status': 'error', 'message': '❌ File not found.'}
     with open(filepath, 'r', encoding='utf-8') as f:
@@ -116,7 +116,7 @@ def list_json_entries(params):
 def batch_delete_json_entries(params):
     filename = os.path.basename(params['filename'])
     entry_keys = params['entry_keys']
-    filepath = os.path.join('/app/data', filename)
+    filepath = os.path.join(os.getcwd(), 'data', filename)
     if not os.path.exists(filepath):
         return {'status': 'error', 'message': '❌ File not found.'}
     with open(filepath, 'r', encoding='utf-8') as f:
@@ -135,7 +135,7 @@ def batch_delete_json_entries(params):
 def delete_json_entry(params):
     filename = os.path.basename(params['filename'])
     entry_key = params['entry_key']
-    filepath = os.path.join('/app/data', filename)
+    filepath = os.path.join(os.getcwd(), 'data', filename)
     if not os.path.exists(filepath):
         return {'status': 'error', 'message': '❌ File not found.'}
     with open(filepath, 'r', encoding='utf-8') as f:
@@ -152,7 +152,7 @@ def delete_json_entry(params):
 def batch_update_json_entries(params):
     filename = os.path.basename(params['filename'])
     updates = params['updates']
-    filepath = os.path.join('/app/data', filename)
+    filepath = os.path.join(os.getcwd(), 'data', filename)
     if not os.path.exists(filepath):
         return {'status': 'error', 'message': '❌ File not found.'}
     with open(filepath, 'r', encoding='utf-8') as f:
@@ -172,7 +172,7 @@ def update_json_entry(params):
     filename = os.path.basename(params['filename'])
     entry_key = params['entry_key']
     new_data = params['new_data']
-    filepath = os.path.join('/app/data', filename)
+    filepath = os.path.join(os.getcwd(), 'data', filename)
     if not os.path.exists(filepath):
         return {'status': 'error', 'message': '❌ File not found.'}
     with open(filepath, 'r', encoding='utf-8') as f:
@@ -190,7 +190,7 @@ def update_json_entry(params):
     filename = os.path.basename(params['filename'])
     entry_key = params['entry_key']
     new_data = params['new_data']
-    filepath = os.path.join('/app/data', filename)
+    filepath = os.path.join(os.getcwd(), 'data', filename)
     if not os.path.exists(filepath):
         return {'status': 'error', 'message': '❌ File not found.'}
     with open(filepath, 'r', encoding='utf-8') as f:
@@ -207,7 +207,7 @@ def update_json_entry(params):
 def read_json_entry(params):
     filename = os.path.basename(params['filename'])
     entry_key = params['entry_key']
-    filepath = os.path.join('/app/data', filename)
+    filepath = os.path.join(os.getcwd(), 'data', filename)
     if not os.path.exists(filepath):
         return {'status': 'error', 'message': '❌ File not found.'}
     with open(filepath, 'r', encoding='utf-8') as f:
@@ -223,7 +223,7 @@ def add_json_entry(params):
     filename = os.path.basename(params['filename'])
     entry_key = params['entry_key']
     entry_data = params['entry_data']
-    filepath = os.path.join('/app/data', filename)
+    filepath = os.path.join(os.getcwd(), 'data', filename)
     if not os.path.exists(filepath):
         return {'status': 'error', 'message': '❌ File not found.'}
     with open(filepath, 'r', encoding='utf-8') as f:
@@ -237,7 +237,7 @@ def add_json_entry(params):
 
 def read_json_file(params):
     filename = os.path.basename(params['filename'])
-    filepath = os.path.join('/app/data', filename)
+    filepath = os.path.join(os.getcwd(), 'data', filename)
     if not os.path.exists(filepath):
         return {'status': 'error', 'message': '❌ File not found.'}
     with open(filepath, 'r', encoding='utf-8') as f:
@@ -247,7 +247,7 @@ def read_json_file(params):
 
 def create_json_file(params):
     filename = os.path.basename(params['filename'])
-    filepath = os.path.join('/app/data', filename)
+    filepath = os.path.join(os.getcwd(), 'data', filename)
     with open(filepath, 'w', encoding='utf-8') as f:
         json.dump({'entries': {}}, f, indent=4)
     return {'status': 'success', 'message': '✅ File initialized.'}
