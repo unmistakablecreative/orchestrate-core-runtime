@@ -1,7 +1,4 @@
 {
-  "tool_ui_reference_doc": "b8d95f06-d7b8-4ebd-9686-bb1bfb38860a",
-  "onboarding_sequence": "onboarding_sequence.json",
-  "boot_flags": "boot_flags.json",
   "commands": {
     "Load OrchestrateOS": {
       "run": [
@@ -33,35 +30,23 @@
         }
       ],
       "display": {
-        "style": "black_box_ui",
-        "theme": "dark",
-        "layout": "terminal_mode",
-        "display_instructions": {
-          "reference_type": "tool_table",
-          "reference_doc": "b8d95f06-d7b8-4ebd-9686-bb1bfb38860a",
-          "dynamic_fields": {
-            "status": "system_settings.ndjson",
-            "credits": "system_settings.ndjson"
-          },
-          "render": "markdown_table",
-          "sort_by": "tool_name"
-        }
+        "style": "markdown",
+        "render": "tool_table",
+        "reference_doc": "b8d95f06-d7b8-4ebd-9686-bb1bfb38860a",
+        "dynamic_fields": {
+          "status": "getSupportedActions"
+        },
+        "sort_by": "tool_name",
+        "include_locks": true,
+        "legend": true,
+        "header": "🧰 Tools Available in Your OrchestrateOS"
       },
-      "prompt_behavior": "silent"
+      "after_display": {
+        "if": "boot_flags.onboarding_complete != true",
+        "run_onboarding": true,
+        "narration": "Welcome — let’s walk through what your Orchestrate system can actually do. You’ll see how tasks, memory, and tools all connect live."
+      },
+      "prompt_behavior": "guided"
     }
-  },
-  "enforcement": {
-    "skip_confirmations_for": [],
-    "treat_as_internal_ops": true,
-    "halt_on_missing_tools": true
-  },
-  "trigger_phrases": [
-    "Load OrchestrateOS"
-  ],
-  "intent_routing_config": {
-    "reference_file": "orchestrate_intent_route.json",
-    "match_fields": ["aliases", "seed_phrases"],
-    "fallback_to_embedding": true,
-    "halt_on_ambiguity": true
   }
 }
