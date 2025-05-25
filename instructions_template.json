@@ -11,10 +11,9 @@
         },
         {
           "tool": "${SAFE_DOMAIN}__jit_plugin",
-          "action": "read_json_entry",
+          "action": "read_json_file",
           "params": {
-            "filename": "boot_flags.json",
-            "entry_key": "onboarding_complete"
+            "filename": "boot_flags.json"
           }
         },
         {
@@ -22,16 +21,6 @@
           "action": "read_json_file",
           "params": {
             "filename": "onboarding_sequence.json"
-          },
-          "when": "boot_flags.onboarding_complete != true"
-        },
-        {
-          "tool": "${SAFE_DOMAIN}__jit_plugin",
-          "action": "add_json_entry",
-          "params": {
-            "filename": "boot_flags.json",
-            "entry_key": "onboarding_complete",
-            "entry_data": true
           },
           "when": "boot_flags.onboarding_complete != true"
         },
