@@ -1,7 +1,7 @@
 {
   "tool_ui_reference_doc": "b8d95f06-d7b8-4ebd-9686-bb1bfb38860a",
-  "onboarding_sequence": "data/onboarding_sequence.json",
-  "boot_flags": "data/boot_flags.json",
+  "onboarding_sequence": "onboarding_sequence.json",
+  "boot_flags": "boot_flags.json",
   "commands": {
     "Load OrchestrateOS": {
       "run": [
@@ -34,6 +34,13 @@
             "entry_data": true
           },
           "when": "boot_flags.onboarding_complete != true"
+        },
+        {
+          "tool": "${SAFE_DOMAIN}__jit_plugin",
+          "action": "read_json_file",
+          "params": {
+            "filename": "orchestrate_intent_route.json"
+          }
         }
       ],
       "display": {
@@ -61,5 +68,11 @@
   },
   "trigger_phrases": [
     "Load OrchestrateOS"
-  ]
+  ],
+  "intent_routing_config": {
+    "reference_file": "orchestrate_intent_route.json",
+    "match_fields": ["aliases", "seed_phrases"],
+    "fallback_to_embedding": true,
+    "halt_on_ambiguity": true
+  }
 }

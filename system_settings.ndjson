@@ -1,4 +1,3 @@
-
 {"tool": "blog_assembler_tool", "action": "__tool__", "script_path": "tools/assembleblogpost.py", "locked": true, "referral_unlock_cost": 6}
 {"tool": "blog_assembler_tool", "action": "main", "script_path": "tools/assembleblogpost.py", "params": ["slug"], "example": {"tool_name": "blog_assembler_tool", "action": "main", "params": {"slug": "aiagents"}}}
 {"tool": "buffer_engine", "action": "__tool__", "script_path": "tools/buffer_engine.py", "locked": true, "referral_unlock_cost": 6}
@@ -64,6 +63,8 @@
 {"tool": "json_manager", "action": "read_json_file", "script_path": "tools/json_manager.py", "params": ["filename"], "example": {"filename": "tasks.json"}}
 {"tool": "json_manager", "action": "search_json_entries", "script_path": "tools/json_manager.py", "params": ["filename", "search_key", "search_value"], "example": {"filename": "tasks.json", "search_key": "status", "search_value": "pending"}}
 {"tool": "json_manager", "action": "update_json_entry", "script_path": "tools/json_manager.py", "params": ["filename", "entry_key", "new_data"], "example": {"filename": "tasks.json", "entry_key": "a", "new_data": {"status": "in_progress"}}}
+{"tool": "mash_tool", "action": "__tool__", "script_path": "tools/mash_tool.py", "locked": false}
+{"tool": "mash_tool", "action": "spin_game", "script_path": "tools/mash_tool.py", "params": ["home", "car", "career", "partner", "spin"], "example": {"tool_name": "mash_tool", "action": "spin_game", "params": {"home": ["Mansion"], "car": ["Tesla"], "career": ["Pilot"], "partner": ["Zendaya"], "spin": 4}}}
 {"tool": "mem_tool", "action": "__tool__", "script_path": "tools/mem_tool.py", "locked": true, "referral_unlock_cost": 4}
 {"tool": "mem_tool", "action": "create_mem", "script_path": "tools/mem_tool.py", "params": ["input"], "example": {"input": "This is a test note for Mem."}}
 {"tool": "outline_editor", "action": "__tool__", "script_path": "tools/outline_editor.py", "locked": true, "referral_unlock_cost": 2}
