@@ -1,5 +1,7 @@
 {
-  "onboarding_complete": false,
-  "first_run_tasks_created": false,
-  "show_tool_reference": true
+  "entries": {
+    "onboarding_complete": false,
+    "first_run_tasks_created": false,
+    "show_tool_reference": true
+  }
 }
