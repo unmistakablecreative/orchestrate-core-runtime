@@ -1,165 +1,167 @@
 {
-  "intro": {
-    "title": "👋 Welcome to Orchestrate",
-    "narration": "You're about to walk through a live demo of your own Second Brain — editable tasks, memory, notes, files, and more. I'll guide you step-by-step, and you can pause, skip, or ask questions anytime."
-  },
-  "steps": {
-    "step_1": {
-      "title": "🧠 Load your Second Brain",
-      "narration": "Let’s begin by loading your task + project workspace.",
-      "action": {
-        "tool": "json_manager",
-        "action": "read_json_file",
-        "params": {
-          "filename": "secondbrain.json"
+  "entries": {
+    "intro": {
+      "title": "👋 Welcome to Orchestrate",
+      "narration": "You're about to walk through a live demo of your own Second Brain — editable tasks, memory, notes, files, and more. I'll guide you step-by-step, and you can pause, skip, or ask questions anytime."
+    },
+    "steps": {
+      "step_1": {
+        "title": "🧠 Load your Second Brain",
+        "narration": "Let’s begin by loading your task + project workspace.",
+        "action": {
+          "tool": "json_manager",
+          "action": "read_json_file",
+          "params": {
+            "filename": "secondbrain.json"
+          }
+        },
+        "next": "step_2",
+        "meta": {
+          "interactive": false
         }
       },
-      "next": "step_2",
-      "meta": {
-        "interactive": false
-      }
-    },
-    "step_2": {
-      "title": "✍️ See a Live Task Edit",
-      "narration": "Watch as I update one of your tasks — everything here is editable.",
-      "action": {
-        "tool": "json_manager",
-        "action": "update_json_entry",
-        "params": {
-          "filename": "secondbrain.json",
-          "entry_key": "tasks",
-          "new_data": {
-            "example_task": {
-              "title": "Understand how tasks work",
-              "status": "active"
+      "step_2": {
+        "title": "✍️ See a Live Task Edit",
+        "narration": "Watch as I update one of your tasks — everything here is editable.",
+        "action": {
+          "tool": "json_manager",
+          "action": "update_json_entry",
+          "params": {
+            "filename": "secondbrain.json",
+            "entry_key": "tasks",
+            "new_data": {
+              "example_task": {
+                "title": "Understand how tasks work",
+                "status": "active"
+              }
             }
           }
-        }
+        },
+        "next": "step_3"
       },
-      "next": "step_3"
-    },
-    "step_3": {
-      "title": "🆕 Add a Task Yourself",
-      "narration": "Now it’s your turn — what do you want to remember or get done?",
-      "prompt": "What task should I add?",
-      "action_template": {
-        "tool": "json_manager",
-        "action": "add_json_entry",
-        "params": {
-          "filename": "secondbrain.json",
-          "entry_key": "example_task_2",
-          "entry_data": {
-            "title": "{{user_input}}"
+      "step_3": {
+        "title": "🆕 Add a Task Yourself",
+        "narration": "Now it’s your turn — what do you want to remember or get done?",
+        "prompt": "What task should I add?",
+        "action_template": {
+          "tool": "json_manager",
+          "action": "add_json_entry",
+          "params": {
+            "filename": "secondbrain.json",
+            "entry_key": "example_task_2",
+            "entry_data": {
+              "title": "{{user_input}}"
+            }
           }
+        },
+        "next": "step_4",
+        "meta": {
+          "interactive": true,
+          "requires_input": true
         }
       },
-      "next": "step_4",
-      "meta": {
-        "interactive": true,
-        "requires_input": true
-      }
-    },
-    "step_4": {
-      "title": "📓 Open Your Notes",
-      "narration": "Switching over to memory mode. These are your personal notes.",
-      "action": {
-        "tool": "json_manager",
-        "action": "read_json_file",
-        "params": {
-          "filename": "notes.json"
-        }
-      },
-      "next": "step_5"
-    },
-    "step_5": {
-      "title": "💬 Capture an Insight",
-      "narration": "Think of anything worth saving? I’ll log it into your notes instantly.",
-      "prompt": "What’s something you just realized?",
-      "action_template": {
-        "tool": "json_manager",
-        "action": "add_json_entry",
-        "params": {
-          "filename": "notes.json",
-          "entry_key": "insight_1",
-          "entry_data": {
-            "title": "{{user_input}}",
-            "tags": ["insight"]
+      "step_4": {
+        "title": "📓 Open Your Notes",
+        "narration": "Switching over to memory mode. These are your personal notes.",
+        "action": {
+          "tool": "json_manager",
+          "action": "read_json_file",
+          "params": {
+            "filename": "notes.json"
           }
-        }
+        },
+        "next": "step_5"
       },
-      "next": "step_6",
-      "meta": {
-        "interactive": true,
-        "requires_input": true
-      }
-    },
-    "step_6": {
-      "title": "📂 Use the Drop Zone",
-      "narration": "Drop any file into your Drop Zone. I’ll scan and find it.",
-      "action": {
-        "tool": "file_finder",
-        "action": "search_files",
-        "params": {
-          "keyword": "*"
-        }
-      },
-      "next": "step_7",
-      "meta": {
-        "skippable": true
-      }
-    },
-    "step_7": {
-      "title": "📖 Read the First File",
-      "narration": "Opening the first file I found...",
-      "action_template": {
-        "tool": "read_file",
-        "action": "read_file",
-        "params": {
-          "filename": "{{found_file}}"
-        }
-      },
-      "next": "step_8",
-      "meta": {
-        "depends_on_file": true
-      }
-    },
-    "step_8": {
-      "title": "🧠 Save an Insight from the File",
-      "narration": "Want to save something you saw in that file?",
-      "prompt": "What insight should I save from it?",
-      "action_template": {
-        "tool": "json_manager",
-        "action": "add_json_entry",
-        "params": {
-          "filename": "notes.json",
-          "entry_key": "insight_from_file",
-          "entry_data": {
-            "title": "{{user_input}}",
-            "tags": ["insight"]
+      "step_5": {
+        "title": "💬 Capture an Insight",
+        "narration": "Think of anything worth saving? I’ll log it into your notes instantly.",
+        "prompt": "What’s something you just realized?",
+        "action_template": {
+          "tool": "json_manager",
+          "action": "add_json_entry",
+          "params": {
+            "filename": "notes.json",
+            "entry_key": "insight_1",
+            "entry_data": {
+              "title": "{{user_input}}",
+              "tags": ["insight"]
+            }
           }
+        },
+        "next": "step_6",
+        "meta": {
+          "interactive": true,
+          "requires_input": true
         }
       },
-      "next": "step_9",
-      "meta": {
-        "interactive": true,
-        "requires_input": true
+      "step_6": {
+        "title": "📂 Use the Drop Zone",
+        "narration": "Drop any file into your Drop Zone. I’ll scan and find it.",
+        "action": {
+          "tool": "file_finder",
+          "action": "search_files",
+          "params": {
+            "keyword": "*"
+          }
+        },
+        "next": "step_7",
+        "meta": {
+          "skippable": true
+        }
+      },
+      "step_7": {
+        "title": "📖 Read the First File",
+        "narration": "Opening the first file I found...",
+        "action_template": {
+          "tool": "read_file",
+          "action": "read_file",
+          "params": {
+            "filename": "{{found_file}}"
+          }
+        },
+        "next": "step_8",
+        "meta": {
+          "depends_on_file": true
+        }
+      },
+      "step_8": {
+        "title": "🧠 Save an Insight from the File",
+        "narration": "Want to save something you saw in that file?",
+        "prompt": "What insight should I save from it?",
+        "action_template": {
+          "tool": "json_manager",
+          "action": "add_json_entry",
+          "params": {
+            "filename": "notes.json",
+            "entry_key": "insight_from_file",
+            "entry_data": {
+              "title": "{{user_input}}",
+              "tags": ["insight"]
+            }
+          }
+        },
+        "next": "step_9",
+        "meta": {
+          "interactive": true,
+          "requires_input": true
+        }
+      },
+      "step_9": {
+        "title": "🔓 Unlock More Tools",
+        "narration": "You’ve seen your system at work. Ready to expand your OS?",
+        "action": {
+          "tool": "json_manager",
+          "action": "read_json_file",
+          "params": {
+            "filename": "referrals.json"
+          }
+        },
+        "next": "outro"
       }
     },
-    "step_9": {
-      "title": "🔓 Unlock More Tools",
-      "narration": "You’ve seen your system at work. Ready to expand your OS?",
-      "action": {
-        "tool": "json_manager",
-        "action": "read_json_file",
-        "params": {
-          "filename": "referrals.json"
-        }
-      },
-      "next": "outro"
+    "outro": {
+      "title": "🎉 You’re In",
+      "narration": "That’s the core of Orchestrate. Tasks, notes, files, and tools — all alive, editable, and extendable. You’re ready."
     }
-  },
-  "outro": {
-    "title": "🎉 You’re In",
-    "narration": "That’s the core of Orchestrate. Tasks, notes, files, and tools — all alive, editable, and extendable. You’re ready."
   }
 }
