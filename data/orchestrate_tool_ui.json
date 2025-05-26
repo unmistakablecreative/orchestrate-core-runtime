@@ -2,82 +2,97 @@
   "display_mode": "table",
   "theme": "dark",
   "legend": true,
-  "sort_by": "custom",
+  "sort_by": "referral_unlock_cost",
   "tools": {
     "file_finder": {
       "label": "Find File",
       "description": "Search filenames by keyword to quickly locate assets.",
-      "priority": 1
+      "priority": 1,
+      "referral_unlock_cost": 0
     },
     "read_file": {
       "label": "Read File",
       "description": "Reads and returns file content as clean JSON.",
-      "priority": 2
+      "priority": 2,
+      "referral_unlock_cost": 0
     },
     "json_manager": {
       "label": "JSON Manager",
       "description": "Structured editor for JSON files — add, update, delete.",
-      "priority": 3
+      "priority": 3,
+      "referral_unlock_cost": 0
     },
     "system_settings": {
       "label": "System Settings",
       "description": "Internal registry controller for tools, actions, and unlocks.",
-      "priority": 4
+      "priority": 4,
+      "referral_unlock_cost": 0
     },
     "terminal": {
       "label": "Terminal Tool",
       "description": "Controlled, sandboxed shell access for command execution.",
-      "priority": 5
+      "priority": 5,
+      "referral_unlock_cost": 14
     },
     "mash_tool": {
       "label": "Mash",
       "description": "Run a nostalgic “MASH” game for fun outcomes.",
-      "priority": 6
+      "priority": 6,
+      "referral_unlock_cost": 0
     },
     "buffer_engine": {
       "label": "Buffer Engine",
       "description": "Schedule and auto-post content to external platforms.",
-      "priority": 7
+      "priority": 7,
+      "referral_unlock_cost": 6
     },
     "blog_assembler_tool": {
       "label": "Blog Assembler",
       "description": "Compile a blog post from structured outlines and data.",
-      "priority": 8
+      "priority": 8,
+      "referral_unlock_cost": 6
     },
     "outline_editor": {
       "label": "Outline Editor",
       "description": "Create, manage, and publish structured content docs.",
-      "priority": 9
+      "priority": 9,
+      "referral_unlock_cost": 2
     },
     "mem_tool": {
       "label": "Mem",
       "description": "Syncs with Mem for note storage and retrieval.",
-      "priority": 10
+      "priority": 10,
+      "referral_unlock_cost": 4
     },
     "github_tool_universal": {
       "label": "Github",
       "description": "Clone, commit, and push repos from GPT-managed workflows.",
-      "priority": 11
+      "priority": 11,
+      "referral_unlock_cost": 8
     },
     "ideogram_tool": {
       "label": "Ideogram",
       "description": "Generates AI-enhanced visual assets from prompt input.",
-      "priority": 12
+      "priority": 12,
+      "referral_unlock_cost": 8
     },
     "composer": {
       "label": "Composer",
       "description": "Chain tools and actions into reusable automations.",
-      "priority": 13
+      "priority": 13,
+      "referral_unlock_cost": 12
     },
     "code_editor": {
       "label": "Code Editor",
       "description": "Create, patch, and modify code live in the Orchestrate env.",
-      "priority": 14
+      "priority": 14,
+      "referral_unlock_cost": 24
     },
     "universal_integrator": {
       "label": "Universal Integrator",
       "description": "Send custom API requests to any third-party service.",
-      "priority": 15
+      "priority": 15,
+      "referral_unlock_cost": 32
     }
   }
 }
