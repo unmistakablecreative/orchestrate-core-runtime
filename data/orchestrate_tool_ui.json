@@ -1,9 +1,5 @@
 {
-  "display_mode": "table",
-  "theme": "dark",
-  "legend": true,
-  "sort_by": "referral_unlock_cost",
-  "tools": {
+  "entries": {
     "file_finder": {
       "label": "Find File",
       "description": "Search filenames by keyword to quickly locate assets.",
