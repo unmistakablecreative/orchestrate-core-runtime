@@ -1,159 +1,163 @@
 {
-  "intro": {
-    "title": "👋 Welcome to Orchestrate",
-    "narration": "You’re now inside Orchestrate — your command center for tasks, notes, and file tools. Let’s walk through how it works."
-  },
-  "steps": {
-    "step_1": {
-      "title": "📂 Load Your Workspace",
-      "narration": "We’ll start by loading your workspace — tasks and saved items.",
-      "action": {
+  "entries": {
+    "intro": {
+      "title": "👋 Welcome to Orchestrate",
+      "narration": "You’re now inside Orchestrate — your command center for tasks, notes, and file tools. Let’s walk through how it works."
+    },
+    "steps": {
+      "step_1": {
+        "title": "📂 Load Your Workspace",
+        "narration": "We’ll start by loading your workspace — tasks and saved items.",
+        "action": {
+          "tool": "json_manager",
+          "action": "read_json_file",
+          "params": {
+            "filename": "secondbrain.json"
+          }
+        },
+        "next": "step_2"
+      },
+      "step_2": {
+        "title": "✏️ Create Your First Task",
+        "narration": "What’s something you need to remember or take action on? Let’s save your first task.",
+        "prompt": "What task should I remember for you?",
+        "action_template": {
+          "tool": "json_manager",
+          "action": "add_json_entry",
+          "params": {
+            "filename": "secondbrain.json",
+            "entry_key": "user_task_1",
+            "entry_data": {
+              "title": "{{user_input}}",
+              "status": "active"
+            }
+          }
+        },
+        "next": "step_3",
+        "meta": {
+          "interactive": true,
+          "requires_input": true
+        }
+      },
+      "step_3": {
+        "title": "📓 Open Your Notes",
+        "narration": "Your notes and personal memory space live here. Let’s open them.",
+        "action": {
+          "tool": "json_manager",
+          "action": "read_json_file",
+          "params": {
+            "filename": "notes.json"
+          }
+        },
+        "next": "step_4"
+      },
+      "step_4": {
+        "title": "🧠 Save an Insight",
+        "narration": "Think of something worth remembering. I’ll log it to your notes instantly.",
+        "prompt": "What’s something you just realized or learned?",
+        "action_template": {
+          "tool": "json_manager",
+          "action": "add_json_entry",
+          "params": {
+            "filename": "notes.json",
+            "entry_key": "insight_1",
+            "entry_data": {
+              "title": "{{user_input}}",
+              "tags": ["insight"]
+            }
+          }
+        },
+        "next": "step_5",
+        "meta": {
+          "interactive": true,
+          "requires_input": true
+        }
+      },
+      "step_5": {
+        "title": "⬇️ Use the Drop Zone",
+        "narration": "Now let’s explore your Drop Zone. It’s a special folder on your desktop. You can drop **any text or markdown file** in there — tasks, notes, even old journals. I’ll scan and find it.",
+        "action": {
+          "tool": "file_finder",
+          "action": "search_files",
+          "params": {
+            "keyword": "*"
+          }
+        },
+        "next": "step_6",
+        "meta": {
+          "skippable": false
+        }
+      },
+      "step_6": {
+        "title": "📖 Read a File",
+        "narration": "Let’s open one of the files from your Drop Zone.",
+        "action_template": {
+          "tool": "read_file",
+          "action": "read_file",
+          "params": {
+            "filename": "{{found_file}}"
+          }
+        },
+        "next": "step_7",
+        "meta": {
+          "depends_on_file": true
+        }
+      },
+      "step_7": {
+        "title": "🧠 Save an Insight from the File",
+        "narration": "Want to capture something from that file? I’ll log it instantly.",
+        "prompt": "What insight do you want to save?",
+        "action_template": {
+          "tool": "json_manager",
+          "action": "add_json_entry",
+          "params": {
+            "filename": "notes.json",
+            "entry_key": "insight_from_file",
+            "entry_data": {
+              "title": "{{user_input}}",
+              "tags": ["insight"]
+            }
+          }
+        },
+        "next": "step_8",
+        "meta": {
+          "interactive": true,
+          "requires_input": true
+        }
+      },
+      "step_8": {
+        "title": "🔮 Predict Your Future",
+        "narration": "Time for something completely different. Let’s play MASH — the legendary game that predicts your future. You choose the options, and I’ll spin the wheel.",
+        "prompt": "List 4 options for each: \n- Where you might live (e.g. Mansion, Apartment...)\n- What you might drive (e.g. Tesla, Bike...)\n- Dream jobs (e.g. Astronaut, DJ...)\n- Life partners (real or fictional)\n\nThen pick a number from 1–10 for the spin.",
+        "action_template": {
+          "tool": "mash_tool",
+          "action": "spin_game",
+          "params": {
+            "params": {
+              "home": "{{user_input.home}}",
+              "car": "{{user_input.car}}",
+              "career": "{{user_input.career}}",
+              "partner": "{{user_input.partner}}",
+              "spin": "{{user_input.spin}}"
+            }
+          }
+        },
+        "next": "outro",
+        "meta": {
+          "interactive": true,
+          "requires_input": true
+        }
+      }
+    },
+    "outro": {
+      "title": "✅ You’re Set Up",
+      "narration": "You’ve created a task, saved a note, dropped in a file, captured insight, and had your future predicted. Your Orchestrate workspace is now live and ready.",
+      "next_action": {
         "tool": "json_manager",
-        "action": "read_json_file",
+        "action": "list_json_entries",
         "params": {
           "filename": "secondbrain.json"
         }
-      },
-      "next": "step_2"
-    },
-    "step_2": {
-      "title": "✏️ Create Your First Task",
-      "narration": "What’s something you need to remember or take action on? Let’s save your first task.",
-      "prompt": "What task should I remember for you?",
-      "action_template": {
-        "tool": "json_manager",
-        "action": "add_json_entry",
-        "params": {
-          "filename": "secondbrain.json",
-          "entry_key": "user_task_1",
-          "entry_data": {
-            "title": "{{user_input}}",
-            "status": "active"
-          }
-        }
-      },
-      "next": "step_3",
-      "meta": {
-        "interactive": true,
-        "requires_input": true
-      }
-    },
-    "step_3": {
-      "title": "📓 Open Your Notes",
-      "narration": "Your notes and personal memory space live here. Let’s open them.",
-      "action": {
-        "tool": "json_manager",
-        "action": "read_json_file",
-        "params": {
-          "filename": "notes.json"
-        }
-      },
-      "next": "step_4"
-    },
-    "step_4": {
-      "title": "🧠 Save an Insight",
-      "narration": "Think of something worth remembering. I’ll log it to your notes instantly.",
-      "prompt": "What’s something you just realized or learned?",
-      "action_template": {
-        "tool": "json_manager",
-        "action": "add_json_entry",
-        "params": {
-          "filename": "notes.json",
-          "entry_key": "insight_1",
-          "entry_data": {
-            "title": "{{user_input}}",
-            "tags": ["insight"]
-          }
-        }
-      },
-      "next": "step_5",
-      "meta": {
-        "interactive": true,
-        "requires_input": true
-      }
-    },
-    "step_5": {
-      "title": "⬇️ Use the Drop Zone",
-      "narration": "Now let’s explore your Drop Zone. It’s a special folder on your desktop. You can drop **any text or markdown file** in there — tasks, notes, even old journals. I’ll scan and find it.",
-      "action": {
-        "tool": "file_finder",
-        "action": "search_files",
-        "params": {
-          "keyword": "*"
-        }
-      },
-      "next": "step_6",
-      "meta": {
-        "skippable": false
-      }
-    },
-    "step_6": {
-      "title": "📖 Read a File",
-      "narration": "Let’s open one of the files from your Drop Zone.",
-      "action_template": {
-        "tool": "read_file",
-        "action": "read_file",
-        "params": {
-          "filename": "{{found_file}}"
-        }
-      },
-      "next": "step_7",
-      "meta": {
-        "depends_on_file": true
-      }
-    },
-    "step_7": {
-      "title": "🧠 Save an Insight from the File",
-      "narration": "Want to capture something from that file? I’ll log it instantly.",
-      "prompt": "What insight do you want to save?",
-      "action_template": {
-        "tool": "json_manager",
-        "action": "add_json_entry",
-        "params": {
-          "filename": "notes.json",
-          "entry_key": "insight_from_file",
-          "entry_data": {
-            "title": "{{user_input}}",
-            "tags": ["insight"]
-          }
-        }
-      },
-      "next": "step_8",
-      "meta": {
-        "interactive": true,
-        "requires_input": true
-      }
-    },
-    "step_8": {
-      "title": "🔮 Predict Your Future",
-      "narration": "Time for something completely different. Let’s play MASH — the legendary game that predicts your future. You choose the options, and I’ll spin the wheel.",
-      "prompt": "List 4 options for each: \n- Where you might live (e.g. Mansion, Apartment...)\n- What you might drive (e.g. Tesla, Bike...)\n- Dream jobs (e.g. Astronaut, DJ...)\n- Life partners (real or fictional)\n\nThen pick a number from 1–10 for the spin.",
-      "action_template": {
-        "tool": "mash_tool",
-        "action": "spin_game",
-        "params": {
-          "home": "{{user_input.home}}",
-          "car": "{{user_input.car}}",
-          "career": "{{user_input.career}}",
-          "partner": "{{user_input.partner}}",
-          "spin": "{{user_input.spin}}"
-        }
-      },
-      "next": "outro",
-      "meta": {
-        "interactive": true,
-        "requires_input": true
-      }
-    }
-  },
-  "outro": {
-    "title": "✅ You’re Set Up",
-    "narration": "You’ve created a task, saved a note, dropped in a file, captured insight, and had your future predicted. Your Orchestrate workspace is now live and ready.",
-    "next_action": {
-      "tool": "json_manager",
-      "action": "list_json_entries",
-      "params": {
-        "filename": "secondbrain.json"
       }
     }
   }
