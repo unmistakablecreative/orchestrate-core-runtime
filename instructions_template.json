@@ -8,45 +8,90 @@
         },
         {
           "tool": "${SAFE_DOMAIN}__jit_plugin",
-          "action": "read_json_file",
+          "action": "executeTask",
           "params": {
-            "filename": "boot_flags.json"
+            "tool_name": "json_manager",
+            "action": "read_json_file",
+            "params": {
+              "filename": "orchestrate_tool_ui.json"
+            }
           }
         },
         {
           "tool": "${SAFE_DOMAIN}__jit_plugin",
-          "action": "read_json_file",
+          "action": "executeTask",
           "params": {
-            "filename": "onboarding_sequence.json"
-          },
-          "when": "boot_flags.onboarding_complete != true"
+            "tool_name": "json_manager",
+            "action": "read_json_file",
+            "params": {
+              "filename": "onboarding_sequence.json"
+            }
+          }
         },
         {
           "tool": "${SAFE_DOMAIN}__jit_plugin",
-          "action": "read_json_file",
+          "action": "executeTask",
           "params": {
-            "filename": "orchestrate_intent_route.json"
+            "tool_name": "json_manager",
+            "action": "read_json_file",
+            "params": {
+              "filename": "orchestrate_intent_routes.json"
+            }
+          }
+        },
+        {
+          "tool": "${SAFE_DOMAIN}__jit_plugin",
+          "action": "executeTask",
+          "params": {
+            "tool_name": "json_manager",
+            "action": "read_json_file",
+            "params": {
+              "filename": "secondbrain.json"
+            }
           }
         }
       ],
-      "display": {
-        "style": "markdown",
-        "render": "tool_table",
-        "reference_doc": "b8d95f06-d7b8-4ebd-9686-bb1bfb38860a",
-        "dynamic_fields": {
-          "status": "getSupportedActions"
+      "display": [
+        {
+          "style": "custom",
+          "theme": "dark",
+          "layout": "standard",
+          "display_instructions": {
+            "reference_type": "tool_ui_json",
+            "reference_doc": "orchestrate_tool_ui.json",
+            "render": "markdown_table",
+            "force_render": true,
+            "title": "🧰 All Available Tools",
+            "dynamic_fields": {
+              "status": "getSupportedActions"
+            },
+            "include_tool_name": "display_name",
+            "include_descriptions": true,
+            "include_locks": true,
+            "include_credits": true,
+            "include_actions": false,
+            "include_params": false,
+            "sort_by": "referral_unlock_cost",
+            "sort_order": "ascending",
+            "group_locked_tools": false,
+            "suppress_summary": false,
+            "lock_icon_locked": "🔒",
+            "lock_icon_unlocked": "✅",
+            "lock_icon_unknown": "—",
+            "columns": ["Tool", "Description", "Locked", "Credits"]
+          }
         },
-        "sort_by": "tool_name",
-        "include_locks": true,
-        "legend": true,
-        "header": "🧰 Tools Available in Your OrchestrateOS"
-      },
-      "after_display": {
-        "if": "boot_flags.onboarding_complete != true",
-        "run_onboarding": true,
-        "narration": "Welcome — let’s walk through what your Orchestrate system can actually do. You’ll see how tasks, memory, and tools all connect live."
-      },
-      "prompt_behavior": "guided"
+        {
+          "style": "standard",
+          "theme": "dark",
+          "display_instructions": {
+            "reference_type": "json",
+            "reference_doc": "onboarding_sequence.json",
+            "render": "guided"
+          }
+        }
+      ],
+      "prompt_behavior": "silent"
     }
   }
 }
