@@ -70,7 +70,7 @@
       },
       "step_5": {
         "title": "⬇️ Use the Drop Zone",
-        "narration": "Now let’s explore your Drop Zone. It’s a special folder on your desktop. You can drop **any text or markdown file** in there — tasks, notes, even old journals. I’ll scan and find it.",
+        "narration": "Now let’s explore your Drop Zone. It’s a special folder on your machine that Orchestrate watches for new files.\n\n🗂 You’ll find it at:\n**~/Documents/Orchestrate/dropzone**\n\nYou can drop **any text or markdown file** in there — tasks, notes, even old journals. I’ll scan and find them automatically.",
         "action": {
           "tool": "file_finder",
           "action": "search_files",
@@ -129,12 +129,27 @@
           }
         },
         "requires_user_input": true,
+        "next": "step_9"
+      },
+      "step_9": {
+        "title": "🎁 Refer a Friend — Unlock More Tools",
+        "narration": "Invite someone to try Orchestrate. Just enter their name and email — we’ll generate a preloaded installer and credit you both.",
+        "prompt": "Enter the name and email of the person you'd like to refer (e.g. John Smith, john@example.com):",
+        "action_template": {
+          "tool": "refer_user",
+          "action": "refer_user",
+          "params": {
+            "name": "{{user_input.name}}",
+            "email": "{{user_input.email}}"
+          }
+        },
+        "requires_user_input": true,
         "next": "outro"
       }
     },
     "outro": {
       "title": "✅ You’re Set Up",
-      "narration": "You’ve created a task, saved a note, dropped in a file, captured insight, and had your future predicted. Your Orchestrate workspace is now live and ready.",
+      "narration": "You’ve created a task, saved a note, dropped in a file, captured insight, predicted your future, and referred someone. Your Orchestrate workspace is now live.",
       "action": {
         "tool": "json_manager",
         "action": "list_json_entries",
