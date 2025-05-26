@@ -1,5 +1,13 @@
 {
   "entries": {
+    "meta": {
+      "render": "guided",
+      "start_step": "intro",
+      "flow_control": true,
+      "advance_on": ["user_input", "action_success"],
+      "enforce_sequence": true,
+      "note": "Step-by-step onboarding. Do not render all steps. Follow 'next' chaining only."
+    },
     "intro": {
       "title": "👋 Welcome to Orchestrate",
       "narration": "You’re now inside Orchestrate — your command center for tasks, notes, and file tools. Let’s walk through how it works.",
