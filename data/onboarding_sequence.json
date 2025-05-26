@@ -2,7 +2,8 @@
   "entries": {
     "intro": {
       "title": "👋 Welcome to Orchestrate",
-      "narration": "You’re now inside Orchestrate — your command center for tasks, notes, and file tools. Let’s walk through how it works."
+      "narration": "You’re now inside Orchestrate — your command center for tasks, notes, and file tools. Let’s walk through how it works.",
+      "next": "step_1"
     },
     "steps": {
       "step_1": {
@@ -33,11 +34,8 @@
             }
           }
         },
-        "next": "step_3",
-        "meta": {
-          "interactive": true,
-          "requires_input": true
-        }
+        "requires_user_input": true,
+        "next": "step_3"
       },
       "step_3": {
         "title": "📓 Open Your Notes",
@@ -67,11 +65,8 @@
             }
           }
         },
-        "next": "step_5",
-        "meta": {
-          "interactive": true,
-          "requires_input": true
-        }
+        "requires_user_input": true,
+        "next": "step_5"
       },
       "step_5": {
         "title": "⬇️ Use the Drop Zone",
@@ -83,10 +78,7 @@
             "keyword": "*"
           }
         },
-        "next": "step_6",
-        "meta": {
-          "skippable": false
-        }
+        "next": "step_6"
       },
       "step_6": {
         "title": "📖 Read a File",
@@ -98,10 +90,7 @@
             "filename": "{{found_file}}"
           }
         },
-        "next": "step_7",
-        "meta": {
-          "depends_on_file": true
-        }
+        "next": "step_7"
       },
       "step_7": {
         "title": "🧠 Save an Insight from the File",
@@ -119,15 +108,12 @@
             }
           }
         },
-        "next": "step_8",
-        "meta": {
-          "interactive": true,
-          "requires_input": true
-        }
+        "requires_user_input": true,
+        "next": "step_8"
       },
       "step_8": {
         "title": "🔮 Predict Your Future",
-        "narration": "Time for something completely different. Let’s play MASH — the legendary game that predicts your future. You choose the options, and I’ll spin the wheel.",
+        "narration": "Let’s play MASH — the legendary game that predicts your future. You choose the options, and I’ll spin the wheel.",
         "prompt": "List 4 options for each: \n- Where you might live (e.g. Mansion, Apartment...)\n- What you might drive (e.g. Tesla, Bike...)\n- Dream jobs (e.g. Astronaut, DJ...)\n- Life partners (real or fictional)\n\nThen pick a number from 1–10 for the spin.",
         "action_template": {
           "tool": "mash_tool",
@@ -142,17 +128,14 @@
             }
           }
         },
-        "next": "outro",
-        "meta": {
-          "interactive": true,
-          "requires_input": true
-        }
+        "requires_user_input": true,
+        "next": "outro"
       }
     },
     "outro": {
       "title": "✅ You’re Set Up",
       "narration": "You’ve created a task, saved a note, dropped in a file, captured insight, and had your future predicted. Your Orchestrate workspace is now live and ready.",
-      "next_action": {
+      "action": {
         "tool": "json_manager",
         "action": "list_json_entries",
         "params": {
