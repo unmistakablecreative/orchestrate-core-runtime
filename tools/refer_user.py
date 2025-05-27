@@ -71,6 +71,13 @@ def refer_user(name, email, referrer_id):
     except:
         print("❌ Invalid response:", r.text)
 
+
+def run(params):
+    referrer_id = get_referrer_id()
+    refer_user(params["name"], params["email"], referrer_id)
+    return {"status": "success", "message": f"📨 Referral sent for {params['name']}"}
+
+
 # === Entry point ===
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
