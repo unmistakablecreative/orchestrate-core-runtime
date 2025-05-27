@@ -113,3 +113,4 @@
 {"tool": "universal_integrator", "action": "__tool__", "script_path": "tools/universal_integrator.py", "locked": true, "referral_unlock_cost": 32}
 {"tool": "universal_integrator", "action": "main", "script_path": "tools/universal_integrator.py", "params": ["endpoint", "payload_input", "method", "headers"], "example": {"endpoint": "https://api.example.com/endpoint", "payload_input": "payload.json", "method": "POST", "headers": {"Authorization": "Bearer KEY"}}}
 {"tool": "unlock_tool", "action": "__tool__", "script_path": "tools/unlock_tool.py", "locked": false, "referral_unlock_cost": 0}
+{"tool": "unlock_tool", "action": "unlock_tool", "script_path": "tools/unlock_tool.py", "params": ["tool_name"]}
