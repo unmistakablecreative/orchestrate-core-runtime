@@ -89,6 +89,12 @@ def unlock_tool(tool_name):
     print(f"❌ Tool '{tool_name}' not found.")
     save_referral_status(user)
 
+def run(params):
+    tool_name = params.get("tool_name")
+    unlock_tool(tool_name)
+    return {"status": "success", "message": f"🔓 Attempted unlock of '{tool_name}'"}
+
+
 if __name__ == "__main__":
     if len(sys.argv) != 2:
         print("Usage: python unlock_tool.py <tool_name>")
