@@ -6,9 +6,11 @@ BIN_ID = '68292fcf8561e97a50162139'
 API_KEY = '$2a$10$MoavwaWsCucy2FkU/5ycV.lBTPWoUq4uKHhCi9Y47DOHWyHFL3o2C'
 HEADERS = {'X-Master-Key': API_KEY, 'Content-Type': 'application/json'}
 PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-IDENTITY_PATH = os.path.join(PROJECT_ROOT, 'system_identity.json')
-NDJSON_PATH = os.path.join(PROJECT_ROOT, 'system_settings.ndjson')
-REFERRAL_STATUS_PATH = os.path.join(PROJECT_ROOT, 'referrals.json')
+
+IDENTITY_PATH = "/container_state/system_identity.json"
+NDJSON_PATH = "/opt/orchestrate-core-runtime/system_settings.ndjson"
+REFERRAL_STATUS_PATH = "/container_state/referrals.json"
+
 
 
 def load_system_identity():
