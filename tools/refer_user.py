@@ -78,12 +78,19 @@ def run(params):
     referrer_id = get_referrer_id()
     return refer_user(params["name"], params["email"], referrer_id, silent=True)
 
-# === CLI Entry Point ===
-if __name__ == "__main__":
-    parser = argparse.ArgumentParser()
-    parser.add_argument("--name", required=True)
-    parser.add_argument("--email", required=True)
-    args = parser.parse_args()
 
-    referrer_id = get_referrer_id()
-    refer_user(args.name, args.email, referrer_id)
+
+if __name__ == "__main__":
+    if len(sys.argv) >= 3 and sys.argv[1] == "refer_user" and sys.argv[2] == "--params":
+        input_data = json.loads(sys.argv[3])
+        result = run(input_data)
+        print(json.dumps(result, indent=2))
+    else:
+        parser = argparse.ArgumentParser()
+        parser.add_argument("--name", required=True)
+        parser.add_argument("--email", required=True)
+        args = parser.parse_args()
+        referrer_id = get_referrer_id()
+        refer_user(args.name, args.email, referrer_id)
+
+
