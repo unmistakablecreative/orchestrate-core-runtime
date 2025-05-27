@@ -89,6 +89,8 @@
 {"tool": "readwise_tool", "action": "__tool__", "script_path": "tools/readwise_tool.py", "locked": true, "referral_unlock_cost": 4}
 {"tool": "readwise_tool", "action": "fetch_books", "script_path": "tools/readwise_tool.py", "params": ["page_size"], "example": {"page_size": 10}}
 {"tool": "readwise_tool", "action": "fetch_highlights", "script_path": "tools/readwise_tool.py", "params": ["book_title"], "example": {"book_title": "Atomic Habits"}}
+{"tool": "refer_user", "action": "__tool__", "script_path": "tools/refer_user.py", "locked": false, "referral_unlock_cost": 0}
+{"tool": "refer_user", "action": "refer_user", "script_path": "tools/refer_user.py", "params": ["name", "email"], "locked": false, "referral_unlock_cost": 0}
 {"tool": "system_settings", "action": "__tool__", "script_path": "tools/system_settings.py", "locked": false, "referral_unlock_cost": 0}
 {"tool": "system_settings", "action": "add_action", "script_path": "tools/system_settings.py", "params": ["tool", "action", "script", "params", "example"], "example": {"tool": "json_manager", "action": "delete_entry", "script": "tools/json_manager.py", "params": ["filename", "entry_key"], "example": {"tool_name": "json_manager", "action": "delete_entry", "params": {"filename": "tasks.json", "entry_key": "task_1"}}}}
 {"tool": "system_settings", "action": "add_cli_route", "script_path": "tools/system_settings.py", "params": ["action_name", "command"], "example": {"action_name": "fetch_josh_dm", "command": "bash slack_dm_tool.sh"}}
