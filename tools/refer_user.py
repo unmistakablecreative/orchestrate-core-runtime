@@ -52,7 +52,7 @@ def build_clean_zip(installer_path):
     return base64.b64encode(buffer.getvalue()).decode("utf-8")
 
 # === Send referral payload ===
-def refer_user(name, email, referrer_id):
+def refer_user(name, email, referrer_id, silent=False):
     installer_path = clone_and_extract_installer()
     inject_referrer(installer_path, referrer_id)
     encoded_zip = build_clean_zip(installer_path)
@@ -65,20 +65,20 @@ def refer_user(name, email, referrer_id):
     }
 
     r = requests.post(REFERRAL_RELAY_URL, json=payload)
-    print("✅ Status:", r.status_code)
-    try:
-        print("🌐 Response:", r.json())
-    except:
-        print("❌ Invalid response:", r.text)
+    if not silent:
+        print("✅ Status:", r.status_code)
+        try:
+            print("🌐 Response:", r.json())
+        except:
+            print("❌ Invalid response:", r.text)
+    return {"status": "success", "message": f"📨 Referral sent for {name}", "http_status": r.status_code}
 
-
+# === FastAPI Entry Point ===
 def run(params):
     referrer_id = get_referrer_id()
-    refer_user(params["name"], params["email"], referrer_id)
-    return {"status": "success", "message": f"📨 Referral sent for {params['name']}"}
+    return refer_user(params["name"], params["email"], referrer_id, silent=True)
 
-
-# === Entry point ===
+# === CLI Entry Point ===
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--name", required=True)
