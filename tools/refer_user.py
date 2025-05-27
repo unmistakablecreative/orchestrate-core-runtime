@@ -6,6 +6,7 @@ import zipfile
 import base64
 import requests
 import tempfile
+import sys
 from io import BytesIO
 
 # === Constants ===
@@ -14,12 +15,10 @@ REFERRAL_RELAY_URL = "https://referral-relay-fzc4u40pd-srinivas-rao-s-projects.v
 SYSTEM_ID_PATH = "/container_state/system_identity.json"
 EXCLUDED_PATTERNS = [".git", ".DS_Store", "__MACOSX"]
 
-# === Load referrer ID from system identity ===
 def get_referrer_id():
     with open(SYSTEM_ID_PATH, "r") as f:
         return json.load(f)["user_id"]
 
-# === Clone installer and extract payload ===
 def clone_and_extract_installer():
     clone_dir = tempfile.mkdtemp()
     subprocess.run(["git", "clone", INSTALLER_REPO, clone_dir], check=True)
@@ -31,12 +30,10 @@ def clone_and_extract_installer():
     subprocess.run(["unzip", zip_path, "-d", extract_path], check=True)
     return os.path.join(extract_path, "Orchestrate_OS_Installer")
 
-# === Inject referrer into zip ===
 def inject_referrer(installer_path, referrer_id):
     with open(os.path.join(installer_path, "referrer.txt"), "w") as f:
         f.write(referrer_id)
 
-# === Build base64 zip archive ===
 def build_clean_zip(installer_path):
     buffer = BytesIO()
     with zipfile.ZipFile(buffer, "w", zipfile.ZIP_DEFLATED) as zipf:
@@ -51,7 +48,6 @@ def build_clean_zip(installer_path):
                 zipf.write(full, arcname=rel)
     return base64.b64encode(buffer.getvalue()).decode("utf-8")
 
-# === Send referral payload ===
 def refer_user(name, email, referrer_id, silent=False):
     installer_path = clone_and_extract_installer()
     inject_referrer(installer_path, referrer_id)
@@ -73,12 +69,9 @@ def refer_user(name, email, referrer_id, silent=False):
             print("❌ Invalid response:", r.text)
     return {"status": "success", "message": f"📨 Referral sent for {name}", "http_status": r.status_code}
 
-# === FastAPI Entry Point ===
 def run(params):
     referrer_id = get_referrer_id()
     return refer_user(params["name"], params["email"], referrer_id, silent=True)
-
-
 
 if __name__ == "__main__":
     if len(sys.argv) >= 3 and sys.argv[1] == "refer_user" and sys.argv[2] == "--params":
@@ -92,5 +85,3 @@ if __name__ == "__main__":
         args = parser.parse_args()
         referrer_id = get_referrer_id()
         refer_user(args.name, args.email, referrer_id)
-
-
