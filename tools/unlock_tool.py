@@ -8,21 +8,11 @@ BIN_ID = "68292fcf8561e97a50162139"
 API_KEY = "$2a$10$MoavwaWsCucy2FkU/5ycV.lBTPWoUq4uKHhCi9Y47DOHWyHFL3o2C"
 HEADERS = {"X-Master-Key": API_KEY, "Content-Type": "application/json"}
 
-# Path configuration
+# Paths
 IDENTITY_PATH = "/container_state/system_identity.json"
 NDJSON_PATH = "/opt/orchestrate-core-runtime/system_settings.ndjson"
 REFERRAL_STATUS_PATH = "/container_state/referrals.json"
 
-# Mode detection
-CLI_MODE = __name__ == "__main__"
-
-# Util
-def respond(payload):
-    if CLI_MODE:
-        print(json.dumps(payload, indent=2))
-    return payload
-
-# Core functions
 def load_system_identity():
     with open(IDENTITY_PATH, "r") as f:
         return json.load(f)["user_id"]
@@ -58,54 +48,54 @@ def save_referral_status(user):
     with open(REFERRAL_STATUS_PATH, "w") as f:
         json.dump(data, f, indent=2)
 
-# Unlock logic
 def unlock_tool(tool_name):
-    try:
-        user_id = load_system_identity()
-        ledger = get_ledger()
-        if user_id not in ledger["installs"]:
-            save_referral_status({})
-            return respond({"status": "error", "message": "❌ User not found in install_ledger"})
+    user_id = load_system_identity()
+    ledger = get_ledger()
 
-        user = ledger["installs"][user_id]
-        available_credits = user.get("referral_credits", 0)
-        settings = load_ndjson(NDJSON_PATH)
+    if user_id not in ledger["installs"]:
+        save_referral_status({})
+        return {"status": "error", "message": "❌ User not found in install_ledger"}
 
-        for entry in settings:
-            if entry["tool"] == tool_name:
-                if not entry.get("locked", False):
-                    save_referral_status(user)
-                    return respond({"status": "noop", "message": f"⚠️ Tool '{tool_name}' is already unlocked."})
+    user = ledger["installs"][user_id]
+    available_credits = user.get("referral_credits", 0)
+    settings = load_ndjson(NDJSON_PATH)
 
-                cost = entry.get("referral_unlock_cost", 1)
-                if available_credits < cost:
-                    save_referral_status(user)
-                    return respond({"status": "error", "message": f"🔒 Not enough credits. {cost} required, {available_credits} available."})
-
-                entry["locked"] = False
-                user["referral_credits"] = available_credits - cost
-                user["tools_unlocked"] = list(set(user.get("tools_unlocked", []) + [tool_name]))
-
-                save_ndjson(NDJSON_PATH, settings)
-                put_ledger(ledger)
+    for entry in settings:
+        if entry["tool"] == tool_name:
+            if not entry.get("locked", False):
                 save_referral_status(user)
+                return {"status": "noop", "message": f"⚠️ Tool '{tool_name}' is already unlocked."}
 
-                return respond({"status": "success", "message": f"✅ '{tool_name}' unlocked. Remaining credits: {user['referral_credits']}"})
+            cost = entry.get("referral_unlock_cost", 1)
+            if available_credits < cost:
+                save_referral_status(user)
+                return {"status": "error", "message": f"🔒 Not enough credits. {cost} required, {available_credits} available."}
 
-        save_referral_status(user)
-        return respond({"status": "error", "message": f"❌ Tool '{tool_name}' not found."})
+            entry["locked"] = False
+            user["referral_credits"] = available_credits - cost
+            user["tools_unlocked"] = list(set(user.get("tools_unlocked", []) + [tool_name]))
 
-    except Exception as e:
-        return respond({"status": "error", "message": "🔥 Crash in unlock_tool", "details": str(e)})
+            save_ndjson(NDJSON_PATH, settings)
+            put_ledger(ledger)
+            save_referral_status(user)
 
-# FastAPI-compatible interface
+            return {"status": "success", "message": f"✅ '{tool_name}' unlocked. Remaining credits: {user['referral_credits']}"}
+
+    save_referral_status(user)
+    return {"status": "error", "message": f"❌ Tool '{tool_name}' not found."}
+
 def run(params):
-    tool_name = params.get("tool_name")
-    return unlock_tool(tool_name)
+    try:
+        tool_name = params.get("tool_name")
+        return unlock_tool(tool_name)
+    except Exception as e:
+        return {"status": "error", "message": "Execution failed", "details": str(e)}
 
-# CLI entry point
-if CLI_MODE:
-    if len(sys.argv) != 2:
-        print("Usage: python unlock_tool.py <tool_name>")
+if __name__ == "__main__":
+    parser = sys.argv
+    if len(parser) < 3 or parser[1] != "unlock_tool":
+        print(json.dumps({"status": "error", "message": "Usage: python unlock_tool.py unlock_tool --params '{\"tool_name\": \"calendar_tool\"}'"}, indent=2))
         sys.exit(1)
-    unlock_tool(sys.argv[1])
+    raw_params = json.loads(parser[3]) if parser[2] == "--params" else {}
+    result = run(raw_params)
+    print(json.dumps(result, indent=2))
