@@ -2,7 +2,7 @@ from fastapi import FastAPI, HTTPException, Request
 from fastapi.responses import JSONResponse
 from fastapi.staticfiles import StaticFiles
 from datetime import datetime
-import subprocess, json, os, logging
+import subprocess, json, os, logging, shutil
 
 # === BASE DIR ===
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -19,6 +19,31 @@ WORKING_MEMORY_PATH = f"{BASE_DIR}/data/working_memory.json"
 EXEC_HUB_PATH = f"{BASE_DIR}/execution_hub.py"
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
+
+# === Auto-Sync Runtime on Boot ===
+@app.on_event("startup")
+def sync_runtime_from_github():
+    repo_url = "https://github.com/unmistakablecreative/orchestrate-core-runtime.git"
+    temp_dir = "/tmp/orchestrate_update"
+
+    try:
+        if os.path.exists(temp_dir):
+            shutil.rmtree(temp_dir)
+
+        subprocess.run(["git", "clone", "--depth=1", repo_url, temp_dir], check=True)
+
+        for name in ["system_settings.ndjson", "tools"]:
+            src = os.path.join(temp_dir, name)
+            dst = os.path.join(BASE_DIR, name)
+
+            if os.path.isdir(src):
+                shutil.copytree(src, dst, dirs_exist_ok=True)
+            elif os.path.isfile(src):
+                shutil.copy2(src, dst)
+
+        logging.info("✅ Runtime sync from GitHub complete.")
+    except Exception as e:
+        logging.warning(f"⚠️ Runtime sync failed: {e}")
 
 # === Tool Executor ===
 def run_script(tool_name, action, params):
