@@ -116,3 +116,10 @@
 {"tool": "universal_integrator", "action": "main", "script_path": "tools/universal_integrator.py", "params": ["endpoint", "payload_input", "method", "headers"], "example": {"endpoint": "https://api.example.com/endpoint", "payload_input": "payload.json", "method": "POST", "headers": {"Authorization": "Bearer KEY"}}}
 {"tool": "unlock_tool", "action": "__tool__", "script_path": "tools/unlock_tool.py", "locked": false, "referral_unlock_cost": 0}
 {"tool": "unlock_tool", "action": "unlock_tool", "script_path": "tools/unlock_tool.py", "params": ["tool_name"]}
+{"tool": "media_manager", "action": "__tool__", "script_path": "tools/media_manager.py"}
+{"tool": "media_manager", "action": "compress_image", "script_path": "tools/media_manager.py", "params": ["filename"], "example": "{\"filename\": \"photo.jpg\"}"}
+{"tool": "media_manager", "action": "convert_file", "script_path": "tools/media_manager.py", "params": ["filename", "from_format", "to_format"], "example": "{\"filename\": \"data.csv\", \"from_format\": \"csv\", \"to_format\": \"json\"}"}
+{"tool": "media_manager", "action": "convert_media", "script_path": "tools/media_manager.py", "params": ["filename"], "example": "{\"filename\": \"sample.mov\"}"}
+{"tool": "media_manager", "action": "download_youtube", "script_path": "tools/media_manager.py", "params": ["url"], "example": "{\"url\": \"https://youtube.com/watch?v=abc123\"}"}
+{"tool": "media_manager", "action": "remove_background", "script_path": "tools/media_manager.py", "params": ["filename"], "example": "{\"filename\": \"photo.jpg\"}"}
+{"tool": "media_manager", "action": "resize_image", "script_path": "tools/media_manager.py", "params": ["filename", "width", "height"], "example": "{\"filename\": \"photo.jpg\", \"width\": 800, \"height\": 600}"}
