@@ -1,0 +1,9 @@
+{
+  "visible": true,
+  "message": "✨ New Tool: Media Manager — Now available for unlock. Handle image compression, video conversion, and more!",
+  "timestamp": "2025-06-01T22:00:00Z",
+  "action": {
+    "label": "Unlock Media Manager",
+    "tool": "media_manager"
+  }
+}
