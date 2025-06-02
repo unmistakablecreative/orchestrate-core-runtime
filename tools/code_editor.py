@@ -16,15 +16,18 @@ def create_code_blueprint(params):
     filename = params.get('filename')
     imports = params.get('imports', [])
     if not filename.endswith('.json'):
-        filename = filename.replace('.py', '') + '.json'
+        filename = filename.replace('.py', '').replace('.sh', '') + '.json'
     if is_protected_file(filename):
         return {'status': 'error', 'message':
             '❌ This file is protected and cannot be modified.'}
-    output_py_filename = filename.replace('.json', '.py')
-    internal_py_path = os.path.abspath(os.path.join('..',
-        'Orchestrate_Hackathon', 'tools', output_py_filename))
-    blueprint = {'filename': internal_py_path, 'imports': imports,
-        'functions': {}, 'router': {}}
+    if 'filename' in params and '.sh' in params['filename']:
+        output_script = filename.replace('.json', '.sh')
+    else:
+        output_script = filename.replace('.json', '.py')
+    internal_path = os.path.abspath(os.path.join('generated_tools',
+        output_script))
+    blueprint = {'filename': internal_path, 'imports': imports, 'functions':
+        {}, 'router': {}}
     filepath = os.path.join('code_blueprints', filename)
     with open(filepath, 'w', encoding='utf-8') as f:
         json.dump(blueprint, f, indent=4)
@@ -139,37 +142,47 @@ def compile_blueprint_to_script_file(params):
     path = params['json_path']
     with open(path, 'r') as f:
         data = json.load(f)
-    filename = os.path.basename(data.get('filename', ''))
-    compiled_dir = os.path.join(os.getcwd(), 'generated_tools')
-    os.makedirs(compiled_dir, exist_ok=True)
-    compiled_path = os.path.join(compiled_dir, filename)
+    filename = data.get('filename', '')
+    is_shell = filename.endswith('.sh')
     lines = []
-    lines.extend(data.get('imports', []))
-    lines.append('\n# --- Core Functions ---')
-    for fn_name, fn_data in data['functions'].items():
-        params_str = ', '.join(fn_data['params'])
-        lines.append(f'\ndef {fn_name}({params_str}):')
-        for line in fn_data['body'].splitlines():
-            lines.append(f'    {line}')
-    lines.append('\n# --- Action Router ---')
-    lines.append('if __name__ == "__main__":')
-    lines.append('    import argparse, json')
-    lines.append('    parser = argparse.ArgumentParser()')
-    lines.append('    parser.add_argument("action")')
-    lines.append('    parser.add_argument("--params")')
-    lines.append('    args = parser.parse_args()')
-    lines.append('    params = json.loads(args.params) if args.params else {}')
-    for action, fn in data.get('router', {}).items():
-        lines.append(f'    if args.action == "{action}":')
-        lines.append(f'        result = {fn}(**params)')
-    lines.append('    else:')
-    lines.append(
-        '        result = {"status": "error", "message": f"Unknown action {args.action}"}'
-        )
-    lines.append('    print(json.dumps(result, indent=2))')
-    with open(compiled_path, 'w') as f:
+    if not is_shell:
+        lines.extend(data.get('imports', []))
+        lines.append('\n# --- Core Functions ---')
+        for fn_name, fn_data in data['functions'].items():
+            params_str = ', '.join(fn_data['params'])
+            lines.append(f'\ndef {fn_name}({params_str}):')
+            for line in fn_data['body'].splitlines():
+                lines.append(f'    {line}')
+        lines.append('\n# --- Action Router ---')
+        lines.append('def main():')
+        lines.append('    import argparse, json')
+        lines.append('    parser = argparse.ArgumentParser()')
+        lines.append('    parser.add_argument("action")')
+        lines.append('    parser.add_argument("--params")')
+        lines.append('    args = parser.parse_args()')
+        lines.append(
+            '    params = json.loads(args.params) if args.params else {}')
+        router = data.get('router') or {fn: fn for fn in data['functions']}
+        for i, (action, fn) in enumerate(router.items()):
+            keyword = 'if' if i == 0 else 'elif'
+            lines.append(f'    {keyword} args.action == "{action}":')
+            lines.append(f'        result = {fn}(**params)')
+        lines.append('    else:')
+        lines.append(
+            '        result = {"status": "error", "message": f"Unknown action {args.action}"}'
+            )
+        lines.append('    print(json.dumps(result, indent=2))')
+        lines.append('\nif __name__ == "__main__":')
+        lines.append('    main()')
+    else:
+        for fn_data in data['functions'].values():
+            lines.append(fn_data['body'])
+    output_path = os.path.abspath(os.path.join('generated_tools', os.path.
+        basename(filename)))
+    os.makedirs('generated_tools', exist_ok=True)
+    with open(output_path, 'w') as f:
         f.write('\n'.join(lines))
-    return {'status': 'success', 'message': f'✅ Compiled {compiled_path}'}
+    return {'status': 'success', 'message': f'✅ Compiled {output_path}'}
 
 
 def add_function_to_code_file(params):
@@ -201,62 +214,74 @@ def add_function_to_code_file(params):
 
 
 def patch_code_function_in_file(params):
-    import ast
-    import astor
-    import os
-    filename = params['filename']
-    function_name = params['function_name']
-    new_body = params['body']
-    param_list = params.get('params', [])
+    import ast, astor, os
+
+    filename = params.get('filename')
+    function_name = params.get('function_name')
+    new_body = params.get('body')
+    param_list = params.get('params', ['params'])
+
     if not filename or not function_name or not new_body:
         return {'status': 'error', 'message': '❌ Missing required fields.'}
-    filepath = filename if os.path.isfile(filename) else os.path.join('tools',
-        filename)
+
+    # Resolve relative to /tools
+    filepath = filename if os.path.isfile(filename) else os.path.join('tools', filename)
     if not os.path.exists(filepath):
         return {'status': 'error', 'message': f'❌ File not found: {filepath}'}
+
+    # --- Normalize: Strip outer def and dedent ---
+    lines = new_body.strip().splitlines()
+    if lines and lines[0].lstrip().startswith("def "):
+        base_indent = (
+            len(lines[1]) - len(lines[1].lstrip())
+            if len(lines) > 1 else 4
+        )
+        lines = lines[1:]
+        new_body = '\n'.join(
+            line[base_indent:] if line.startswith(' ' * base_indent) else line
+            for line in lines
+        )
+
+    # --- Parse original source ---
     try:
         with open(filepath, 'r', encoding='utf-8') as f:
             source = f.read()
-            tree = ast.parse(source)
+        tree = ast.parse(source)
     except Exception as e:
-        return {'status': 'error', 'message':
-            f'❌ Failed to parse file: {str(e)}'}
+        return {'status': 'error', 'message': f'❌ Failed to parse file: {str(e)}'}
 
-
-    class PatchFound(Exception):
-        pass
-    patch_applied = False
-
-
-    class Patcher(ast.NodeTransformer):
-
+    # --- Function rewrite ---
+    class FunctionPatcher(ast.NodeTransformer):
         def visit_FunctionDef(self, node):
-            nonlocal patch_applied
             if node.name == function_name:
                 try:
-                    body_ast = ast.parse(new_body).body
+                    patched_body = ast.parse(new_body).body
                 except Exception as e:
-                    raise PatchFound(f'❌ Failed to parse new body: {str(e)}')
-                new_func = ast.FunctionDef(name=function_name, args=ast.
-                    arguments(posonlyargs=[], args=[ast.arg(arg=p) for p in
-                    param_list], kwonlyargs=[], kw_defaults=[], defaults=[]
-                    ), body=body_ast, decorator_list=[])
-                patch_applied = True
-                return new_func
+                    raise ValueError(f'❌ Failed to parse new body: {str(e)}')
+                return ast.FunctionDef(
+                    name=function_name,
+                    args=ast.arguments(
+                        posonlyargs=[],
+                        args=[ast.arg(arg=p) for p in param_list],
+                        kwonlyargs=[],
+                        kw_defaults=[],
+                        defaults=[]
+                    ),
+                    body=patched_body,
+                    decorator_list=[]
+                )
             return node
+
     try:
-        patched_tree = Patcher().visit(tree)
-        if not patch_applied:
-            return {'status': 'error', 'message':
-                f"❌ Function '{function_name}' not found."}
-        ast.fix_missing_locations(patched_tree)
-        compiled = astor.to_source(patched_tree)
+        patcher = FunctionPatcher()
+        modified_tree = patcher.visit(tree)
+        ast.fix_missing_locations(modified_tree)
+        updated_code = astor.to_source(modified_tree)
+
         with open(filepath, 'w', encoding='utf-8') as f:
-            f.write(compiled)
-        return {'status': 'success', 'message':
-            f"✅ Patched '{function_name}' in {filename}"}
-    except PatchFound as fail_reason:
-        return {'status': 'error', 'message': str(fail_reason)}
+            f.write(updated_code)
+
+        return {'status': 'success', 'message': f"✅ Patched '{function_name}' in {filename}"}
     except Exception as e:
         return {'status': 'error', 'message': f'❌ Patch failed: {str(e)}'}
 
@@ -446,43 +471,47 @@ def add_to_action_map_in_file(params):
             f'❌ Failed to update action_map: {str(e)}'}
 
 
+
 def main():
-    parser = argparse.ArgumentParser(description='Orchestrate Code Editor Tool'
-        )
+    import argparse
+    parser = argparse.ArgumentParser(description='Orchestrate Code Editor Tool')
     parser.add_argument('action', help='Action to perform')
-    parser.add_argument('--params', type=str, required=False, help=
-        'JSON-encoded parameters for the action')
+    parser.add_argument('--params', type=str, required=False, help='JSON-encoded parameters for the action')
     args = parser.parse_args()
+
     try:
         params = json.loads(args.params) if args.params else {}
     except json.JSONDecodeError:
-        print(json.dumps({'status': 'error', 'message':
-            '❌ Invalid JSON format.'}, indent=4))
+        print(json.dumps({'status': 'error', 'message': '❌ Invalid JSON format.'}, indent=4))
         return
-    action_map = {'create_code_blueprint': create_code_blueprint,
+
+    action_map = {
+        'create_code_blueprint': create_code_blueprint,
         'add_function_to_blueprint': add_function_to_blueprint,
-        'update_function_in_blueprint_file':
-        update_function_in_blueprint_file, 'remove_function_from_blueprint':
-        remove_function_from_blueprint, 'read_blueprint_file':
-        read_blueprint_file, 'read_function_from_blueprint':
-        read_function_from_blueprint, 'list_functions_in_blueprint':
-        list_functions_in_blueprint, 'configure_router_in_blueprint':
-        configure_router_in_blueprint, 'compile_blueprint_to_script_file':
-        compile_blueprint_to_script_file, 'add_function_to_code_file':
-        add_function_to_code_file, 'patch_code_function_in_file':
-        patch_code_function_in_file, 'remove_function_from_code_file':
-        remove_function_from_code_file, 'rename_function_in_file':
-        rename_function_in_file, 'replace_in_code_file':
-        replace_in_code_file, 'replace_tail_from_line':
-        replace_tail_from_line, 'add_endpoint_to_fastapi_file':
-        add_endpoint_to_fastapi_file, 'add_import_statement_to_file':
-        add_import_statement_to_file, 'add_to_action_map_in_file':
-        add_to_action_map_in_file, 'append_code_to_file': append_code_to_file}
+        'update_function_in_blueprint_file': update_function_in_blueprint_file,
+        'remove_function_from_blueprint': remove_function_from_blueprint,
+        'read_blueprint_file': read_blueprint_file,
+        'read_function_from_blueprint': read_function_from_blueprint,
+        'list_functions_in_blueprint': list_functions_in_blueprint,
+        'configure_router_in_blueprint': configure_router_in_blueprint,
+        'compile_blueprint_to_script_file': compile_blueprint_to_script_file,
+        'add_function_to_code_file': add_function_to_code_file,
+        'patch_code_function_in_file': patch_code_function_in_file,
+        'remove_function_from_code_file': remove_function_from_code_file,
+        'rename_function_in_file': rename_function_in_file,
+        'replace_in_code_file': replace_in_code_file,
+        'replace_tail_from_line': replace_tail_from_line,
+        'add_endpoint_to_fastapi_file': add_endpoint_to_fastapi_file,
+        'add_import_statement_to_file': add_import_statement_to_file,
+        'add_to_action_map_in_file': add_to_action_map_in_file,
+        'append_code_to_file': append_code_to_file
+    }
+
     if args.action in action_map:
         result = action_map[args.action](params)
     else:
-        result = {'status': 'error', 'message':
-            f'❌ Unknown action: {args.action}'}
+        result = {'status': 'error', 'message': f'❌ Unknown action: {args.action}'}
+
     print(json.dumps(result, indent=4))
 
 
