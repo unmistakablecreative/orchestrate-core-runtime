@@ -2,7 +2,11 @@ import json
 import requests
 
 
-def create_doc(title, content, collectionId):
+def create_doc(params):
+    title = params.get('title')
+    content = params.get('content')
+    collectionId = params.get('collectionId')
+    parentDocumentId = params.get('parentDocumentId', None)
     from system_settings import load_credential
     api_base = 'https://app.getoutline.com/api'
     token = load_credential('outline_api_key')
@@ -15,6 +19,8 @@ def create_doc(title, content, collectionId):
         collectionId = '6a798b00-6302-42eb-9bbf-b38bef766cd9'
     payload = {'title': title, 'text': content, 'collectionId':
         collectionId, 'publish': True}
+    if parentDocumentId:
+        payload['parentDocumentId'] = parentDocumentId
     res = requests.post(f'{api_base}/documents.create', json=payload,
         headers=headers, verify=False)
     res.raise_for_status()
@@ -36,7 +42,12 @@ def get_doc(doc_id):
     return res.json()
 
 
-def update_doc(doc_id, title, text, append, publish):
+def update_doc(params):
+    doc_id = params.get('doc_id')
+    title = params.get('title')
+    text = params.get('text')
+    append = params.get('append')
+    publish = params.get('publish')
     from system_settings import load_credential
     api_base = 'https://app.getoutline.com/api'
     token = load_credential('outline_api_key')
@@ -45,17 +56,29 @@ def update_doc(doc_id, title, text, append, publish):
             '❌ Missing Outline API token in credentials.json'}
     headers = {'Authorization': f'Bearer {token}', 'Content-Type':
         'application/json'}
-    payload = {'id': doc_id, 'title': title, 'text': text, 'append': append,
-        'publish': publish}
+    if append:
+        payload_append = True
+        text = '\n\n' + text.strip()
+    else:
+        payload_append = False
+    payload = {'id': doc_id, 'title': title, 'text': text, 'publish': publish}
+    if payload_append:
+        payload['append'] = True
     res = requests.post(f'{api_base}/documents.update', json=payload,
         headers=headers, verify=False)
     res.raise_for_status()
     return res.json()
 
 
-def export_doc(doc_id):
+def export_doc(params):
     import requests, os, json
     from system_settings import load_credential
+    doc_id = params.get('doc_id')
+    filename = params.get('filename')
+    if not filename:
+        doc = get_doc(doc_id)
+        title = doc.get('title', f'doc_{doc_id}')
+        filename = f"{title.replace(' ', '_').lower()}.md"
     api_base = 'https://app.getoutline.com/api'
     token = load_credential('outline_api_key')
     if not token:
@@ -75,10 +98,10 @@ def export_doc(doc_id):
     output_dir = os.path.join('/orchestrate_user/orchestrate_exports',
         'markdown')
     os.makedirs(output_dir, exist_ok=True)
-    filename = os.path.join(output_dir, f'{doc_id}.md')
-    with open(filename, 'w', encoding='utf-8') as f:
+    filepath = os.path.join(output_dir, filename)
+    with open(filepath, 'w', encoding='utf-8') as f:
         f.write(markdown)
-    return {'status': 'success', 'message': f'✅ Exported to {filename}'}
+    return {'status': 'success', 'message': f'✅ Exported to {filepath}'}
 
 
 def delete_doc(doc_id):
@@ -266,7 +289,7 @@ def delete_collection(collection_id):
     return res.json()
 
 
-if __name__ == '__main__':
+def main():
     import argparse, json
     parser = argparse.ArgumentParser()
     parser.add_argument('action')
@@ -274,11 +297,11 @@ if __name__ == '__main__':
     args = parser.parse_args()
     params = json.loads(args.params) if args.params else {}
     if args.action == 'create_doc':
-        result = create_doc(**params)
+        result = create_doc(params)
     elif args.action == 'get_doc':
         result = get_doc(**params)
     elif args.action == 'update_doc':
-        result = update_doc(**params)
+        result = update_doc(params)
     elif args.action == 'delete_doc':
         result = delete_doc(**params)
     elif args.action == 'list_docs':
@@ -292,7 +315,7 @@ if __name__ == '__main__':
     elif args.action == 'append_section':
         result = append_section(**params)
     elif args.action == 'export_doc':
-        result = export_doc(**params)
+        result = export_doc(params)
     elif args.action == 'import_doc_from_file':
         result = import_doc_from_file(**params)
     elif args.action == 'move_doc':
@@ -309,3 +332,7 @@ if __name__ == '__main__':
         result = {'status': 'error', 'message': f'Unknown action {args.action}'
             }
     print(json.dumps(result, indent=2))
+
+
+if __name__ == '__main__':
+    main()
