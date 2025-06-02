@@ -2,80 +2,97 @@
   "entries": {
     "file_finder": {
       "label": "Find File",
-      "description": "Search filenames by keyword to quickly locate assets.",
+      "description": "Instantly locate any system file using smart keyword search — no path memory needed.",
+      "priority": 1,
       "referral_unlock_cost": 0
     },
     "read_file": {
       "label": "Read File",
-      "description": "Reads and returns file content as clean JSON.",
+      "description": "View any file’s full contents instantly, cleanly formatted for direct use or review.",
+      "priority": 2,
       "referral_unlock_cost": 0
     },
     "json_manager": {
       "label": "JSON Manager",
-      "description": "Structured editor for JSON files — add, update, delete.",
+      "description": "Easily edit structured data — add, update, or delete entries without breaking format.",
+      "priority": 3,
       "referral_unlock_cost": 0
     },
     "system_settings": {
       "label": "System Settings",
-      "description": "Internal registry controller for tools, actions, and unlocks.",
+      "description": "Control core system behavior — manage tool registry, unlock logic, and execution routing.",
+      "priority": 4,
       "referral_unlock_cost": 0
+    },
+    "terminal": {
+      "label": "Terminal Tool",
+      "description": "Run safe shell commands from inside GPT — test, debug, or inspect the environment live.",
+      "priority": 5,
+      "referral_unlock_cost": 14
     },
     "mash_tool": {
-      "label": "Mash",
-      "description": "Run a nostalgic “MASH” game for fun outcomes.",
+      "label": "MASH",
+      "description": "Play a nostalgic logic game that generates randomized future outcomes for fun or storytelling.",
+      "priority": 6,
       "referral_unlock_cost": 0
-    },
-    "outline_editor": {
-      "label": "Outline Editor",
-      "description": "Create, manage, and publish structured content docs.",
-      "referral_unlock_cost": 2
-    },
-    "mem_tool": {
-      "label": "Mem",
-      "description": "Syncs with Mem for note storage and retrieval.",
-      "referral_unlock_cost": 4
     },
     "buffer_engine": {
       "label": "Buffer Engine",
-      "description": "Schedule and auto-post content to external platforms.",
+      "description": "Draft, schedule, and auto-publish content to social channels — no manual posting needed.",
+      "priority": 7,
       "referral_unlock_cost": 6
     },
     "blog_assembler_tool": {
       "label": "Blog Assembler",
-      "description": "Compile a blog post from structured outlines and data.",
+      "description": "Turn structured outlines into fully formatted, image-injected blog articles in seconds.",
+      "priority": 8,
       "referral_unlock_cost": 6
     },
+    "outline_editor": {
+      "label": "Outline Editor",
+      "description": "Build, manage, and publish clean content documents with deep structure and backlinks.",
+      "priority": 9,
+      "referral_unlock_cost": 2
+    },
+    "mem_tool": {
+      "label": "Mem",
+      "description": "Send notes, ideas, or transcripts directly into Mem — perfect for cross-app capture.",
+      "priority": 10,
+      "referral_unlock_cost": 4
+    },
     "github_tool_universal": {
-      "label": "Github",
-      "description": "Clone, commit, and push repos from GPT-managed workflows.",
+      "label": "GitHub",
+      "description": "Push updates, clone repos, or commit changes — all through GPT-managed automation.",
+      "priority": 11,
       "referral_unlock_cost": 8
     },
     "ideogram_tool": {
       "label": "Ideogram",
-      "description": "Generates AI-enhanced visual assets from prompt input.",
+      "description": "Generate beautiful AI-driven visuals from simple prompts — great for headers or assets.",
+      "priority": 12,
       "referral_unlock_cost": 8
     },
     "composer": {
       "label": "Composer",
-      "description": "Chain tools and actions into reusable automations.",
+      "description": "Chain multiple actions into a reusable automation — build repeatable workflows fast.",
+      "priority": 13,
       "referral_unlock_cost": 12
-    },
-    "terminal": {
-      "label": "Terminal Tool",
-      "description": "Controlled, sandboxed shell access for command execution.",
-      "referral_unlock_cost": 14
     },
     "code_editor": {
       "label": "Code Editor",
-      "description": "Create, patch, and modify code live in the Orchestrate env.",
+      "description": "Create, patch, or inject code into live tools — works with blueprints or raw scripts.",
+      "priority": 14,
       "referral_unlock_cost": 24
     },
     "universal_integrator": {
       "label": "Universal Integrator",
-      "description": "Send custom API requests to any third-party service.",
+      "description": "Send API requests to any service — connect GPT with platforms not yet formally supported.",
+      "priority": 15,
       "referral_unlock_cost": 32
     }
   },
-  "sort_by": "referral_unlock_cost",
-  "sort_order": "ascending"
+  "display_mode": "table",
+  "theme": "dark",
+  "legend": true,
+  "sort_by": "custom"
 }
