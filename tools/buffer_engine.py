@@ -9,7 +9,7 @@ import os
 
 def load_credential(key):
     try:
-        with open("tools/credentials.json", "r") as f:
+        with open("credentials.json", "r") as f:
             creds = json.load(f)
         return creds.get(key)
     except Exception as e:
