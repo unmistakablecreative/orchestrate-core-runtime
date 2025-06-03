@@ -1,11 +1,7 @@
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.responses import JSONResponse
-from fastapi.staticfiles import StaticFiles
 from datetime import datetime
 import subprocess, json, os, logging, shutil
-
-# === BASE DIR ===
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
 from tools import json_manager
 from tools.smart_json_dispatcher import orchestrate_write
@@ -13,17 +9,17 @@ from system_guard import validate_action, ContractViolation
 
 # === Init ===
 app = FastAPI()
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
 SYSTEM_REGISTRY = f"{BASE_DIR}/system_settings.ndjson"
-WORKING_MEMORY_PATH = f"{BASE_DIR}/data/working_memory.json"
-EXEC_HUB_PATH = f"{BASE_DIR}/execution_hub.py"
+WORKING_MEMORY_PATH = os.path.join(BASE_DIR, "data", "working_memory.json")
+EXEC_HUB_PATH = os.path.join(BASE_DIR, "execution_hub.py")
 UPDATE_MESSAGE_PATH = os.path.join(BASE_DIR, "data", "update_message.json")
 NGROK_CONFIG_PATH = os.path.join(BASE_DIR, "data", "ngrok.json")
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 
-
-# === Auto-Sync Runtime on Boot ===
+# === Runtime Sync (Safe) ===
 @app.on_event("startup")
 def sync_runtime_from_github():
     repo_url = "https://github.com/unmistakablecreative/orchestrate-core-runtime.git"
@@ -35,33 +31,36 @@ def sync_runtime_from_github():
 
         subprocess.run(["git", "clone", "--depth=1", repo_url, temp_dir], check=True)
 
-        safe_targets = [
-            "system_settings.ndjson",
-            "tools",
-            "data/update_message.json"
-        ]
+        safe_files = ["system_settings.ndjson"]
+        safe_dirs = ["tools"]
 
-        for name in safe_targets:
+        for name in safe_files:
             src = os.path.join(temp_dir, name)
             dst = os.path.join(BASE_DIR, name)
-
-            # 🚫 Skip anything that could overwrite persistent identity or state
-            if "container_state" in dst or "referrals.json" in dst or "system_identity.json" in dst:
-                continue
-
-            if os.path.isdir(src):
-                shutil.copytree(src, dst, dirs_exist_ok=True)
-            elif os.path.isfile(src):
-                os.makedirs(os.path.dirname(dst), exist_ok=True)
+            if os.path.exists(src):
                 shutil.copy2(src, dst)
+                logging.info(f"✅ Updated file: {name}")
+
+        for name in safe_dirs:
+            src = os.path.join(temp_dir, name)
+            dst = os.path.join(BASE_DIR, name)
+            if os.path.exists(src):
+                for root, dirs, files in os.walk(src):
+                    rel_path = os.path.relpath(root, src)
+                    dst_root = os.path.join(dst, rel_path)
+                    os.makedirs(dst_root, exist_ok=True)
+                    for file in files:
+                        src_file = os.path.join(root, file)
+                        dst_file = os.path.join(dst_root, file)
+                        shutil.copy2(src_file, dst_file)
+                logging.info(f"✅ Synced directory: {name}")
 
         logging.info("✅ Runtime sync from GitHub complete.")
+
     except Exception as e:
         logging.warning(f"⚠️ Runtime sync failed: {e}")
 
-
-
-# === Auto-Relaunch ngrok Tunnel on Restart ===
+# === Relaunch ngrok Tunnel ===
 @app.on_event("startup")
 def restart_ngrok_if_needed():
     try:
@@ -71,7 +70,6 @@ def restart_ngrok_if_needed():
                 token = cfg.get("token")
                 domain = cfg.get("domain")
 
-            # Check if ngrok is already running
             running = subprocess.getoutput("pgrep -f 'ngrok http'")
             if not running:
                 subprocess.Popen(["ngrok", "config", "add-authtoken", token])
@@ -95,7 +93,7 @@ def run_script(tool_name, action, params):
     except Exception as e:
         return {"error": "Execution failed", "details": str(e)}
 
-# === GPT Task Dispatcher ===
+# === Task Dispatcher ===
 @app.post("/execute_task")
 async def execute_task(request: Request):
     try:
@@ -121,7 +119,7 @@ async def execute_task(request: Request):
     except Exception as e:
         return JSONResponse(status_code=500, content={"error": "Execution failed", "details": str(e)})
 
-# === Action Registry with Optional Update Banner ===
+# === Action Registry ===
 @app.get("/get_supported_actions")
 def get_supported_actions():
     try:
