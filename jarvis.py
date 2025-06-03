@@ -18,18 +18,16 @@ WORKING_MEMORY_PATH = f"{BASE_DIR}/data/working_memory.json"
 REFERRAL_PATH = f"{BASE_DIR}/container_state/referrals.json"
 NGROK_CONFIG_PATH = os.path.join(BASE_DIR, "data", "ngrok.json")
 EXEC_HUB_PATH = f"{BASE_DIR}/execution_hub.py"
-TOOLS_DIR = f"{BASE_DIR}/tools"
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 
 
-# === Git Auto-Sync + Registry Merge ===
+# === Repo Sync + Registry Merge ===
 def sync_repo_and_merge_registry():
     try:
         logging.info("🔄 Syncing Orchestrate repo...")
         subprocess.run(["git", "-C", BASE_DIR, "pull"], check=True)
 
-        # Merge registry with unlocked tools
         with open(SYSTEM_REGISTRY, "r") as f:
             updated_registry = [json.loads(line.strip()) for line in f if line.strip()]
 
@@ -49,7 +47,7 @@ def sync_repo_and_merge_registry():
 
         # Force update of update_messages.json
         repo_path = os.path.join(BASE_DIR, "data", "update_messages.json")
-        git_path = os.path.join(BASE_DIR, ".git", "..", "data", "update_message.json")
+        git_path = os.path.join(BASE_DIR, ".git", "..", "data", "update_messages.json")
         if os.path.exists(git_path):
             subprocess.run(["cp", git_path, repo_path])
             logging.info("📢 update_messages.json refreshed from git.")
@@ -58,10 +56,6 @@ def sync_repo_and_merge_registry():
 
     except Exception as e:
         logging.error(f"❌ Repo sync failed: {e}")
-
-
-
-
 
 
 # === Tool Executor ===
@@ -78,10 +72,11 @@ def run_script(tool_name, action, params):
         return {"error": "Execution failed", "details": str(e)}
 
 
-# === Ngrok Auto-Relaunch ===
+# === Startup Sequence ===
 @app.on_event("startup")
 def startup_routines():
     try:
+        logging.info("🔥 FASTAPI STARTUP HOOK TRIGGERED")
         sync_repo_and_merge_registry()
     except Exception as e:
         logging.warning(f"⚠️ Sync failed on startup: {e}")
@@ -104,7 +99,7 @@ def startup_routines():
         logging.warning(f"⚠️ Ngrok relaunch failed: {e}")
 
 
-# === /execute_task ===
+# === Execute Task ===
 @app.post("/execute_task")
 async def execute_task(request: Request):
     try:
@@ -131,23 +126,21 @@ async def execute_task(request: Request):
         return JSONResponse(status_code=500, content={"error": "Execution failed", "details": str(e)})
 
 
-# === /get_supported_actions ===
+# === Supported Actions + Messages ===
 @app.get("/get_supported_actions")
 def get_supported_actions():
     try:
         sync_repo_and_merge_registry()
 
-        # Load supported actions
         with open(SYSTEM_REGISTRY, "r") as f:
             entries = [json.loads(line.strip()) for line in f if line.strip()]
 
-        # Load update messages
-        update_messages_path = os.path.join(BASE_DIR, "data", "update_message.json")
+        update_messages_path = os.path.join(BASE_DIR, "data", "update_messages.json")
+        update_messages = []
         if os.path.exists(update_messages_path):
             with open(update_messages_path, "r") as f:
-                update_messages = json.load(f)
-        else:
-            update_messages = []
+                obj = json.load(f)
+                update_messages = obj if isinstance(obj, list) else [obj]
 
         return {
             "status": "success",
@@ -160,10 +153,7 @@ def get_supported_actions():
         raise HTTPException(status_code=500, detail="Could not load registry or update messages.")
 
 
-
-
-
-# === /load_memory ===
+# === Memory Loader ===
 @app.post("/load_memory")
 def load_memory():
     try:
@@ -181,7 +171,7 @@ def load_memory():
         })
 
 
-# === /
+# === Health Check ===
 @app.get("/")
 def root():
     return {"status": "Jarvis core is online."}
