@@ -22,6 +22,7 @@ NGROK_CONFIG_PATH = os.path.join(BASE_DIR, "data", "ngrok.json")
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 
+
 # === Auto-Sync Runtime on Boot ===
 @app.on_event("startup")
 def sync_runtime_from_github():
@@ -34,9 +35,20 @@ def sync_runtime_from_github():
 
         subprocess.run(["git", "clone", "--depth=1", repo_url, temp_dir], check=True)
 
-        for name in ["system_settings.ndjson", "tools", "data/update_message.json"]:
+        safe_targets = [
+            "system_settings.ndjson",
+            "tools",
+            "data/update_message.json"
+        ]
+
+        for name in safe_targets:
             src = os.path.join(temp_dir, name)
             dst = os.path.join(BASE_DIR, name)
+
+            # 🚫 Skip anything that could overwrite persistent identity or state
+            if "container_state" in dst or "referrals.json" in dst or "system_identity.json" in dst:
+                continue
+
             if os.path.isdir(src):
                 shutil.copytree(src, dst, dirs_exist_ok=True)
             elif os.path.isfile(src):
@@ -46,6 +58,8 @@ def sync_runtime_from_github():
         logging.info("✅ Runtime sync from GitHub complete.")
     except Exception as e:
         logging.warning(f"⚠️ Runtime sync failed: {e}")
+
+
 
 # === Auto-Relaunch ngrok Tunnel on Restart ===
 @app.on_event("startup")
