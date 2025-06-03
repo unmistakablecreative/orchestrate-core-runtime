@@ -29,17 +29,16 @@ def sync_repo_and_merge_registry():
         logging.info("🔄 Syncing Orchestrate repo...")
         subprocess.run(["git", "-C", BASE_DIR, "pull"], check=True)
 
+        # Merge registry with unlocked tools
         with open(SYSTEM_REGISTRY, "r") as f:
             updated_registry = [json.loads(line.strip()) for line in f if line.strip()]
 
+        unlocked_tools = set()
         if os.path.exists(REFERRAL_PATH):
             with open(REFERRAL_PATH, "r") as f:
                 referral_data = json.load(f)
             unlocked_tools = set(referral_data.get("tools_unlocked", []))
-        else:
-            unlocked_tools = set()
 
-        # Preserve unlocked tools
         for entry in updated_registry:
             if entry.get("tool") in unlocked_tools:
                 entry["unlocked"] = True
@@ -48,10 +47,21 @@ def sync_repo_and_merge_registry():
             for entry in updated_registry:
                 f.write(json.dumps(entry) + "\n")
 
-        logging.info("✅ Repo synced and system_settings.ndjson updated.")
+        # Force update of update_messages.json
+        repo_path = os.path.join(BASE_DIR, "data", "update_messages.json")
+        git_path = os.path.join(BASE_DIR, ".git", "..", "data", "update_message.json")
+        if os.path.exists(git_path):
+            subprocess.run(["cp", git_path, repo_path])
+            logging.info("📢 update_messages.json refreshed from git.")
+
+        logging.info("✅ Repo + registry sync complete.")
 
     except Exception as e:
         logging.error(f"❌ Repo sync failed: {e}")
+
+
+
+
 
 
 # === Tool Executor ===
