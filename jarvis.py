@@ -142,7 +142,7 @@ def get_supported_actions():
             entries = [json.loads(line.strip()) for line in f if line.strip()]
 
         # Load update messages
-        update_messages_path = os.path.join(BASE_DIR, "data", "update_messages.json")
+        update_messages_path = os.path.join(BASE_DIR, "data", "update_message.json")
         if os.path.exists(update_messages_path):
             with open(update_messages_path, "r") as f:
                 update_messages = json.load(f)
