@@ -19,7 +19,7 @@ NGROK_CONFIG_PATH = os.path.join(BASE_DIR, "data", "ngrok.json")
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 
-# === Runtime Sync (Safe) ===
+# === Safe Runtime Sync ===
 @app.on_event("startup")
 def sync_runtime_from_github():
     repo_url = "https://github.com/unmistakablecreative/orchestrate-core-runtime.git"
@@ -31,31 +31,48 @@ def sync_runtime_from_github():
 
         subprocess.run(["git", "clone", "--depth=1", repo_url, temp_dir], check=True)
 
-        safe_files = ["system_settings.ndjson"]
-        safe_dirs = ["tools"]
+        # === Sync tools directory ===
+        src_tools = os.path.join(temp_dir, "tools")
+        dst_tools = os.path.join(BASE_DIR, "tools")
 
-        for name in safe_files:
-            src = os.path.join(temp_dir, name)
-            dst = os.path.join(BASE_DIR, name)
-            if os.path.exists(src):
-                shutil.copy2(src, dst)
-                logging.info(f"✅ Updated file: {name}")
+        if os.path.exists(src_tools):
+            for root, dirs, files in os.walk(src_tools):
+                rel_path = os.path.relpath(root, src_tools)
+                dst_root = os.path.join(dst_tools, rel_path)
+                os.makedirs(dst_root, exist_ok=True)
+                for file in files:
+                    src_file = os.path.join(root, file)
+                    dst_file = os.path.join(dst_root, file)
+                    shutil.copy2(src_file, dst_file)
+            logging.info("✅ Synced tools directory.")
 
-        for name in safe_dirs:
-            src = os.path.join(temp_dir, name)
-            dst = os.path.join(BASE_DIR, name)
-            if os.path.exists(src):
-                for root, dirs, files in os.walk(src):
-                    rel_path = os.path.relpath(root, src)
-                    dst_root = os.path.join(dst, rel_path)
-                    os.makedirs(dst_root, exist_ok=True)
-                    for file in files:
-                        src_file = os.path.join(root, file)
-                        dst_file = os.path.join(dst_root, file)
-                        shutil.copy2(src_file, dst_file)
-                logging.info(f"✅ Synced directory: {name}")
+        # === Merge system_settings.ndjson ===
+        incoming_path = os.path.join(temp_dir, "system_settings.ndjson")
+        if os.path.exists(incoming_path):
+            existing_entries = []
+            if os.path.exists(SYSTEM_REGISTRY):
+                with open(SYSTEM_REGISTRY, "r") as f:
+                    existing_entries = [json.loads(line.strip()) for line in f if line.strip()]
 
-        logging.info("✅ Runtime sync from GitHub complete.")
+            existing_keys = {(e["tool"], e["action"]) for e in existing_entries}
+
+            new_entries = []
+            with open(incoming_path, "r") as f:
+                for line in f:
+                    if line.strip():
+                        entry = json.loads(line.strip())
+                        key = (entry.get("tool"), entry.get("action"))
+                        if key not in existing_keys:
+                            new_entries.append(entry)
+
+            all_entries = existing_entries + new_entries
+            with open(SYSTEM_REGISTRY, "w") as f:
+                for entry in all_entries:
+                    f.write(json.dumps(entry) + "\n")
+
+            logging.info("✅ Merged system_settings.ndjson (no unlocks lost).")
+
+        logging.info("✅ Runtime sync complete.")
 
     except Exception as e:
         logging.warning(f"⚠️ Runtime sync failed: {e}")
