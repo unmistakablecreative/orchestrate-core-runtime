@@ -105,6 +105,9 @@
 {"tool": "system_settings", "action": "remove_cli_route", "script_path": "tools/system_settings.py", "params": ["action_name"], "example": {"action_name": "fetch_josh_dm"}}
 {"tool": "system_settings", "action": "remove_memory_file", "script_path": "tools/system_settings.py", "params": ["path"], "example": {"path": "semantic_memory/srini_notes.json"}}
 {"tool": "system_settings", "action": "remove_tool", "script_path": "tools/system_settings.py", "params": ["tool"], "example": {"tool": "cli_router"}}
+{"tool": "system_settings", "action": "set_credential", "script_path": "tools/system_settings.py", "params": ["key", "value"], "example": "{\"tool_name\": \"system_settings\", \"action\": \"set_credential\", \"params\": {\"key\": \"API_KEY\", \"value\": \"your-api-key\"}}"}
+
+
 {"tool": "terminal", "action": "__tool__", "script_path": "tools/terminal.py", "locked": false, "referral_unlock_cost": 14}
 {"tool": "terminal", "action": "check_safe", "script_path": "tools/terminal.py", "params": ["command"], "example": {"command": "ls"}}
 {"tool": "terminal", "action": "ls", "script_path": "tools/terminal.py", "params": ["path"], "example": {"path": "/some/path"}}
