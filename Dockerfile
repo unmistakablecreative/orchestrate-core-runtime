@@ -16,7 +16,9 @@ RUN apt-get update && apt-get install -y \
     beautifulsoup4 \
     python-dotenv \
     pyyaml \
-    python-multipart
+    python-multipart \
+    astor \
+    oauthlib
 
 RUN chmod +x /app/entrypoint.sh
 
