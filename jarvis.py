@@ -1,6 +1,5 @@
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.responses import JSONResponse
-from fastapi.staticfiles import StaticFiles
 from datetime import datetime
 import subprocess, json, os, logging
 
@@ -16,11 +15,44 @@ app = FastAPI()
 
 SYSTEM_REGISTRY = f"{BASE_DIR}/system_settings.ndjson"
 WORKING_MEMORY_PATH = f"{BASE_DIR}/data/working_memory.json"
-EXEC_HUB_PATH = f"{BASE_DIR}/execution_hub.py"
+REFERRAL_PATH = f"{BASE_DIR}/container_state/referrals.json"
 NGROK_CONFIG_PATH = os.path.join(BASE_DIR, "data", "ngrok.json")
-
+EXEC_HUB_PATH = f"{BASE_DIR}/execution_hub.py"
+TOOLS_DIR = f"{BASE_DIR}/tools"
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
+
+
+# === Git Auto-Sync + Registry Merge ===
+def sync_repo_and_merge_registry():
+    try:
+        logging.info("🔄 Syncing Orchestrate repo...")
+        subprocess.run(["git", "-C", BASE_DIR, "pull"], check=True)
+
+        with open(SYSTEM_REGISTRY, "r") as f:
+            updated_registry = [json.loads(line.strip()) for line in f if line.strip()]
+
+        if os.path.exists(REFERRAL_PATH):
+            with open(REFERRAL_PATH, "r") as f:
+                referral_data = json.load(f)
+            unlocked_tools = set(referral_data.get("tools_unlocked", []))
+        else:
+            unlocked_tools = set()
+
+        # Preserve unlocked tools
+        for entry in updated_registry:
+            if entry.get("tool") in unlocked_tools:
+                entry["unlocked"] = True
+
+        with open(SYSTEM_REGISTRY, "w") as f:
+            for entry in updated_registry:
+                f.write(json.dumps(entry) + "\n")
+
+        logging.info("✅ Repo synced and system_settings.ndjson updated.")
+
+    except Exception as e:
+        logging.error(f"❌ Repo sync failed: {e}")
+
 
 # === Tool Executor ===
 def run_script(tool_name, action, params):
@@ -35,13 +67,15 @@ def run_script(tool_name, action, params):
     except Exception as e:
         return {"error": "Execution failed", "details": str(e)}
 
-# === GPT Task Dispatcher ===
 
-
-
-# === Auto-Relaunch ngrok Tunnel on Restart ===
+# === Ngrok Auto-Relaunch ===
 @app.on_event("startup")
-def restart_ngrok_if_needed():
+def startup_routines():
+    try:
+        sync_repo_and_merge_registry()
+    except Exception as e:
+        logging.warning(f"⚠️ Sync failed on startup: {e}")
+
     try:
         if os.path.exists(NGROK_CONFIG_PATH):
             with open(NGROK_CONFIG_PATH) as f:
@@ -49,7 +83,6 @@ def restart_ngrok_if_needed():
                 token = cfg.get("token")
                 domain = cfg.get("domain")
 
-            # Check if ngrok is already running
             running = subprocess.getoutput("pgrep -f 'ngrok http'")
             if not running:
                 subprocess.Popen(["ngrok", "config", "add-authtoken", token])
@@ -60,6 +93,8 @@ def restart_ngrok_if_needed():
     except Exception as e:
         logging.warning(f"⚠️ Ngrok relaunch failed: {e}")
 
+
+# === /execute_task ===
 @app.post("/execute_task")
 async def execute_task(request: Request):
     try:
@@ -85,10 +120,12 @@ async def execute_task(request: Request):
     except Exception as e:
         return JSONResponse(status_code=500, content={"error": "Execution failed", "details": str(e)})
 
-# === Action Registry ===
+
+# === /get_supported_actions ===
 @app.get("/get_supported_actions")
 def get_supported_actions():
     try:
+        sync_repo_and_merge_registry()
         with open(SYSTEM_REGISTRY, "r") as f:
             entries = [json.loads(line.strip()) for line in f if line.strip()]
         return {"status": "success", "supported_actions": entries}
@@ -96,7 +133,8 @@ def get_supported_actions():
         logging.error(f"🚨 Failed to load registry: {e}")
         raise HTTPException(status_code=500, detail="Could not load registry.")
 
-# === Memory Loader ===
+
+# === /load_memory ===
 @app.post("/load_memory")
 def load_memory():
     try:
@@ -113,7 +151,8 @@ def load_memory():
             "details": str(e)
         })
 
-# === Health Check ===
+
+# === /
 @app.get("/")
 def root():
     return {"status": "Jarvis core is online."}
