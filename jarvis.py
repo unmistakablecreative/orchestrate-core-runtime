@@ -20,6 +20,30 @@ EXEC_HUB_PATH = f"{BASE_DIR}/execution_hub.py"
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 
+
+
+# === Auto-Relaunch ngrok Tunnel on Restart ===
+@app.on_event("startup")
+def restart_ngrok_if_needed():
+    try:
+        if os.path.exists(NGROK_CONFIG_PATH):
+            with open(NGROK_CONFIG_PATH) as f:
+                cfg = json.load(f)
+                token = cfg.get("token")
+                domain = cfg.get("domain")
+
+            # Check if ngrok is already running
+            running = subprocess.getoutput("pgrep -f 'ngrok http'")
+            if not running:
+                subprocess.Popen(["ngrok", "config", "add-authtoken", token])
+                subprocess.Popen(["ngrok", "http", "--domain=" + domain, "8000"])
+                logging.info("🚀 ngrok tunnel relaunched.")
+            else:
+                logging.info("🔁 ngrok already running.")
+    except Exception as e:
+        logging.warning(f"⚠️ Ngrok relaunch failed: {e}")
+
+
 # === Tool Executor ===
 def run_script(tool_name, action, params):
     command = ["python3", EXEC_HUB_PATH, "execute_task", "--params", json.dumps({
