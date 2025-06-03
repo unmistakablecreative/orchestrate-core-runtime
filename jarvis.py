@@ -15,12 +15,16 @@ WORKING_MEMORY_PATH = os.path.join(BASE_DIR, "data", "working_memory.json")
 EXEC_HUB_PATH = os.path.join(BASE_DIR, "execution_hub.py")
 UPDATE_MESSAGE_PATH = os.path.join(BASE_DIR, "data", "update_message.json")
 NGROK_CONFIG_PATH = os.path.join(BASE_DIR, "data", "ngrok.json")
+IDENTITY_FILE = "/container_state/system_identity.json"
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 
-
 @app.on_event("startup")
-def sync_tools_and_settings():
+def sync_only_if_installed():
+    if not os.path.exists(IDENTITY_FILE):
+        logging.warning("⏭️ Identity file missing. Skipping sync.")
+        return
+
     repo_url = "https://github.com/unmistakablecreative/orchestrate-core-runtime.git"
     temp_dir = "/tmp/orchestrate_update"
 
@@ -29,7 +33,7 @@ def sync_tools_and_settings():
             shutil.rmtree(temp_dir)
         subprocess.run(["git", "clone", "--depth=1", repo_url, temp_dir], check=True)
 
-        # === Sync tools/ only ===
+        # === Sync tools only ===
         tools_src = os.path.join(temp_dir, "tools")
         tools_dst = os.path.join(BASE_DIR, "tools")
         for root, dirs, files in os.walk(tools_src):
@@ -62,9 +66,10 @@ def sync_tools_and_settings():
                 for e in all_entries:
                     f.write(json.dumps(e) + "\n")
 
-    except Exception as e:
-        logging.warning(f"⚠️ Runtime sync failed: {e}")
+        logging.info("✅ Runtime sync complete.")
 
+    except Exception as e:
+        logging.warning(f"⚠️ Sync failed: {e}")
 
 @app.on_event("startup")
 def restart_ngrok_if_needed():
@@ -81,7 +86,6 @@ def restart_ngrok_if_needed():
     except Exception as e:
         logging.warning(f"⚠️ Ngrok relaunch failed: {e}")
 
-
 def run_script(tool_name, action, params):
     command = ["python3", EXEC_HUB_PATH, "execute_task", "--params", json.dumps({
         "tool_name": tool_name,
@@ -93,7 +97,6 @@ def run_script(tool_name, action, params):
         return json.loads(result.stdout.strip())
     except Exception as e:
         return {"error": "Execution failed", "details": str(e)}
-
 
 @app.post("/execute_task")
 async def execute_task(request: Request):
@@ -120,7 +123,6 @@ async def execute_task(request: Request):
     except Exception as e:
         return JSONResponse(status_code=500, content={"error": "Execution failed", "details": str(e)})
 
-
 @app.get("/get_supported_actions")
 def get_supported_actions():
     try:
@@ -141,7 +143,6 @@ def get_supported_actions():
         logging.error(f"🚨 Failed to load registry: {e}")
         raise HTTPException(status_code=500, detail="Could not load registry.")
 
-
 @app.post("/load_memory")
 def load_memory():
     try:
@@ -157,7 +158,6 @@ def load_memory():
             "error": "Cannot load working_memory.json",
             "details": str(e)
         })
-
 
 @app.get("/")
 def root():
