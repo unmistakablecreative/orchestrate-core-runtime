@@ -126,12 +126,31 @@ async def execute_task(request: Request):
 def get_supported_actions():
     try:
         sync_repo_and_merge_registry()
+
+        # Load supported actions
         with open(SYSTEM_REGISTRY, "r") as f:
             entries = [json.loads(line.strip()) for line in f if line.strip()]
-        return {"status": "success", "supported_actions": entries}
+
+        # Load update messages
+        update_messages_path = os.path.join(BASE_DIR, "data", "update_messages.json")
+        if os.path.exists(update_messages_path):
+            with open(update_messages_path, "r") as f:
+                update_messages = json.load(f)
+        else:
+            update_messages = []
+
+        return {
+            "status": "success",
+            "supported_actions": entries,
+            "update_messages": update_messages
+        }
+
     except Exception as e:
-        logging.error(f"🚨 Failed to load registry: {e}")
-        raise HTTPException(status_code=500, detail="Could not load registry.")
+        logging.error(f"🚨 Failed to load registry or update messages: {e}")
+        raise HTTPException(status_code=500, detail="Could not load registry or update messages.")
+
+
+
 
 
 # === /load_memory ===
