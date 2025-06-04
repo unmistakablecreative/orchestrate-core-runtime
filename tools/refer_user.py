@@ -11,7 +11,7 @@ from io import BytesIO
 
 # === Constants ===
 INSTALLER_REPO = "https://github.com/unmistakablecreative/OrchestrateOS_Installer.git"
-REFERRAL_RELAY_URL = "https://referral-relay-fzc4u40pd-srinivas-rao-s-projects.vercel.app/referral"
+REFERRAL_RELAY_URL = "https://referral-relay.vercel.app/referral"
 SYSTEM_ID_PATH = "/container_state/system_identity.json"
 EXCLUDED_PATTERNS = [".git", ".DS_Store", "__MACOSX"]
 
