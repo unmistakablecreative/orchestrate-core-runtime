@@ -18,7 +18,8 @@ RUN apt-get update && apt-get install -y \
     pyyaml \
     python-multipart \
     astor \
-    oauthlib
+    oauthlib \
+    requests-oauthlib
 
 RUN chmod +x /app/entrypoint.sh
 
