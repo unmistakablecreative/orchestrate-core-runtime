@@ -48,13 +48,18 @@ def save_referral_status(user):
     with open(REFERRAL_STATUS_PATH, "w") as f:
         json.dump(data, f, indent=2)
 
+
+
 def unlock_tool(tool_name):
     user_id = load_system_identity()
     ledger = get_ledger()
 
     if user_id not in ledger["installs"]:
         save_referral_status({})
-        return {"status": "error", "message": "❌ User not found in install_ledger"}
+        return {
+            "status": "error",
+            "message": "❌ User not found in install_ledger"
+        }
 
     user = ledger["installs"][user_id]
     available_credits = user.get("referral_credits", 0)
@@ -64,12 +69,18 @@ def unlock_tool(tool_name):
         if entry["tool"] == tool_name:
             if not entry.get("locked", False):
                 save_referral_status(user)
-                return {"status": "noop", "message": f"⚠️ Tool '{tool_name}' is already unlocked."}
+                return {
+                    "status": "noop",
+                    "message": f"⚠️ Tool '{tool_name}' is already unlocked."
+                }
 
             cost = entry.get("referral_unlock_cost", 1)
             if available_credits < cost:
                 save_referral_status(user)
-                return {"status": "error", "message": f"🔒 Not enough credits. {cost} required, {available_credits} available."}
+                return {
+                    "status": "locked",
+                    "message": f"🚫 You need {cost} credits to unlock '{tool_name}'. Refer someone to earn credits and you'll be able to unlock more tools."
+                }
 
             entry["locked"] = False
             user["referral_credits"] = available_credits - cost
@@ -79,10 +90,19 @@ def unlock_tool(tool_name):
             put_ledger(ledger)
             save_referral_status(user)
 
-            return {"status": "success", "message": f"✅ '{tool_name}' unlocked. Remaining credits: {user['referral_credits']}"}
+            return {
+                "status": "success",
+                "message": f"✅ '{tool_name}' unlocked. Remaining credits: {user['referral_credits']}"
+            }
 
     save_referral_status(user)
-    return {"status": "error", "message": f"❌ Tool '{tool_name}' not found."}
+    return {
+        "status": "error",
+        "message": f"❌ Tool '{tool_name}' not found."
+    }
+
+
+
 
 def run(params):
     try:
