@@ -9,11 +9,15 @@ import os
 
 def load_credential(key):
     try:
-        with open("credentials.json", "r") as f:
+        base_dir = os.path.dirname(os.path.abspath(__file__))
+        cred_path = os.path.join(base_dir, "credentials.json")
+        with open(cred_path, "r") as f:
             creds = json.load(f)
         return creds.get(key)
-    except Exception as e:
+    except Exception:
         return None
+
+
 
 def post_to_platform(params):
     content = params.get("content", "").strip()
