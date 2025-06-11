@@ -31,11 +31,18 @@ def clone_and_extract_installer():
     return os.path.join(extract_path, "Orchestrate_OS_Installer")
 
 
-def inject_referrer(installer_path, referrer_id):
+def inject_referrer(installer_base_path, referrer_id):
+    # Find the actual installer folder (handle cases like "Orchestrate_OS_Installer 2")
+    for item in os.listdir(installer_base_path):
+        if item.startswith("Orchestrate_OS_Installer"):
+            installer_path = os.path.join(installer_base_path, item)
+            break
+    else:
+        raise FileNotFoundError("Installer folder not found in extracted path.")
+
     with open(os.path.join(installer_path, "referrer.txt"), "w") as f:
         f.write(referrer_id)
 
-    # Remove quarantine flag to prevent App Translocation
     subprocess.run([
         "xattr", "-dr", "com.apple.quarantine",
         os.path.join(installer_path, "Launch Orchestrate.app")
