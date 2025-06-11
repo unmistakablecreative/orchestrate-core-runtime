@@ -55,9 +55,11 @@ def build_clean_zip(installer_path):
                 full = os.path.join(root, file)
                 if any(skip in full for skip in EXCLUDED_PATTERNS):
                     continue
-                rel = os.path.relpath(full, installer_path)
+                rel = os.path.relpath(full, installer_path)  # this makes zip contents root-level
                 zipf.write(full, arcname=rel)
     return base64.b64encode(buffer.getvalue()).decode("utf-8")
+
+
 
 def refer_user(name, email, referrer_id, silent=False):
     extract_path = clone_and_extract_installer()
