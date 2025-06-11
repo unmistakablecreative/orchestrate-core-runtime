@@ -32,30 +32,16 @@ def clone_and_extract_installer():
     # Return the parent folder where all unzipped content lives
     return extract_path
 
-def inject_referrer(extract_path, referrer_id):
-    # Dynamically find the actual folder (handles names like "Orchestrate_OS_Installer 2")
-    folders = [
-        os.path.join(extract_path, d)
-        for d in os.listdir(extract_path)
-        if d.startswith("Orchestrate_OS_Installer") and os.path.isdir(os.path.join(extract_path, d))
-    ]
-
-    if not folders:
-        raise FileNotFoundError("No installer folder found after unzip.")
-    if len(folders) > 1:
-        raise RuntimeError(f"Multiple installer folders found: {folders}")
-
-    installer_path = folders[0]
-
+def inject_referrer(installer_path, referrer_id):
     with open(os.path.join(installer_path, "referrer.txt"), "w") as f:
         f.write(referrer_id)
 
-    subprocess.run([
-        "xattr", "-dr", "com.apple.quarantine",
-        os.path.join(installer_path, "Launch Orchestrate.app")
-    ], check=False)
+    if sys.platform == "darwin":
+        subprocess.run([
+            "xattr", "-dr", "com.apple.quarantine",
+            os.path.join(installer_path, "Launch Orchestrate.app")
+        ], check=False)
 
-    return installer_path  # return for zipping
 
 def build_clean_zip(installer_path):
     buffer = BytesIO()
