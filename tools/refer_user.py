@@ -29,8 +29,12 @@ def clone_and_extract_installer():
 
     subprocess.run(["unzip", zip_path, "-d", extract_path], check=True)
 
-    # Return the parent folder where all unzipped content lives
-    return extract_path
+    for name in os.listdir(extract_path):
+        full = os.path.join(extract_path, name)
+        if os.path.isdir(full) and name.startswith("Orchestrate_OS_Installer"):
+            return full
+
+    raise FileNotFoundError("Installer folder not found after unzip.")
 
 def inject_referrer(installer_path, referrer_id):
     with open(os.path.join(installer_path, "referrer.txt"), "w") as f:
@@ -42,8 +46,7 @@ def inject_referrer(installer_path, referrer_id):
             os.path.join(installer_path, "Launch Orchestrate.app")
         ], check=False)
 
-    return installer_path  # <- THIS LINE IS REQUIRED
-
+    return installer_path
 
 def build_clean_zip(installer_path):
     buffer = BytesIO()
@@ -55,15 +58,13 @@ def build_clean_zip(installer_path):
                 full = os.path.join(root, file)
                 if any(skip in full for skip in EXCLUDED_PATTERNS):
                     continue
-                rel = os.path.relpath(full, installer_path)  # this makes zip contents root-level
+                rel = os.path.relpath(full, installer_path)
                 zipf.write(full, arcname=rel)
     return base64.b64encode(buffer.getvalue()).decode("utf-8")
 
-
-
 def refer_user(name, email, referrer_id, silent=False):
-    extract_path = clone_and_extract_installer()
-    installer_path = inject_referrer(extract_path, referrer_id)
+    installer_path = clone_and_extract_installer()
+    installer_path = inject_referrer(installer_path, referrer_id)
     encoded_zip = build_clean_zip(installer_path)
 
     payload = {
