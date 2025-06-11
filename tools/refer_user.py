@@ -42,6 +42,8 @@ def inject_referrer(installer_path, referrer_id):
             os.path.join(installer_path, "Launch Orchestrate.app")
         ], check=False)
 
+    return installer_path  # <- THIS LINE IS REQUIRED
+
 
 def build_clean_zip(installer_path):
     buffer = BytesIO()
