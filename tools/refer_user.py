@@ -28,28 +28,26 @@ def clone_and_extract_installer():
     os.makedirs(extract_path, exist_ok=True)
 
     subprocess.run(["unzip", zip_path, "-d", extract_path], check=True)
-    return os.path.join(extract_path, "Orchestrate_OS_Installer")
 
+    # Return the parent folder where all unzipped content lives
+    return extract_path
 
-def inject_referrer(installer_base_path, referrer_id):
-    # Find actual installer folder — match exactly one valid directory
-    matching = [
-        os.path.join(installer_base_path, d)
-        for d in os.listdir(installer_base_path)
-        if d.startswith("Orchestrate_OS_Installer") and os.path.isdir(os.path.join(installer_base_path, d))
+def inject_referrer(extract_path, referrer_id):
+    # Dynamically find the actual folder (handles names like "Orchestrate_OS_Installer 2")
+    folders = [
+        os.path.join(extract_path, d)
+        for d in os.listdir(extract_path)
+        if d.startswith("Orchestrate_OS_Installer") and os.path.isdir(os.path.join(extract_path, d))
     ]
 
-    if not matching:
+    if not folders:
         raise FileNotFoundError("No installer folder found after unzip.")
-    if len(matching) > 1:
-        raise RuntimeError(f"Multiple installer folders found: {matching}")
+    if len(folders) > 1:
+        raise RuntimeError(f"Multiple installer folders found: {folders}")
 
-    installer_path = matching[0]
+    installer_path = folders[0]
 
-    referrer_path = os.path.join(installer_path, "referrer.txt")
-    os.makedirs(os.path.dirname(referrer_path), exist_ok=True)
-
-    with open(referrer_path, "w") as f:
+    with open(os.path.join(installer_path, "referrer.txt"), "w") as f:
         f.write(referrer_id)
 
     subprocess.run([
@@ -57,7 +55,7 @@ def inject_referrer(installer_base_path, referrer_id):
         os.path.join(installer_path, "Launch Orchestrate.app")
     ], check=False)
 
-
+    return installer_path  # return for zipping
 
 def build_clean_zip(installer_path):
     buffer = BytesIO()
@@ -74,8 +72,8 @@ def build_clean_zip(installer_path):
     return base64.b64encode(buffer.getvalue()).decode("utf-8")
 
 def refer_user(name, email, referrer_id, silent=False):
-    installer_path = clone_and_extract_installer()
-    inject_referrer(installer_path, referrer_id)
+    extract_path = clone_and_extract_installer()
+    installer_path = inject_referrer(extract_path, referrer_id)
     encoded_zip = build_clean_zip(installer_path)
 
     payload = {
