@@ -24,4 +24,4 @@ RUN apt-get update && apt-get install -y \
 RUN chmod +x /app/entrypoint.sh
 
 EXPOSE 8000
-CMD ["uvicorn", "jarvis:app", "--host", "0.0.0.0", "--port", "8000"]
+ENTRYPOINT ["/bin/bash", "/app/entrypoint.sh"]
