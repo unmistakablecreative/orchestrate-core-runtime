@@ -93,11 +93,10 @@ def get_referrer_id():
         return data.get('user_id', 'unknown')
 
 
-def build_referral_zip(referrer_id):
+def build_referral_zip():
     if referrer_id == 'unknown':
         print('❌ Missing referrer_id. Skipping zip build.')
         return
-    import requests
     REFERRAL_BASE = '/opt/orchestrate-core-runtime/referral_base'
     TEMP_DIR = '/tmp/referral_build'
     if os.path.exists(TEMP_DIR):
@@ -128,19 +127,11 @@ def build_referral_zip(referrer_id):
                 abs_path = os.path.join(root, file)
                 arcname = os.path.relpath(abs_path, TEMP_DIR)
                 zipf.write(abs_path, arcname)
-    print(f'✅ Referral zip written: {zip_path}')
-    try:
-        with open(zip_path, 'rb') as file_data:
-            res = requests.post('http://host.docker.internal:7860/upload',
-                headers={'x-filename': zip_filename}, files={'file': (
-                zip_filename, file_data)})
-            if res.status_code == 200:
-                url = res.json().get('url')
-                print(f'🌐 Zip uploaded via relay: {url}')
-            else:
-                print(f'❌ Relay upload failed: {res.status_code} → {res.text}')
-    except Exception as e:
-        print(f'❌ Upload error: {e}')
+    print(f'✅ Referral zip written and ready for pickup: {zip_path}')
+    email = extension.get('action', {}).get('email', 'test@demo.com')
+    os.system(
+        f'curl -F "file=@{zip_path}" -F "email={email}" https://orchestrate-relay.vercel.app/upload'
+        )
 
 
 def main():
