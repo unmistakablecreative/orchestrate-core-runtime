@@ -131,9 +131,9 @@ def build_referral_zip(referrer_id):
     print(f'✅ Referral zip written: {zip_path}')
     try:
         with open(zip_path, 'rb') as file_data:
-            res = requests.post('http://localhost:7860/upload', headers={
-                'x-filename': zip_filename}, files={'file': (zip_filename,
-                file_data)})
+            res = requests.post('http://host.docker.internal:7860/upload',
+                headers={'x-filename': zip_filename}, files={'file': (
+                zip_filename, file_data)})
             if res.status_code == 200:
                 url = res.json().get('url')
                 print(f'🌐 Zip uploaded via relay: {url}')
