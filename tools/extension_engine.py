@@ -46,9 +46,12 @@ def start_watcher():
 
 
     class ExtensionEventHandler(FileSystemEventHandler):
+        VALID_EVENTS = {'modified', 'closed'}
 
         def on_any_event(self, event):
             print(f'📡 Event: {event.event_type} → {event.src_path}')
+            if event.event_type not in self.VALID_EVENTS:
+                return
             if not event.is_directory and event.src_path.endswith('.json'):
                 filename = os.path.basename(event.src_path)
                 matching_exts = [ext for ext in loaded_extensions if ext.
