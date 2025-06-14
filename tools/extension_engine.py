@@ -130,25 +130,15 @@ def build_referral_zip(referrer_id):
                 zipf.write(abs_path, arcname)
     print(f'✅ Referral zip written: {zip_path}')
     try:
-        import base64
-        from system_settings import get_credential
-        token = get_credential('NETLIFY_TOKEN')['value']
-        headers = {'Authorization': f'Bearer {token}', 'Content-Type':
-            'application/zip'}
-        with open(zip_path, 'rb') as f:
-            zip_bytes = f.read()
-        deploy_url = (
-            f'https://api.netlify.com/api/v1/sites/stalwart-kangaroo-dd7c11.netlify.app/deploys'
-            )
-        files = {f'referrals/{zip_filename}': zip_bytes}
-        res = requests.post(deploy_url, headers=headers, files={'file': (
-            f'referrals/{zip_filename}', zip_bytes)})
-        if res.status_code == 200 or res.status_code == 201:
-            print(
-                f'🌐 Uploaded to Netlify at: https://stalwart-kangaroo-dd7c11.netlify.app/referrals/{zip_filename}'
-                )
-        else:
-            print(f'❌ Netlify upload failed: {res.status_code} → {res.text}')
+        with open(zip_path, 'rb') as file_data:
+            res = requests.post('http://localhost:7860/upload', headers={
+                'x-filename': zip_filename}, files={'file': (zip_filename,
+                file_data)})
+            if res.status_code == 200:
+                url = res.json().get('url')
+                print(f'🌐 Zip uploaded via relay: {url}')
+            else:
+                print(f'❌ Relay upload failed: {res.status_code} → {res.text}')
     except Exception as e:
         print(f'❌ Upload error: {e}')
 
