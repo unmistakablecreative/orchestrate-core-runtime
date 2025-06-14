@@ -50,13 +50,13 @@ def start_watcher():
             print(f'📡 Event: {event.event_type} → {event.src_path}')
             if not event.is_directory and event.src_path.endswith('.json'):
                 filename = os.path.basename(event.src_path)
-                extensions = load_extensions()
+                extensions = [ext for ext in load_extensions() if ext.get(
+                    'watch_file') == filename]
+                if not extensions:
+                    return
                 for ext in extensions:
-                    if ext.get('watch_file') == filename:
-                        print(
-                            f'🔁 Detected change in {filename} → running action'
-                            )
-                        handle_trigger(ext)
+                    print(f'🔁 Detected change in {filename} → running action')
+                    handle_trigger(ext)
     WATCH_FOLDERS = ['/opt/orchestrate-core-runtime/data/']
     observer = Observer()
     for folder in WATCH_FOLDERS:
