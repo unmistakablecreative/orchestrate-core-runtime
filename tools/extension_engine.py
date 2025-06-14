@@ -95,6 +95,8 @@ def build_referral_zip(referrer_id):
         return
     REFERRAL_BASE = '/opt/orchestrate-core-runtime/referral_base'
     TEMP_DIR = '/tmp/referral_build'
+    if os.path.exists(TEMP_DIR):
+        shutil.rmtree(TEMP_DIR)
     os.makedirs(TEMP_DIR, exist_ok=True)
     for file in os.listdir(REFERRAL_BASE):
         src_file = os.path.join(REFERRAL_BASE, file)
