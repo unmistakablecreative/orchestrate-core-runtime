@@ -23,7 +23,8 @@ RUN apt-get update && apt-get install -y \
     python-multipart \
     astor \
     oauthlib \
-    requests-oauthlib
+    requests-oauthlib \
+    watchdog  # 👈 Added this line
 
 # Make sure entrypoint.sh is executable
 RUN chmod +x /app/entrypoint.sh
