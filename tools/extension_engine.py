@@ -42,6 +42,7 @@ def on_modified_handler(event):
 
 
 def start_watcher():
+    loaded_extensions = load_extensions()
 
 
     class ExtensionEventHandler(FileSystemEventHandler):
@@ -50,11 +51,11 @@ def start_watcher():
             print(f'📡 Event: {event.event_type} → {event.src_path}')
             if not event.is_directory and event.src_path.endswith('.json'):
                 filename = os.path.basename(event.src_path)
-                extensions = [ext for ext in load_extensions() if ext.get(
-                    'watch_file') == filename]
-                if not extensions:
+                matching_exts = [ext for ext in loaded_extensions if ext.
+                    get('watch_file') == filename]
+                if not matching_exts:
                     return
-                for ext in extensions:
+                for ext in matching_exts:
                     print(f'🔁 Detected change in {filename} → running action')
                     handle_trigger(ext)
     WATCH_FOLDERS = ['/opt/orchestrate-core-runtime/data/']
