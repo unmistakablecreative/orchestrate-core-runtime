@@ -97,6 +97,7 @@ def build_referral_zip(referrer_id):
     if referrer_id == 'unknown':
         print('❌ Missing referrer_id. Skipping zip build.')
         return
+    import requests
     REFERRAL_BASE = '/opt/orchestrate-core-runtime/referral_base'
     TEMP_DIR = '/tmp/referral_build'
     if os.path.exists(TEMP_DIR):
@@ -119,7 +120,8 @@ def build_referral_zip(referrer_id):
         f.write(user_id)
     ZIP_OUTPUT_PATH = '/app'
     os.makedirs(ZIP_OUTPUT_PATH, exist_ok=True)
-    zip_path = os.path.join(ZIP_OUTPUT_PATH, f'referral_{user_id}.zip')
+    zip_filename = f'referral_{user_id}.zip'
+    zip_path = os.path.join(ZIP_OUTPUT_PATH, zip_filename)
     with ZipFile(zip_path, 'w') as zipf:
         for root, dirs, files in os.walk(TEMP_DIR):
             for file in files:
@@ -127,6 +129,19 @@ def build_referral_zip(referrer_id):
                 arcname = os.path.relpath(abs_path, TEMP_DIR)
                 zipf.write(abs_path, arcname)
     print(f'✅ Referral zip written: {zip_path}')
+    try:
+        with open(zip_path, 'rb') as file_data:
+            encoded = file_data.read()
+            res = requests.post(
+                'https://stalwart-kangaroo-dd7c11.netlify.app/.netlify/functions/receive_zip'
+                , headers={'x-filename': zip_filename}, data=encoded)
+            if res.status_code == 200:
+                url = res.json().get('url')
+                print(f'🌐 Zip uploaded successfully: {url}')
+            else:
+                print(f'❌ Upload failed: {res.status_code} → {res.text}')
+    except Exception as e:
+        print(f'❌ Upload error: {e}')
 
 
 def main():
