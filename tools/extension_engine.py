@@ -79,8 +79,7 @@ def handle_trigger(extension):
     action = extension.get('action', {})
     type = action.get('type')
     if type == 'create_referral_zip':
-        referrer_id = get_referrer_id()
-        build_referral_zip(referrer_id)
+        build_referral_zip(extension)
 
 
 def get_referrer_id():
