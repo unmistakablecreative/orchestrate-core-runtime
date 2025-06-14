@@ -7,10 +7,11 @@ import base64
 import requests
 import tempfile
 import sys
+import urllib.request
 from io import BytesIO
 
 # === Constants ===
-INSTALLER_REPO = "https://github.com/unmistakablecreative/OrchestrateOS_Installer.git"
+NETLIFY_INSTALLER_URL = "https://timely-croissant-0dd32d.netlify.app/Orchestrate_OS_Installer.zip"
 REFERRAL_RELAY_URL = "https://referral-relay-7ugyt7c5z-srinivas-rao-s-projects.vercel.app/referral"
 SYSTEM_ID_PATH = "/container_state/system_identity.json"
 EXCLUDED_PATTERNS = [".git", ".DS_Store", "__MACOSX"]
@@ -19,16 +20,19 @@ def get_referrer_id():
     with open(SYSTEM_ID_PATH, "r") as f:
         return json.load(f)["user_id"]
 
-def clone_and_extract_installer():
-    clone_dir = tempfile.mkdtemp()
-    subprocess.run(["git", "clone", INSTALLER_REPO, clone_dir], check=True)
-
-    zip_path = os.path.join(clone_dir, "Orchestrate_OS_Installer.zip")
-    extract_path = os.path.join(clone_dir, "unzipped")
+def download_and_extract_installer():
+    temp_dir = tempfile.mkdtemp()
+    zip_path = os.path.join(temp_dir, "Orchestrate_OS_Installer.zip")
+    extract_path = os.path.join(temp_dir, "unzipped")
     os.makedirs(extract_path, exist_ok=True)
 
+    # Download zip from Netlify
+    urllib.request.urlretrieve(NETLIFY_INSTALLER_URL, zip_path)
+
+    # Unzip it
     subprocess.run(["unzip", zip_path, "-d", extract_path], check=True)
 
+    # Locate installer folder
     for name in os.listdir(extract_path):
         full = os.path.join(extract_path, name)
         if os.path.isdir(full) and name.startswith("Orchestrate_OS_Installer"):
@@ -63,7 +67,7 @@ def build_clean_zip(installer_path):
     return base64.b64encode(buffer.getvalue()).decode("utf-8")
 
 def refer_user(name, email, referrer_id, silent=False):
-    installer_path = clone_and_extract_installer()
+    installer_path = download_and_extract_installer()
     installer_path = inject_referrer(installer_path, referrer_id)
     encoded_zip = build_clean_zip(installer_path)
 
