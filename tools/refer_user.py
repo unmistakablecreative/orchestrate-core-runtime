@@ -11,7 +11,7 @@ import urllib.request
 from io import BytesIO
 
 # === Constants ===
-NETLIFY_INSTALLER_URL = "https://timely-croissant-0dd32d.netlify.app/Orchestrate_OS_Installer.zip"
+NETLIFY_INSTALLER_URL = "https://timely-croissant-0dd32d.netlify.app/orchestrate_os_installer.zip"
 REFERRAL_RELAY_URL = "https://referral-relay-7ugyt7c5z-srinivas-rao-s-projects.vercel.app/referral"
 SYSTEM_ID_PATH = "/container_state/system_identity.json"
 EXCLUDED_PATTERNS = [".git", ".DS_Store", "__MACOSX"]
@@ -22,21 +22,21 @@ def get_referrer_id():
 
 def download_and_extract_installer():
     temp_dir = tempfile.mkdtemp()
-    zip_path = os.path.join(temp_dir, "Orchestrate_OS_Installer.zip")
+    zip_path = os.path.join(temp_dir, "orchestrate_os_installer.zip")
     extract_path = os.path.join(temp_dir, "unzipped")
     os.makedirs(extract_path, exist_ok=True)
 
-    # Download zip from Netlify
+    # Download from Netlify
     urllib.request.urlretrieve(NETLIFY_INSTALLER_URL, zip_path)
 
-    # Unzip it
+    # Unzip
     subprocess.run(["unzip", zip_path, "-d", extract_path], check=True)
 
-    # Locate installer folder
+    # Look for a valid extracted folder (e.g., Orchestrate Engine.app or any folder with Orchestrate in the name)
     for name in os.listdir(extract_path):
         full = os.path.join(extract_path, name)
-        if os.path.isdir(full) and name.startswith("Orchestrate_OS_Installer"):
-            return full
+        if os.path.isdir(full) and "Orchestrate" in name and not name.startswith("__MACOSX"):
+            return extract_path  # Return the full extracted root for zipping
 
     raise FileNotFoundError("Installer folder not found after unzip.")
 
@@ -45,10 +45,8 @@ def inject_referrer(installer_path, referrer_id):
         f.write(referrer_id)
 
     if sys.platform == "darwin":
-        subprocess.run([
-            "xattr", "-dr", "com.apple.quarantine",
-            os.path.join(installer_path, "Launch Orchestrate.app")
-        ], check=False)
+        script_path = os.path.join(installer_path, "Orchestrate Engine.app", "Contents", "MacOS", "Launch Orchestrate")
+        subprocess.run(["xattr", "-dr", "com.apple.quarantine", script_path], check=False)
 
     return installer_path
 
