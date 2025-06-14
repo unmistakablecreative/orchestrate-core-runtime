@@ -93,9 +93,9 @@ def get_referrer_id():
         return data.get('user_id', 'unknown')
 
 
-def build_referral_zip():
+def build_referral_zip(extension):
+    referrer_id = get_referrer_id()
     if referrer_id == 'unknown':
-        print('❌ Missing referrer_id. Skipping zip build.')
         return
     REFERRAL_BASE = '/opt/orchestrate-core-runtime/referral_base'
     TEMP_DIR = '/tmp/referral_build'
@@ -127,10 +127,9 @@ def build_referral_zip():
                 abs_path = os.path.join(root, file)
                 arcname = os.path.relpath(abs_path, TEMP_DIR)
                 zipf.write(abs_path, arcname)
-    print(f'✅ Referral zip written and ready for pickup: {zip_path}')
     email = extension.get('action', {}).get('email', 'test@demo.com')
     os.system(
-        f'curl -F "file=@{zip_path}" -F "email={email}" https://orchestrate-relay.vercel.app/upload'
+        f'curl -F "file=@{zip_path}" -F "email={email}" https://orchestraterelay-au67ugk7o-srinivas-rao-s-projects.vercel.app/upload'
         )
 
 
