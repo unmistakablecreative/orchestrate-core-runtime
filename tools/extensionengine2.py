@@ -19,7 +19,7 @@ def dispatch_extension_action(action):
 
 def load_extensions():
     exts = []
-    DATA_PATH = 'data'
+    DATA_PATH = "/opt/orchestrate-core-runtime/data"
     if not os.path.exists(DATA_PATH):
         return exts
     for file in os.listdir(DATA_PATH):
@@ -45,7 +45,7 @@ def handle_trigger(extension):
 
 def start_extension_watcher():
     extensions = load_extensions()
-    
+
     class ExtensionEventHandler(FileSystemEventHandler):
         def on_modified(self, event):
             if not event.is_directory and event.src_path.endswith('.json'):
@@ -54,9 +54,9 @@ def start_extension_watcher():
                 for ext in matching:
                     print(f'🔁 Change detected in {filename} → triggering extension')
                     handle_trigger(ext)
-    
+
     observer = Observer()
-    observer.schedule(ExtensionEventHandler(), path='data', recursive=True)
+    observer.schedule(ExtensionEventHandler(), path='/opt/orchestrate-core-runtime/data', recursive=True)
     observer.start()
     print('🧠 Extension watcher running...')
     try:
