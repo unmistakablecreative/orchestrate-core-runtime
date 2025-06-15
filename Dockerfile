@@ -1,17 +1,19 @@
 FROM python:3.10-slim
 
-# Set working directory inside the container
+# Set working directory
 WORKDIR /app
 
-# Copy all files from your installer folder into /app
+# Copy all files into container
 COPY . /app
 
-# Install required system packages, Node.js, and ngrok
+# Install required system packages, Node.js, and Netlify CLI
 RUN apt-get update && apt-get install -y \
-    curl jq unzip gettext git gnupg ca-certificates \
+    curl jq unzip gettext git gnupg ca-certificates build-essential \
     && curl -fsSL https://deb.nodesource.com/setup_18.x | bash - \
     && apt-get install -y nodejs \
     && npm install -g netlify-cli \
+    && ln -s /usr/local/bin/netlify /usr/bin/netlify \
+    && netlify --version \
     && curl -s https://ngrok-agent.s3.amazonaws.com/ngrok.asc | tee /etc/apt/trusted.gpg.d/ngrok.asc >/dev/null \
     && echo "deb https://ngrok-agent.s3.amazonaws.com buster main" | tee /etc/apt/sources.list.d/ngrok.list \
     && apt-get update && apt-get install -y ngrok \
@@ -27,13 +29,13 @@ RUN apt-get update && apt-get install -y \
         astor \
         oauthlib \
         requests-oauthlib \
-        watchdog  # 👈 File watcher support
+        watchdog
 
-# Make sure entrypoint.sh is executable
+# Make entrypoint executable
 RUN chmod +x /app/entrypoint.sh
 
-# Expose API port
+# Expose required ports
 EXPOSE 8000
 
-# Launch entrypoint script
+# Entrypoint
 ENTRYPOINT ["/bin/bash", "entrypoint.sh"]
