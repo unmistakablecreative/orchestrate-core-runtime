@@ -12,6 +12,7 @@ RUN apt-get update && apt-get install -y \
 
 RUN npm install -g netlify-cli
 
+# THIS is what makes watchdog install like it does manually
 RUN pip install --no-cache-dir watchdog
 
 RUN pip install --no-cache-dir \
