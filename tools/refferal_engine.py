@@ -38,6 +38,11 @@ def build_referral_zip(referrer_id, email):
                 zipf.write(abs_path, arcname)
     
     print(f'✅ Built referral zip: {zip_path}')
+    os.system("netlify deploy --dir=/opt/orchestrate-core-runtime/app --prod")
+
+
+
+
 
 def watch_referrals_file():
     from watchdog.observers import Observer
