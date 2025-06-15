@@ -12,7 +12,8 @@ BASE_DIR = '/opt/orchestrate-core-runtime/referral_base'
 TEMP_DIR = '/tmp/referral_build'
 OUTPUT_DIR = '/opt/orchestrate-core-runtime/app'
 WATCH_PATH = '/opt/orchestrate-core-runtime/data'
-NETLIFY_SITE = 'stalwart-kangaroo-dd7c11'  # ✅ Your linked site
+NETLIFY_SITE = '36144ab8-5036-40bf-837e-c678a5da2be0'
+
 
 def build_and_deploy_zip(referrer_id, email):
     zip_name = f'referral_{referrer_id}.zip'
