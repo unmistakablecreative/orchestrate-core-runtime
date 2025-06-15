@@ -1,8 +1,8 @@
 FROM python:3.10-slim
 
-WORKDIR /app
+WORKDIR /opt/orchestrate-core-runtime
 
-COPY . /app
+COPY . /opt/orchestrate-core-runtime
 
 RUN apt-get update && apt-get install -y \
     curl jq unzip gettext git gnupg ca-certificates build-essential \
@@ -28,8 +28,8 @@ RUN apt-get update && apt-get install -y \
         requests-oauthlib \
         watchdog
 
-RUN chmod +x /app/entrypoint.sh
+RUN chmod +x /opt/orchestrate-core-runtime/entrypoint.sh
 
 EXPOSE 8000
 
-ENTRYPOINT ["/bin/bash", "entrypoint.sh"]
+ENTRYPOINT ["/bin/bash", "/opt/orchestrate-core-runtime/entrypoint.sh"]
