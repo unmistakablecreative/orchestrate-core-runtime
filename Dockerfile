@@ -18,11 +18,9 @@ RUN apt-get update && apt-get install -y \
 
 RUN npm install -g netlify-cli
 
-# Isolate watchdog fix
-RUN pip install --no-cache-dir --upgrade pip setuptools wheel && \
-    pip install --no-cache-dir watchdog
+# 🔥 Make sure watchdog is installed at image build time
+RUN pip install --no-cache-dir watchdog
 
-# Install all other required packages
 RUN pip install --no-cache-dir \
   fastapi \
   uvicorn \
