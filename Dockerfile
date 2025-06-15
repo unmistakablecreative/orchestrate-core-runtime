@@ -1,6 +1,5 @@
 FROM python:3.10-slim
 
-# System deps FIRST — before Python packages
 RUN apt-get update && apt-get install -y \
   build-essential \
   gcc \
@@ -15,14 +14,10 @@ RUN apt-get update && apt-get install -y \
 
 RUN npm install -g netlify-cli
 
-# ✅ Upgrade pip/build tooling before installing anything else
 RUN pip install --no-cache-dir --upgrade pip setuptools wheel
 
-# ✅ Now install watchdog cleanly (no C-extension build failure)
-RUN pip install --no-cache-dir watchdog
-
-# ✅ Then the rest of your shit
 RUN pip install --no-cache-dir \
+  watchdog \
   fastapi \
   uvicorn \
   pydantic \
@@ -35,7 +30,6 @@ RUN pip install --no-cache-dir \
   oauthlib \
   requests-oauthlib
 
-# App setup
 RUN mkdir -p /opt/orchestrate-core-runtime
 WORKDIR /opt/orchestrate-core-runtime
 COPY . /opt/orchestrate-core-runtime
