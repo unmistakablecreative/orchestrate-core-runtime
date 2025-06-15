@@ -3,8 +3,17 @@ import json
 import time
 from watchdog.observers import Observer
 from watchdog.events import FileSystemEventHandler
-from json_manager import dispatch_extension_action
 
+# --- Inline dispatcher ---
+def dispatch_extension_action(action):
+    action_type = action.get("type")
+    params = action.get("params", {})
+
+    if action_type == "create_referral_zip":
+        from json_manager import create_referral_zip
+        return create_referral_zip(**params)
+
+    return {"status": "error", "message": f"Unknown action type: {action_type}"}
 
 # --- Core Functions ---
 
@@ -57,28 +66,18 @@ def start_extension_watcher():
         observer.stop()
     observer.join()
 
-def main():
-    start_extension_watcher()
+# --- CLI Interface ---
 
-# --- Action Router ---
 def main():
-    import argparse, json
+    import argparse
     parser = argparse.ArgumentParser()
-    parser.add_argument("action")
+    parser.add_argument("action", nargs="?", default="watch")
     parser.add_argument("--params")
     args = parser.parse_args()
-    params = json.loads(args.params) if args.params else {}
-    if args.action == "load_extensions":
-        result = load_extensions(**params)
-    elif args.action == "handle_trigger":
-        result = handle_trigger(**params)
-    elif args.action == "start_extension_watcher":
-        result = start_extension_watcher(**params)
-    elif args.action == "main":
-        result = main(**params)
+    if args.action == "watch":
+        start_extension_watcher()
     else:
-        result = {"status": "error", "message": f"Unknown action {args.action}"}
-    print(json.dumps(result, indent=2))
+        print(f"❌ Unknown action '{args.action}'")
 
 if __name__ == "__main__":
     main()
