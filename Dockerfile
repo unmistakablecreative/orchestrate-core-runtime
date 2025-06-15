@@ -9,12 +9,20 @@ RUN apt-get update && apt-get install -y \
   gcc \
   python3-dev \
   libffi-dev \
-  libc6-dev \
+  libc-dev \
   curl jq unzip gettext git nodejs npm \
+  && curl -s https://ngrok-agent.s3.amazonaws.com/ngrok.asc | tee /etc/apt/trusted.gpg.d/ngrok.asc >/dev/null \
+  && echo "deb https://ngrok-agent.s3.amazonaws.com buster main" | tee /etc/apt/sources.list.d/ngrok.list \
+  && apt-get update && apt-get install -y ngrok \
   && apt-get clean
 
-RUN pip install --no-cache-dir watchdog
+RUN npm install -g netlify-cli
 
+# Isolate watchdog fix
+RUN pip install --no-cache-dir --upgrade pip setuptools wheel && \
+    pip install --no-cache-dir watchdog
+
+# Install all other required packages
 RUN pip install --no-cache-dir \
   fastapi \
   uvicorn \
@@ -27,8 +35,6 @@ RUN pip install --no-cache-dir \
   astor \
   oauthlib \
   requests-oauthlib
-
-RUN npm install -g netlify-cli
 
 RUN chmod +x entrypoint.sh
 
