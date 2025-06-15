@@ -65,21 +65,8 @@ def watch_referrals_file():
         observer.stop()
     observer.join()
 
-# --- Action Router ---
-def main():
-    import argparse, json
-    parser = argparse.ArgumentParser()
-    parser.add_argument("action")
-    parser.add_argument("--params")
-    args = parser.parse_args()
-    params = json.loads(args.params) if args.params else {}
-    if args.action == "build_referral_zip":
-        result = build_referral_zip(**params)
-    elif args.action == "watch_referrals_file":
-        result = watch_referrals_file(**params)
-    else:
-        result = {"status": "error", "message": f"Unknown action {args.action}"}
-    print(json.dumps(result, indent=2))
+
 
 if __name__ == "__main__":
-    main()
+    watch_referrals_file()
+
