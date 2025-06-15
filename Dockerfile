@@ -1,41 +1,36 @@
 FROM python:3.10-slim
 
-# Set correct working dir
-WORKDIR /opt/orchestrate-core-runtime
+# Set working directory inside the container
+WORKDIR /app
 
-# Copy all source files
-COPY . /opt/orchestrate-core-runtime
+# Copy all files from your installer folder into /app
+COPY . /app
 
-# Install system packages, Node.js, Netlify CLI, and Python deps
+# Install required system packages and ngrok
 RUN apt-get update && apt-get install -y \
-    curl jq unzip gettext git gnupg ca-certificates build-essential \
-    && curl -fsSL https://deb.nodesource.com/setup_18.x | bash - \
-    && apt-get install -y nodejs \
-    && npm install -g netlify-cli --prefix=/usr/local \
-    && ln -s /usr/local/bin/netlify /usr/bin/netlify \
-    && /usr/local/bin/netlify --version || (echo '❌ Netlify CLI not installed' && exit 1) \
-    && curl -s https://ngrok-agent.s3.amazonaws.com/ngrok.asc | tee /etc/apt/trusted.gpg.d/ngrok.asc >/dev/null \
-    && echo "deb https://ngrok-agent.s3.amazonaws.com buster main" | tee /etc/apt/sources.list.d/ngrok.list \
-    && apt-get update && apt-get install -y ngrok \
-    && pip install --no-cache-dir \
-        fastapi \
-        uvicorn \
-        pydantic \
-        requests \
-        beautifulsoup4 \
-        python-dotenv \
-        pyyaml \
-        python-multipart \
-        astor \
-        oauthlib \
-        requests-oauthlib \
-        watchdog
+    curl jq unzip gettext git \
+  && curl -s https://ngrok-agent.s3.amazonaws.com/ngrok.asc | tee /etc/apt/trusted.gpg.d/ngrok.asc >/dev/null \
+  && echo "deb https://ngrok-agent.s3.amazonaws.com buster main" | tee /etc/apt/sources.list.d/ngrok.list \
+  && apt-get update && apt-get install -y ngrok \
+  && pip install --no-cache-dir \
+    fastapi \
+    uvicorn \
+    pydantic \
+    requests \
+    beautifulsoup4 \
+    python-dotenv \
+    pyyaml \
+    python-multipart \
+    astor \
+    oauthlib \
+    requests-oauthlib \
+    watchdog  # 👈 Added this line
 
-# Fix permissions for entrypoint
-RUN chmod +x /opt/orchestrate-core-runtime/entrypoint.sh
+# Make sure entrypoint.sh is executable
+RUN chmod +x /app/entrypoint.sh
 
-# Expose Orchestrate API port
+# Open port 8000 for the API
 EXPOSE 8000
 
-# Entry
-ENTRYPOINT ["/bin/bash", "/opt/orchestrate-core-runtime/entrypoint.sh"]
+# When container starts, run the entrypoint script
+ENTRYPOINT ["/bin/bash", "entrypoint.sh"]
