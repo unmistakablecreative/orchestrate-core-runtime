@@ -1,0 +1,97 @@
+{
+  "commands": {
+    "Load OrchestrateOS": {
+      "run": [
+        {
+          "tool": "${SAFE_DOMAIN}__jit_plugin",
+          "action": "getSupportedActions"
+        },
+        {
+          "tool": "${SAFE_DOMAIN}__jit_plugin",
+          "action": "executeTask",
+          "params": {
+            "tool_name": "json_manager",
+            "action": "read_json_file",
+            "params": {
+              "filename": "orchestrate_tool_ui.json"
+            }
+          }
+        },
+        {
+          "tool": "${SAFE_DOMAIN}__jit_plugin",
+          "action": "executeTask",
+          "params": {
+            "tool_name": "json_manager",
+            "action": "read_json_file",
+            "params": {
+              "filename": "onboarding_sequence.json"
+            }
+          }
+        },
+        {
+          "tool": "${SAFE_DOMAIN}__jit_plugin",
+          "action": "executeTask",
+          "params": {
+            "tool_name": "json_manager",
+            "action": "read_json_file",
+            "params": {
+              "filename": "orchestrate_intent_routes.json"
+            }
+          }
+        },
+        {
+          "tool": "${SAFE_DOMAIN}__jit_plugin",
+          "action": "executeTask",
+          "params": {
+            "tool_name": "json_manager",
+            "action": "read_json_file",
+            "params": {
+              "filename": "secondbrain.json"
+            }
+          }
+        }
+      ],
+      "display": [
+        {
+          "style": "custom",
+          "theme": "dark",
+          "layout": "standard",
+          "display_instructions": {
+            "reference_type": "tool_ui_json",
+            "reference_doc": "orchestrate_tool_ui.json",
+            "render": "markdown_table",
+            "force_render": true,
+            "title": "🧰 All Available Tools",
+            "dynamic_fields": {
+              "status": "getSupportedActions"
+            },
+            "include_tool_name": "display_name",
+            "include_descriptions": true,
+            "include_locks": true,
+            "include_credits": true,
+            "include_actions": false,
+            "include_params": false,
+            "sort_by": "referral_unlock_cost",
+            "sort_order": "ascending",
+            "group_locked_tools": false,
+            "suppress_summary": false,
+            "lock_icon_locked": "🔒",
+            "lock_icon_unlocked": "✅",
+            "lock_icon_unknown": "—",
+            "columns": ["Tool", "Description", "Locked", "Credits"]
+          }
+        },
+        {
+          "style": "standard",
+          "theme": "dark",
+          "display_instructions": {
+            "reference_type": "json",
+            "reference_doc": "onboarding_sequence.json",
+            "render": "guided"
+          }
+        }
+      ],
+      "prompt_behavior": "silent"
+    }
+  }
+}
