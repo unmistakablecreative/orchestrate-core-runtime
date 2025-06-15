@@ -1,9 +1,12 @@
 FROM python:3.10-slim
 
+# Set correct working dir
 WORKDIR /opt/orchestrate-core-runtime
 
+# Copy all source files
 COPY . /opt/orchestrate-core-runtime
 
+# Install system packages, Node.js, Netlify CLI, and Python deps
 RUN apt-get update && apt-get install -y \
     curl jq unzip gettext git gnupg ca-certificates build-essential \
     && curl -fsSL https://deb.nodesource.com/setup_18.x | bash - \
@@ -28,8 +31,11 @@ RUN apt-get update && apt-get install -y \
         requests-oauthlib \
         watchdog
 
+# Fix permissions for entrypoint
 RUN chmod +x /opt/orchestrate-core-runtime/entrypoint.sh
 
+# Expose Orchestrate API port
 EXPOSE 8000
 
+# Entry
 ENTRYPOINT ["/bin/bash", "/opt/orchestrate-core-runtime/entrypoint.sh"]
