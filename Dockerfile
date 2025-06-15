@@ -1,9 +1,5 @@
 FROM python:3.10-slim
 
-RUN mkdir -p /opt/orchestrate-core-runtime
-WORKDIR /opt/orchestrate-core-runtime
-COPY . /opt/orchestrate-core-runtime
-
 RUN apt-get update && apt-get install -y \
   build-essential \
   gcc \
@@ -18,10 +14,10 @@ RUN apt-get update && apt-get install -y \
 
 RUN npm install -g netlify-cli
 
-# 🔥 Make sure watchdog is installed at image build time
-RUN pip install --no-cache-dir watchdog
+RUN pip install --no-cache-dir --upgrade pip setuptools wheel
 
 RUN pip install --no-cache-dir \
+  watchdog \
   fastapi \
   uvicorn \
   pydantic \
@@ -33,6 +29,10 @@ RUN pip install --no-cache-dir \
   astor \
   oauthlib \
   requests-oauthlib
+
+RUN mkdir -p /opt/orchestrate-core-runtime
+WORKDIR /opt/orchestrate-core-runtime
+COPY . /opt/orchestrate-core-runtime
 
 RUN chmod +x entrypoint.sh
 
