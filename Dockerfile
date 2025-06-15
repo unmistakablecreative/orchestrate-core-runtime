@@ -12,7 +12,7 @@ RUN apt-get update && apt-get install -y \
 
 RUN npm install -g netlify-cli
 
-RUN pip install --no-cache-dir --only-binary=:all: watchdog
+RUN pip install --no-cache-dir watchdog
 
 RUN pip install --no-cache-dir \
     fastapi \
