@@ -7,24 +7,27 @@ from zipfile import ZipFile
 from watchdog.observers import Observer
 from watchdog.events import FileSystemEventHandler
 
+# 🛠 Config
+BASE_DIR = '/opt/orchestrate-core-runtime/referral_base'
+TEMP_DIR = '/tmp/referral_build'
+OUTPUT_DIR = '/opt/orchestrate-core-runtime/app'
+WATCH_PATH = '/opt/orchestrate-core-runtime/data'
+NETLIFY_SITE = 'stalwart-kangaroo-dd7c11'  # ✅ Your linked site
+
 def build_and_deploy_zip(referrer_id, email):
-    import os
-    import shutil
-    from zipfile import ZipFile
-    import subprocess
+    zip_name = f'referral_{referrer_id}.zip'
+    zip_path = os.path.join(OUTPUT_DIR, zip_name)
 
-    BASE_DIR = '/opt/orchestrate-core-runtime/referral_base'
-    TEMP_DIR = '/tmp/referral_build'
-    OUTPUT_DIR = '/opt/orchestrate-core-runtime/app'
-    ZIP_NAME = f'referral_{referrer_id}.zip'
-    ZIP_PATH = os.path.join(OUTPUT_DIR, ZIP_NAME)
-
-    # Reset temp build dir
+    # 🔄 Reset temp build dir
     if os.path.exists(TEMP_DIR):
         shutil.rmtree(TEMP_DIR)
     os.makedirs(TEMP_DIR, exist_ok=True)
 
-    # Copy referral_base contents
+    # 📦 Copy base template
+    if not os.path.exists(BASE_DIR):
+        print(f"❌ BASE_DIR not found: {BASE_DIR}")
+        return
+
     for file in os.listdir(BASE_DIR):
         src = os.path.join(BASE_DIR, file)
         dest = os.path.join(TEMP_DIR, file)
@@ -33,42 +36,42 @@ def build_and_deploy_zip(referrer_id, email):
         else:
             shutil.copy2(src, dest)
 
-    # Add referrer.txt
+    # 📝 Add referrer metadata
     with open(os.path.join(TEMP_DIR, 'referrer.txt'), 'w') as f:
         f.write(f"Referrer ID: {referrer_id}\nEmail: {email}")
 
-    # Build ZIP
+    # 🗜️ Create ZIP
     os.makedirs(OUTPUT_DIR, exist_ok=True)
-    with ZipFile(ZIP_PATH, 'w') as zipf:
+    with ZipFile(zip_path, 'w') as zipf:
         for root, _, files in os.walk(TEMP_DIR):
             for file in files:
                 abs_path = os.path.join(root, file)
                 arcname = os.path.relpath(abs_path, TEMP_DIR)
                 zipf.write(abs_path, arcname)
 
-    print(f"✅ Built referral zip: {ZIP_PATH}")
+    print(f"✅ Built referral zip: {zip_path}")
 
-    # Deploy to Netlify using absolute path to avoid 'not found' error
-    deploy_dir = OUTPUT_DIR
-    os.chdir(deploy_dir)
-
+    # 🚀 Deploy to Netlify
+    os.chdir(OUTPUT_DIR)
     deploy_cmd = [
         "/usr/local/bin/netlify", "deploy",
         "--dir=.", "--prod",
-        f"--message=referral_{referrer_id}"
+        "--message", f"referral_{referrer_id}",
+        "--site", NETLIFY_SITE
     ]
 
+    print("🚚 Deploying to Netlify...")
     result = subprocess.run(deploy_cmd, capture_output=True, text=True)
+
+    print("---- NETLIFY STDOUT ----")
+    print(result.stdout)
+    print("---- NETLIFY STDERR ----")
+    print(result.stderr)
 
     if result.returncode == 0:
         print("🌐 Referral deployed successfully.")
-        print(result.stdout)
     else:
-        print("❌ Netlify deploy failed:")
-        print(result.stderr)
-
-
-
+        print("❌ Netlify deploy failed.")
 
 class ReferralHandler(FileSystemEventHandler):
     def on_modified(self, event):
@@ -82,7 +85,7 @@ class ReferralHandler(FileSystemEventHandler):
 def watch_referrals_file():
     observer = Observer()
     handler = ReferralHandler()
-    observer.schedule(handler, path='/opt/orchestrate-core-runtime/data', recursive=False)
+    observer.schedule(handler, path=WATCH_PATH, recursive=False)
     observer.start()
     print('👀 Watching referrals.json for changes...')
     try:
