@@ -7,8 +7,9 @@ from watchdog.observers import Observer
 from watchdog.events import FileSystemEventHandler
 
 # --- Core Functions ---
-
 def build_referral_zip(referrer_id, email):
+    import subprocess
+
     TEMP_DIR = '/tmp/referral_build'
     BASE_DIR = '/opt/orchestrate-core-runtime/referral_base'
     DEPLOY_DIR = '/opt/orchestrate-core-runtime/app'
@@ -29,7 +30,9 @@ def build_referral_zip(referrer_id, email):
         f.write(referrer_id)
     
     os.makedirs(DEPLOY_DIR, exist_ok=True)
-    zip_path = os.path.join(DEPLOY_DIR, f'referral_{referrer_id}.zip')
+    zip_filename = f'referral_{referrer_id}.zip'
+    zip_path = os.path.join(DEPLOY_DIR, zip_filename)
+    
     with ZipFile(zip_path, 'w') as zipf:
         for root, dirs, files in os.walk(TEMP_DIR):
             for file in files:
@@ -38,7 +41,21 @@ def build_referral_zip(referrer_id, email):
                 zipf.write(abs_path, arcname)
     
     print(f'✅ Built referral zip: {zip_path}')
-    os.system("netlify deploy --dir=/opt/orchestrate-core-runtime/app --prod")
+    
+    # --- Replace CLI deploy with curl to Netlify Drop
+    upload_url = "https://timely-croissant-0dd32d.netlify.app"
+    curl_cmd = [
+        "curl", "-s", "-X", "POST",
+        "--data-binary", f"@{zip_path}",
+        upload_url
+    ]
+    
+    result = subprocess.run(curl_cmd, capture_output=True, text=True)
+    
+    if result.returncode == 0:
+        print(f'🌐 Public URL: {upload_url}/{zip_filename}')
+    else:
+        print("❌ Upload failed:", result.stderr)
 
 
 
