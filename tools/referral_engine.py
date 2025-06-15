@@ -8,6 +8,11 @@ from watchdog.observers import Observer
 from watchdog.events import FileSystemEventHandler
 
 def build_and_deploy_zip(referrer_id, email):
+    import os
+    import shutil
+    from zipfile import ZipFile
+    import subprocess
+
     BASE_DIR = '/opt/orchestrate-core-runtime/referral_base'
     TEMP_DIR = '/tmp/referral_build'
     OUTPUT_DIR = '/opt/orchestrate-core-runtime/app'
@@ -43,12 +48,12 @@ def build_and_deploy_zip(referrer_id, email):
 
     print(f"✅ Built referral zip: {ZIP_PATH}")
 
-    # Deploy to Netlify (assumes site already linked inside container)
+    # Deploy to Netlify using absolute path to avoid 'not found' error
     deploy_dir = OUTPUT_DIR
     os.chdir(deploy_dir)
 
     deploy_cmd = [
-        "netlify", "deploy",
+        "/usr/local/bin/netlify", "deploy",
         "--dir=.", "--prod",
         f"--message=referral_{referrer_id}"
     ]
@@ -61,6 +66,8 @@ def build_and_deploy_zip(referrer_id, email):
     else:
         print("❌ Netlify deploy failed:")
         print(result.stderr)
+
+
 
 
 class ReferralHandler(FileSystemEventHandler):
