@@ -11,7 +11,7 @@ from watchdog.events import FileSystemEventHandler
 def build_referral_zip(referrer_id, email):
     TEMP_DIR = '/tmp/referral_build'
     BASE_DIR = '/opt/orchestrate-core-runtime/referral_base'
-    DEPLOY_DIR = '/opt/orchestrate-core-runtime/netlify_uploads'
+    DEPLOY_DIR = '/opt/orchestrate-core-runtime/app'
     
     if os.path.exists(TEMP_DIR):
         shutil.rmtree(TEMP_DIR)
