@@ -3,7 +3,8 @@ import json
 import time
 from watchdog.observers import Observer
 from watchdog.events import FileSystemEventHandler
-from tools.json_manager import dispatch_extension_action
+from json_manager import dispatch_extension_action
+
 
 # --- Core Functions ---
 
