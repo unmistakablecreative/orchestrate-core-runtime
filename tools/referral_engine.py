@@ -15,6 +15,8 @@ WATCH_PATH = '/opt/orchestrate-core-runtime/data'
 NETLIFY_SITE = '36144ab8-5036-40bf-837e-c678a5da2be0'  # Netlify Site ID
 
 
+
+
 def build_and_deploy_zip(referrer_id, name, email):
     import requests
 
@@ -114,7 +116,6 @@ def build_and_deploy_zip(referrer_id, name, email):
 
 
 
-
 class ReferralHandler(FileSystemEventHandler):
     def on_modified(self, event):
         if event.src_path.endswith('referrals.json'):
@@ -123,8 +124,9 @@ class ReferralHandler(FileSystemEventHandler):
                     data = json.load(f)
                     entries = data.get("entries", {})
                     for key, value in entries.items():
+                        name = value.get('name', 'Unknown User')
                         email = value.get('email', 'demo@example.com')
-                        build_and_deploy_zip(key, email)
+                        build_and_deploy_zip(key, name, email)
                 except Exception as e:
                     print(f"❌ Failed to process referrals.json: {e}")
 
