@@ -12,20 +12,19 @@ BASE_DIR = '/opt/orchestrate-core-runtime/referral_base'
 TEMP_DIR = '/tmp/referral_build'
 OUTPUT_DIR = '/opt/orchestrate-core-runtime/app'
 WATCH_PATH = '/opt/orchestrate-core-runtime/data'
-NETLIFY_SITE = '36144ab8-5036-40bf-837e-c678a5da2be0'
-
+NETLIFY_SITE = '36144ab8-5036-40bf-837e-c678a5da2be0'  # Site ID, not slug
 
 
 def build_and_deploy_zip(referrer_id, email):
     zip_name = f'referral_{referrer_id}.zip'
     zip_path = os.path.join(OUTPUT_DIR, zip_name)
 
-    # 🔄 Reset temp build dir
+    # 🔄 Reset build dir
     if os.path.exists(TEMP_DIR):
         shutil.rmtree(TEMP_DIR)
     os.makedirs(TEMP_DIR, exist_ok=True)
 
-    # 📦 Copy base template
+    # 📦 Copy referral_base template
     if not os.path.exists(BASE_DIR):
         print(f"❌ BASE_DIR not found: {BASE_DIR}")
         return
@@ -38,7 +37,7 @@ def build_and_deploy_zip(referrer_id, email):
         else:
             shutil.copy2(src, dest)
 
-    # 🧠 Pull system identity for referrer.txt
+    # 🧠 Load system identity for referrer.txt
     identity_path = '/container_state/system_identity.json'
     user_id = "unknown"
     if os.path.exists(identity_path):
@@ -47,13 +46,13 @@ def build_and_deploy_zip(referrer_id, email):
                 identity = json.load(idf)
                 user_id = identity.get("user_id", "unknown")
             except Exception as e:
-                print(f"⚠️ Failed to read identity file: {e}")
+                print(f"⚠️ Could not read system identity: {e}")
 
-    # 📝 Write referrer.txt with just the raw user ID (no label)
+    # 📝 Write referrer.txt (raw ID only)
     with open(os.path.join(TEMP_DIR, 'referrer.txt'), 'w') as f:
-        f.write(f"{user_id}")
+        f.write(user_id)
 
-    # 🗜️ Create ZIP
+    # 🗜️ Build ZIP
     os.makedirs(OUTPUT_DIR, exist_ok=True)
     with ZipFile(zip_path, 'w') as zipf:
         for root, _, files in os.walk(TEMP_DIR):
@@ -62,7 +61,7 @@ def build_and_deploy_zip(referrer_id, email):
                 arcname = os.path.relpath(abs_path, TEMP_DIR)
                 zipf.write(abs_path, arcname)
 
-    print(f"✅ Built referral zip: {zip_path}")
+    print(f"✅ Built: {zip_name}")
 
     # 🚀 Deploy to Netlify
     os.chdir(OUTPUT_DIR)
@@ -82,21 +81,23 @@ def build_and_deploy_zip(referrer_id, email):
     print(result.stderr)
 
     if result.returncode == 0:
-        print("🌐 Referral deployed successfully.")
+        print(f"🌐 Live URL: https://stalwart-kangaroo-dd7c11.netlify.app/{zip_name}")
     else:
         print("❌ Netlify deploy failed.")
-
-
 
 
 class ReferralHandler(FileSystemEventHandler):
     def on_modified(self, event):
         if event.src_path.endswith('referrals.json'):
             with open(event.src_path) as f:
-                data = json.load(f)
-                for key, value in data.items():
-                    email = value.get('email', 'demo@example.com')
-                    build_and_deploy_zip(key, email)
+                try:
+                    data = json.load(f)
+                    for key, value in data.items():
+                        email = value.get('email', 'demo@example.com')
+                        build_and_deploy_zip(key, email)
+                except Exception as e:
+                    print(f"❌ Failed to load referrals.json: {e}")
+
 
 def watch_referrals_file():
     observer = Observer()
@@ -110,6 +111,7 @@ def watch_referrals_file():
     except KeyboardInterrupt:
         observer.stop()
     observer.join()
+
 
 if __name__ == "__main__":
     watch_referrals_file()
