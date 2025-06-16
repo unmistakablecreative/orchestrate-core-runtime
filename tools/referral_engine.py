@@ -15,7 +15,9 @@ WATCH_PATH = '/opt/orchestrate-core-runtime/data'
 NETLIFY_SITE = '36144ab8-5036-40bf-837e-c678a5da2be0'  # Netlify Site ID
 
 
-def build_and_deploy_zip(referrer_id, email):
+def build_and_deploy_zip(referrer_id, name, email):
+    import requests
+
     # 🚽 Remove old ZIPs to avoid accidental redeploys
     for file in os.listdir(OUTPUT_DIR):
         if file.endswith(".zip"):
@@ -86,9 +88,31 @@ def build_and_deploy_zip(referrer_id, email):
     print(result.stderr)
 
     if result.returncode == 0:
-        print(f"🌐 Live URL: https://stalwart-kangaroo-dd7c11.netlify.app/{zip_name}")
+        referral_url = f"https://stalwart-kangaroo-dd7c11.netlify.app/{zip_name}"
+        print(f"🌐 Live URL: {referral_url}")
+
+        # 📡 Send webhook to Airtable
+        WEBHOOK_URL = "https://hooks.airtable.com/workflows/v1/genericWebhook/appHggDD1APShGNiZ/wflGBzCgFTzCbwJud/wtrQuynZz6WuEUGSB"
+        payload = {
+            "referrer_id": referrer_id,
+            "name": name,
+            "email": email,
+            "referral_url": referral_url
+        }
+        try:
+            response = requests.post(WEBHOOK_URL, json=payload)
+            if response.status_code == 200:
+                print("✅ Webhook delivered successfully")
+            else:
+                print(f"❌ Webhook failed: {response.status_code} - {response.text}")
+        except Exception as e:
+            print(f"❌ Exception sending webhook: {e}")
+
     else:
         print("❌ Netlify deploy failed.")
+
+
+
 
 
 class ReferralHandler(FileSystemEventHandler):
