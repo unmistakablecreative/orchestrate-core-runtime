@@ -37,9 +37,23 @@ def build_and_deploy_zip(referrer_id, email):
         else:
             shutil.copy2(src, dest)
 
-    # 📝 Add referrer metadata
+    # 🧠 Pull system identity for referrer.txt
+    identity_path = '/container_state/system_identity.json'
+    user_id = "unknown"
+    installed_at = "unknown"
+    if os.path.exists(identity_path):
+        with open(identity_path) as idf:
+            try:
+                identity = json.load(idf)
+                user_id = identity.get("user_id", "unknown")
+                installed_at = identity.get("installed_at", "unknown")
+            except Exception as e:
+                print(f"⚠️ Failed to read identity file: {e}")
+
+    # 📝 Write referrer.txt (system identity only)
     with open(os.path.join(TEMP_DIR, 'referrer.txt'), 'w') as f:
-        f.write(f"Referrer ID: {referrer_id}\nEmail: {email}")
+        f.write(f"User ID: {user_id}\n")
+        f.write(f"Installed At: {installed_at}\n")
 
     # 🗜️ Create ZIP
     os.makedirs(OUTPUT_DIR, exist_ok=True)
@@ -73,6 +87,9 @@ def build_and_deploy_zip(referrer_id, email):
         print("🌐 Referral deployed successfully.")
     else:
         print("❌ Netlify deploy failed.")
+
+
+
 
 class ReferralHandler(FileSystemEventHandler):
     def on_modified(self, event):
