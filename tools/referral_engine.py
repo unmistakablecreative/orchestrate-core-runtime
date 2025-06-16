@@ -12,11 +12,11 @@ BASE_DIR = '/opt/orchestrate-core-runtime/referral_base'
 TEMP_DIR = '/tmp/referral_build'
 OUTPUT_DIR = '/opt/orchestrate-core-runtime/app'
 WATCH_PATH = '/opt/orchestrate-core-runtime/data'
-NETLIFY_SITE = '36144ab8-5036-40bf-837e-c678a5da2be0'  # Netlify site ID
+NETLIFY_SITE = '36144ab8-5036-40bf-837e-c678a5da2be0'  # Netlify Site ID
 
 
 def build_and_deploy_zip(referrer_id, email):
-    # 🚽 Clean up old ZIPs
+    # 🚽 Remove old ZIPs to avoid accidental redeploys
     for file in os.listdir(OUTPUT_DIR):
         if file.endswith(".zip"):
             os.remove(os.path.join(OUTPUT_DIR, file))
@@ -29,7 +29,7 @@ def build_and_deploy_zip(referrer_id, email):
         shutil.rmtree(TEMP_DIR)
     os.makedirs(TEMP_DIR, exist_ok=True)
 
-    # 📦 Copy base template
+    # 📦 Copy referral base
     if not os.path.exists(BASE_DIR):
         print(f"❌ BASE_DIR not found: {BASE_DIR}")
         return
@@ -42,7 +42,7 @@ def build_and_deploy_zip(referrer_id, email):
         else:
             shutil.copy2(src, dest)
 
-    # 🧠 Pull system identity for referrer.txt
+    # 🧠 Pull system identity
     identity_path = '/container_state/system_identity.json'
     user_id = "unknown"
     if os.path.exists(identity_path):
@@ -51,13 +51,13 @@ def build_and_deploy_zip(referrer_id, email):
                 identity = json.load(idf)
                 user_id = identity.get("user_id", "unknown")
             except Exception as e:
-                print(f"⚠️ Failed to read identity file: {e}")
+                print(f"⚠️ Failed to read system identity: {e}")
 
     # 📝 Write referrer.txt (raw user ID only)
     with open(os.path.join(TEMP_DIR, 'referrer.txt'), 'w') as f:
         f.write(user_id)
 
-    # 🗜️ Create ZIP
+    # 🗜️ Build the zip
     os.makedirs(OUTPUT_DIR, exist_ok=True)
     with ZipFile(zip_path, 'w') as zipf:
         for root, _, files in os.walk(TEMP_DIR):
