@@ -12,19 +12,24 @@ BASE_DIR = '/opt/orchestrate-core-runtime/referral_base'
 TEMP_DIR = '/tmp/referral_build'
 OUTPUT_DIR = '/opt/orchestrate-core-runtime/app'
 WATCH_PATH = '/opt/orchestrate-core-runtime/data'
-NETLIFY_SITE = '36144ab8-5036-40bf-837e-c678a5da2be0'  # Site ID, not slug
+NETLIFY_SITE = '36144ab8-5036-40bf-837e-c678a5da2be0'  # Netlify site ID
 
 
 def build_and_deploy_zip(referrer_id, email):
+    # 🚽 Clean up old ZIPs
+    for file in os.listdir(OUTPUT_DIR):
+        if file.endswith(".zip"):
+            os.remove(os.path.join(OUTPUT_DIR, file))
+
     zip_name = f'referral_{referrer_id}.zip'
     zip_path = os.path.join(OUTPUT_DIR, zip_name)
 
-    # 🔄 Reset build dir
+    # 🔄 Reset temp build dir
     if os.path.exists(TEMP_DIR):
         shutil.rmtree(TEMP_DIR)
     os.makedirs(TEMP_DIR, exist_ok=True)
 
-    # 📦 Copy referral_base template
+    # 📦 Copy base template
     if not os.path.exists(BASE_DIR):
         print(f"❌ BASE_DIR not found: {BASE_DIR}")
         return
@@ -37,7 +42,7 @@ def build_and_deploy_zip(referrer_id, email):
         else:
             shutil.copy2(src, dest)
 
-    # 🧠 Load system identity for referrer.txt
+    # 🧠 Pull system identity for referrer.txt
     identity_path = '/container_state/system_identity.json'
     user_id = "unknown"
     if os.path.exists(identity_path):
@@ -46,13 +51,13 @@ def build_and_deploy_zip(referrer_id, email):
                 identity = json.load(idf)
                 user_id = identity.get("user_id", "unknown")
             except Exception as e:
-                print(f"⚠️ Could not read system identity: {e}")
+                print(f"⚠️ Failed to read identity file: {e}")
 
-    # 📝 Write referrer.txt (raw ID only)
+    # 📝 Write referrer.txt (raw user ID only)
     with open(os.path.join(TEMP_DIR, 'referrer.txt'), 'w') as f:
         f.write(user_id)
 
-    # 🗜️ Build ZIP
+    # 🗜️ Create ZIP
     os.makedirs(OUTPUT_DIR, exist_ok=True)
     with ZipFile(zip_path, 'w') as zipf:
         for root, _, files in os.walk(TEMP_DIR):
@@ -61,7 +66,7 @@ def build_and_deploy_zip(referrer_id, email):
                 arcname = os.path.relpath(abs_path, TEMP_DIR)
                 zipf.write(abs_path, arcname)
 
-    print(f"✅ Built: {zip_name}")
+    print(f"✅ Built referral zip: {zip_path}")
 
     # 🚀 Deploy to Netlify
     os.chdir(OUTPUT_DIR)
@@ -96,7 +101,7 @@ class ReferralHandler(FileSystemEventHandler):
                         email = value.get('email', 'demo@example.com')
                         build_and_deploy_zip(key, email)
                 except Exception as e:
-                    print(f"❌ Failed to load referrals.json: {e}")
+                    print(f"❌ Failed to process referrals.json: {e}")
 
 
 def watch_referrals_file():
