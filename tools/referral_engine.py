@@ -15,6 +15,7 @@ WATCH_PATH = '/opt/orchestrate-core-runtime/data'
 NETLIFY_SITE = '36144ab8-5036-40bf-837e-c678a5da2be0'
 
 
+
 def build_and_deploy_zip(referrer_id, email):
     zip_name = f'referral_{referrer_id}.zip'
     zip_path = os.path.join(OUTPUT_DIR, zip_name)
@@ -40,20 +41,17 @@ def build_and_deploy_zip(referrer_id, email):
     # 🧠 Pull system identity for referrer.txt
     identity_path = '/container_state/system_identity.json'
     user_id = "unknown"
-    installed_at = "unknown"
     if os.path.exists(identity_path):
         with open(identity_path) as idf:
             try:
                 identity = json.load(idf)
                 user_id = identity.get("user_id", "unknown")
-                installed_at = identity.get("installed_at", "unknown")
             except Exception as e:
                 print(f"⚠️ Failed to read identity file: {e}")
 
-    # 📝 Write referrer.txt (system identity only)
+    # 📝 Write referrer.txt with just the raw user ID (no label)
     with open(os.path.join(TEMP_DIR, 'referrer.txt'), 'w') as f:
-        f.write(f"User ID: {user_id}\n")
-        f.write(f"Installed At: {installed_at}\n")
+        f.write(f"{user_id}")
 
     # 🗜️ Create ZIP
     os.makedirs(OUTPUT_DIR, exist_ok=True)
