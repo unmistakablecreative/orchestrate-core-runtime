@@ -97,11 +97,14 @@ class ReferralHandler(FileSystemEventHandler):
             with open(event.src_path) as f:
                 try:
                     data = json.load(f)
-                    for key, value in data.items():
+                    entries = data.get("entries", {})
+                    for key, value in entries.items():
                         email = value.get('email', 'demo@example.com')
                         build_and_deploy_zip(key, email)
                 except Exception as e:
                     print(f"❌ Failed to process referrals.json: {e}")
+
+
 
 
 def watch_referrals_file():
