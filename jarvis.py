@@ -100,22 +100,6 @@ def startup_routines():
     except Exception as e:
         logging.warning(f"⚠️ Ngrok relaunch failed: {e}")
 
-    # === Start Referral Engine subprocess ===
-    try:
-        referral_script = os.path.join(BASE_DIR, "tools", "referral_engine.py")
-        running_referral = subprocess.getoutput("pgrep -f 'referral_engine.py'")
-        if not running_referral:
-            log_path = os.path.join(BASE_DIR, "referral_debug.log")
-            subprocess.Popen(
-                ["python3", referral_script],
-                stdout=open(log_path, "w"),
-                stderr=subprocess.STDOUT
-            )
-            logging.info("📣 Referral engine launched as background process with logging.")
-        else:
-            logging.info("🔁 Referral engine already running.")
-    except Exception as e:
-        logging.warning(f"⚠️ Failed to launch referral engine: {e}")
 
 
 
