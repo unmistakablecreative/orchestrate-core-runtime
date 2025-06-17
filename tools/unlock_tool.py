@@ -49,7 +49,6 @@ def save_referral_status(user):
         json.dump(data, f, indent=2)
 
 
-
 def unlock_tool(tool_name):
     user_id = load_system_identity()
     ledger = get_ledger()
@@ -64,6 +63,13 @@ def unlock_tool(tool_name):
     user = ledger["installs"][user_id]
     available_credits = user.get("referral_credits", 0)
     settings = load_ndjson(NDJSON_PATH)
+
+    credential_warning = {
+        "outline_editor": "⚠️ This tool requires your Outline API key. Use system_settings.set_credential() to set it.",
+        "ideogram_tool": "⚠️ This tool requires your Ideogram API key.",
+        "buffer_engine": "⚠️ This tool requires your Twitter API credentials.",
+        "readwise_tool": "⚠️ This tool requires your Readwise API key."
+    }
 
     for entry in settings:
         if entry["tool"] == tool_name:
@@ -90,9 +96,13 @@ def unlock_tool(tool_name):
             put_ledger(ledger)
             save_referral_status(user)
 
+            message = f"✅ '{tool_name}' unlocked. Remaining credits: {user['referral_credits']}"
+            if tool_name in credential_warning:
+                message += f"\n{credential_warning[tool_name]}"
+
             return {
                 "status": "success",
-                "message": f"✅ '{tool_name}' unlocked. Remaining credits: {user['referral_credits']}"
+                "message": message
             }
 
     save_referral_status(user)
@@ -100,7 +110,6 @@ def unlock_tool(tool_name):
         "status": "error",
         "message": f"❌ Tool '{tool_name}' not found."
     }
-
 
 
 
