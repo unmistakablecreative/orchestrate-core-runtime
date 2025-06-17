@@ -73,6 +73,7 @@ def run_script(tool_name, action, params):
 
 
 # === Startup Sequence ===
+
 @app.on_event("startup")
 def startup_routines():
     try:
