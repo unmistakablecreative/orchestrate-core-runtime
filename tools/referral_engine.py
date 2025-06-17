@@ -6,6 +6,8 @@ import subprocess
 from zipfile import ZipFile
 from watchdog.observers import Observer
 from watchdog.events import FileSystemEventHandler
+import threading
+
 
 # 🛠 Config
 BASE_DIR = '/opt/orchestrate-core-runtime/referral_base'
@@ -119,18 +121,27 @@ class ReferralHandler(FileSystemEventHandler):
                 except Exception as e:
                     print(f"❌ Failed to process referrals.json: {e}")
 
+
+
 def watch_referrals_file():
     observer = Observer()
     handler = ReferralHandler()
     observer.schedule(handler, path=WATCH_PATH, recursive=False)
     observer.start()
     print('👀 Watching referrals.json for changes...')
-    try:
-        while True:
-            time.sleep(1)
-    except KeyboardInterrupt:
-        observer.stop()
-    observer.join()
+
+    def monitor():
+        try:
+            while True:
+                time.sleep(1)
+        except KeyboardInterrupt:
+            observer.stop()
+        observer.join()
+
+    thread = threading.Thread(target=monitor, daemon=True)
+    thread.start()
+
+
 
 if __name__ == "__main__":
     watch_referrals_file()
