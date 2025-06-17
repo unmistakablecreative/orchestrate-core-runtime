@@ -2,6 +2,8 @@ from fastapi import FastAPI, HTTPException, Request
 from fastapi.responses import JSONResponse
 from datetime import datetime
 import subprocess, json, os, logging
+from tools import referral_engine
+
 
 # === BASE DIR ===
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -100,7 +102,12 @@ def startup_routines():
     except Exception as e:
         logging.warning(f"⚠️ Ngrok relaunch failed: {e}")
 
-
+    # === Start Referral Engine Watcher ===
+    try:
+        referral_engine.watch_referrals_file()
+        logging.info("✅ Referral engine started.")
+    except Exception as e:
+        logging.warning(f"⚠️ Referral engine failed to start: {e}")
 
 
 
