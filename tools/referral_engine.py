@@ -133,18 +133,32 @@ class ReferralHandler(FileSystemEventHandler):
 
 
 
+
 def watch_referrals_file():
+    print('👀 Referral engine started and watching for referrals.json...')
+    print(f'📂 WATCH_PATH is: {WATCH_PATH}')
+    print(f'📦 Current working directory: {os.getcwd()}')
+
+    if not os.path.exists(WATCH_PATH):
+        print(f"❌ WATCH_PATH does not exist: {WATCH_PATH}")
+        return
+
     observer = Observer()
     handler = ReferralHandler()
     observer.schedule(handler, path=WATCH_PATH, recursive=False)
     observer.start()
-    print('👀 Watching referrals.json for changes...')
+
     try:
         while True:
             time.sleep(1)
+            print("💤 Heartbeat: still watching...")
     except KeyboardInterrupt:
         observer.stop()
+        print("🛑 Referral engine stopped by KeyboardInterrupt.")
+    except Exception as e:
+        print(f"❌ Referral engine crashed: {e}")
     observer.join()
+
 
 
 if __name__ == "__main__":
