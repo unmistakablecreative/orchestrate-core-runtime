@@ -17,20 +17,18 @@ NETLIFY_SITE = '36144ab8-5036-40bf-837e-c678a5da2be0'  # Netlify Site ID
 def build_and_deploy_zip(referrer_id, name, email):
     import requests
 
-    # 🚽 Remove old ZIPs to avoid accidental redeploys
     for file in os.listdir(OUTPUT_DIR):
         if file.endswith(".zip"):
             os.remove(os.path.join(OUTPUT_DIR, file))
 
-    zip_name = f'referral_{referrer_id}.zip'
+    safe_name = name.replace(" ", "_").lower()
+    zip_name = f'referral_{safe_name}.zip'
     zip_path = os.path.join(OUTPUT_DIR, zip_name)
 
-    # 🔄 Reset temp build dir
     if os.path.exists(TEMP_DIR):
         shutil.rmtree(TEMP_DIR)
     os.makedirs(TEMP_DIR, exist_ok=True)
 
-    # 📦 Copy referral base
     if not os.path.exists(BASE_DIR):
         print(f"❌ BASE_DIR not found: {BASE_DIR}")
         return
@@ -43,7 +41,6 @@ def build_and_deploy_zip(referrer_id, name, email):
         else:
             shutil.copy2(src, dest)
 
-    # 🧠 Pull system identity
     identity_path = '/container_state/system_identity.json'
     user_id = "unknown"
     if os.path.exists(identity_path):
@@ -54,11 +51,9 @@ def build_and_deploy_zip(referrer_id, name, email):
             except Exception as e:
                 print(f"⚠️ Failed to read system identity: {e}")
 
-    # 📝 Write referrer.txt (raw user ID only)
     with open(os.path.join(TEMP_DIR, 'referrer.txt'), 'w') as f:
         f.write(user_id)
 
-    # 🗜️ Build the zip
     os.makedirs(OUTPUT_DIR, exist_ok=True)
     with ZipFile(zip_path, 'w') as zipf:
         for root, _, files in os.walk(TEMP_DIR):
@@ -69,7 +64,6 @@ def build_and_deploy_zip(referrer_id, name, email):
 
     print(f"✅ Built referral zip: {zip_path}")
 
-    # 🚀 Deploy to Netlify
     os.chdir(OUTPUT_DIR)
     deploy_cmd = [
         "/usr/local/bin/netlify", "deploy",
@@ -90,7 +84,6 @@ def build_and_deploy_zip(referrer_id, name, email):
         referral_url = f"https://stalwart-kangaroo-dd7c11.netlify.app/{zip_name}"
         print(f"🌐 Live URL: {referral_url}")
 
-        # 📡 Send webhook to Airtable
         WEBHOOK_URL = "https://hooks.airtable.com/workflows/v1/genericWebhook/appHggDD1APShGNiZ/wflGBzCgFTzCbwJud/wtrQuynZz6WuEUGSB"
         payload = {
             "referrer_id": referrer_id,
@@ -106,9 +99,11 @@ def build_and_deploy_zip(referrer_id, name, email):
                 print(f"❌ Webhook failed: {response.status_code} - {response.text}")
         except Exception as e:
             print(f"❌ Exception sending webhook: {e}")
-
     else:
         print("❌ Netlify deploy failed.")
+
+
+
 
 class ReferralHandler(FileSystemEventHandler):
     def on_modified(self, event):
