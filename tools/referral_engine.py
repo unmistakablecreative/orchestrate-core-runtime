@@ -8,7 +8,6 @@ from watchdog.observers import Observer
 from watchdog.events import FileSystemEventHandler
 import threading
 
-
 # 🛠 Config
 BASE_DIR = '/opt/orchestrate-core-runtime/referral_base'
 TEMP_DIR = '/tmp/referral_build'
@@ -105,8 +104,6 @@ def build_and_deploy_zip(referrer_id, name, email):
         print("❌ Netlify deploy failed.")
 
 
-
-
 class ReferralHandler(FileSystemEventHandler):
     def on_modified(self, event):
         if event.src_path.endswith('referrals.json'):
@@ -139,6 +136,7 @@ def start_referral_watcher():
 
     thread = threading.Thread(target=monitor, daemon=True)
     thread.start()
+    monitor()  # ✅ BLOCK the main thread so it doesn't exit
 
 
 if __name__ == "__main__":
