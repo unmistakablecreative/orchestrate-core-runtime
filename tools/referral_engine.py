@@ -122,8 +122,7 @@ class ReferralHandler(FileSystemEventHandler):
                     print(f"❌ Failed to process referrals.json: {e}")
 
 
-
-def watch_referrals_file():
+def start_referral_watcher():
     observer = Observer()
     handler = ReferralHandler()
     observer.schedule(handler, path=WATCH_PATH, recursive=False)
