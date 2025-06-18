@@ -104,11 +104,11 @@ def build_and_deploy_zip(referrer_id, name, email):
         print("❌ Netlify deploy failed.")
 
 
-
 class ReferralHandler(FileSystemEventHandler):
     def on_modified(self, event):
         if event.src_path.endswith('referrals.json'):
             processed_path = '/container_state/referrals.processed'
+            open(processed_path, 'a').close()  # ✅ Ensure file exists
             processed = set()
 
             if os.path.exists(processed_path):
@@ -120,15 +120,16 @@ class ReferralHandler(FileSystemEventHandler):
                     data = json.load(f)
                     entries = data.get("entries", {})
                     for key, value in entries.items():
-                        if key in processed:
+                        if key.strip() in processed:
                             continue
                         name = value.get('name', 'Unknown User')
                         email = value.get('email', 'demo@example.com')
                         build_and_deploy_zip(key, name, email)
                         with open(processed_path, 'a') as pf:
-                            pf.write(key + '\n')
+                            pf.write(key.strip() + '\n')
                 except Exception as e:
                     print(f"❌ Failed to process referrals.json: {e}")
+
 
 
 
