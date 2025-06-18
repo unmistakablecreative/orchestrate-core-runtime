@@ -141,6 +141,5 @@ def start_referral_watcher():
     thread.start()
 
 
-
 if __name__ == "__main__":
-    watch_referrals_file()
+    start_referral_watcher()
