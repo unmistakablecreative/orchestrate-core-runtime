@@ -102,12 +102,13 @@ def startup_routines():
     except Exception as e:
         logging.warning(f"⚠️ Ngrok relaunch failed: {e}")
 
-    # === Start Referral Engine Watcher ===
-    try:
-        referral_engine.watch_referrals_file()
-        logging.info("✅ Referral engine started.")
-    except Exception as e:
-        logging.warning(f"⚠️ Referral engine failed to start: {e}")
+
+# === Start Referral Engine Watcher ===
+try:
+    referral_engine.start_referral_watcher()
+    logging.info("✅ Referral engine started.")
+except Exception as e:
+    logging.warning(f"⚠️ Referral engine failed to start: {e}")
 
 
 
