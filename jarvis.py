@@ -2,8 +2,6 @@ from fastapi import FastAPI, HTTPException, Request
 from fastapi.responses import JSONResponse
 from datetime import datetime
 import subprocess, json, os, logging
-from tools import referral_engine
-
 
 # === BASE DIR ===
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -75,7 +73,7 @@ def run_script(tool_name, action, params):
 
 
 # === Startup Sequence ===
-
+# === Startup Sequence ===
 @app.on_event("startup")
 def startup_routines():
     try:
@@ -102,13 +100,17 @@ def startup_routines():
     except Exception as e:
         logging.warning(f"⚠️ Ngrok relaunch failed: {e}")
 
-
-# === Start Referral Engine Watcher ===
-try:
-    referral_engine.start_referral_watcher()
-    logging.info("✅ Referral engine started.")
-except Exception as e:
-    logging.warning(f"⚠️ Referral engine failed to start: {e}")
+    # === Start Referral Engine subprocess ===
+    try:
+        referral_script = os.path.join(BASE_DIR, "tools", "referral_engine.py")
+        running_referral = subprocess.getoutput("pgrep -f 'referral_engine.py'")
+        if not running_referral:
+            subprocess.Popen(["python3", referral_script])
+            logging.info("📣 Referral engine launched as background process.")
+        else:
+            logging.info("🔁 Referral engine already running.")
+    except Exception as e:
+        logging.warning(f"⚠️ Failed to launch referral engine: {e}")
 
 
 
