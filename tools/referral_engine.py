@@ -107,28 +107,30 @@ def build_and_deploy_zip(referrer_id, name, email):
 class ReferralHandler(FileSystemEventHandler):
     def on_modified(self, event):
         if event.src_path.endswith('referrals.json'):
-            with open(event.src_path) as f:
-                try:
+            try:
+                with open(event.src_path) as f:
                     data = json.load(f)
                     entries = data.get("entries", {})
-                    for key, value in entries.items():
-                        status = value.get("status", "queued").strip().lower()
-                        if status != "queued":
-                            continue
 
-                        name = value.get('name', 'Unknown User')
-                        email = value.get('email', 'demo@example.com')
-                        build_and_deploy_zip(key, name, email)
+                updated = False
+                for key, value in entries.items():
+                    status = value.get("status", "queued").strip().lower()
+                    if status != "queued":
+                        continue
 
-                        # ✅ Update the entry to "processed"
-                        data["entries"][key]["status"] = "processed"
+                    name = value.get('name', 'Unknown User')
+                    email = value.get('email', 'demo@example.com')
+                    build_and_deploy_zip(key, name, email)
 
-                    # ✅ Save updated referrals.json
+                    data["entries"][key]["status"] = "processed"
+                    updated = True
+
+                if updated:
                     with open(event.src_path, 'w') as out:
                         json.dump(data, out, indent=2)
 
-                except Exception as e:
-                    print(f"❌ Failed to process referrals.json: {e}")
+            except Exception as e:
+                print(f"❌ Failed to process referrals.json: {e}")
 
 
 
