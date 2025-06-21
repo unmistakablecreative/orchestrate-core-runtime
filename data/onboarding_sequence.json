@@ -59,7 +59,7 @@
       },
       "step_4": {
         "title": "🧠 Save Your First Note",
-        "narration": "What’s something you just realized or learned? I’ll log it to your notes instantly — just like the samples you saw.",
+        "narration": "Let’s explore how notes work in Orchestrate. 🧠 Notes are your system-wide scratchpad — ideal for insights, ideas, or things you want to remember later. You don’t need to organize them manually — I’ll help you retrieve or connect them using tags and search.\n\nNow — what’s something you just realized or learned? I’ll save it as your first note.",
         "prompt": "Type any new idea you want to capture:",
         "action_template": {
           "tool": "json_manager",
