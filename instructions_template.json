@@ -10,6 +10,18 @@
           "tool": "${SAFE_DOMAIN}__jit_plugin",
           "action": "executeTask",
           "params": {
+            "tool_name": "read_file",
+            "action": "read_file",
+            "params": {
+              "filename": "orchestrate_os_protocol.md",
+              "folder": "system_docs"
+            }
+          }
+        },
+        {
+          "tool": "${SAFE_DOMAIN}__jit_plugin",
+          "action": "executeTask",
+          "params": {
             "tool_name": "json_manager",
             "action": "read_json_file",
             "params": {
