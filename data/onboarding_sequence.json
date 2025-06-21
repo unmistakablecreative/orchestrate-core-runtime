@@ -47,7 +47,7 @@
       },
       "step_3": {
         "title": "📓 Open Your Notes",
-        "narration": "Your notes and personal memory space live here. Let’s open them.",
+        "narration": "Your notes live here. I’ve already dropped in a few sample entries that explain how the notes system works — no setup required.",
         "action": {
           "tool": "json_manager",
           "action": "read_json_file",
@@ -58,9 +58,9 @@
         "next": "step_4"
       },
       "step_4": {
-        "title": "🧠 Save an Insight",
-        "narration": "Think of something worth remembering. I’ll log it to your notes instantly.",
-        "prompt": "What’s something you just realized or learned?",
+        "title": "🧠 Save Your First Note",
+        "narration": "What’s something you just realized or learned? I’ll log it to your notes instantly — just like the samples you saw.",
+        "prompt": "Type any new idea you want to capture:",
         "action_template": {
           "tool": "json_manager",
           "action": "add_json_entry",
@@ -140,15 +140,19 @@
         "next": "step_9"
       },
       "step_9": {
-        "title": "🎁 Refer a Friend — Unlock More Tools",
-        "narration": "Invite someone to try Orchestrate. Just enter their name and email — we’ll generate a preloaded installer and credit you both.",
+        "title": "🎁 Refer a Friend — Add to the System",
+        "narration": "Want to refer someone? Just give me their name and email, and I’ll log it to `referrals.json` so they can be invited and both of you unlock tools.",
         "prompt": "Enter the name and email of the person you'd like to refer (e.g. John Smith, john@example.com):",
         "action_template": {
-          "tool": "refer_user",
-          "action": "refer_user",
+          "tool": "json_manager",
+          "action": "add_json_entry",
           "params": {
-            "name": "{{user_input.name}}",
-            "email": "{{user_input.email}}"
+            "filename": "referrals.json",
+            "entry_key": "{{user_input.name | slug}}",
+            "entry_data": {
+              "name": "{{user_input.name}}",
+              "email": "{{user_input.email}}"
+            }
           }
         },
         "requires_user_input": true,
