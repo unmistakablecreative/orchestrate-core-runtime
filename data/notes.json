@@ -1,28 +1,17 @@
 {
-  "onboarding_intro": {
-    "title": "Orchestrate isn't ChatGPT",
-    "description": "You’re running your own system. It reads files, executes tools, and saves real memory.",
-    "tags": ["intro", "system"],
-    "backlinks": []
+  "how_notes_work": {
+    "title": "📓 How Notes Work in Orchestrate",
+    "body": "Notes are your system-wide scratchpad — for ideas, concepts, insights, fragments, or anything you want to remember or reuse. Think of it like your always-on second brain.\n\nYou don’t need to organize your notes manually. Just add them, and Orchestrate will help retrieve or connect them later using tags, keywords, and file search.",
+    "tags": ["system", "onboarding", "notes"]
   },
-  "task_vs_note": {
-    "title": "Tasks vs Notes",
-    "description": "Tasks go in `tasks.json` and have a title, status, and optional description. Notes are looser — any insight, quote, or idea can live here.",
-    "tags": ["structure", "workflow"]
+  "capturing_notes": {
+    "title": "✍️ Capturing Notes",
+    "body": "To capture a note, just say something like:\n\n`Save a note about [insight]`\n\nBehind the scenes, Orchestrate will call `json_manager.add_json_entry` and log your thought to `notes.json`. You don’t need to format it — the system handles it for you.",
+    "tags": ["capture", "example", "notes"]
   },
-  "memory_design": {
-    "title": "How memory works",
-    "description": "Your memory files are just structured JSON. You can update them live — no save button needed.",
-    "tags": ["memory", "json", "insight"]
-  },
-  "dropzone_power": {
-    "title": "Use the Drop Zone",
-    "description": "Any file dropped there becomes readable. You can log notes from it, pull tasks, or store key learnings.",
-    "tags": ["file", "dropzone"]
-  },
-  "tool_calls": {
-    "title": "Every tool is callable",
-    "description": "Each Orchestrate tool is just a script. You can run any one with a sentence — it’s real execution, not simulation.",
-    "tags": ["tools", "execution"]
+  "retrieving_notes": {
+    "title": "🔍 Retrieving Notes",
+    "body": "You can retrieve notes by asking about topics you've saved, or by using tools like `search_json_entries`, `list_json_entries`, or `read_json_entry`. You can also search by tag — for example, 'insight' or 'creative'.\n\nTry: `Search notes for insights about risk`",
+    "tags": ["retrieval", "search", "notes"]
   }
 }
