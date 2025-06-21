@@ -2,23 +2,33 @@ import os
 import json
 import argparse
 
-DROPZONE_DIR = '/orchestrate_user/dropzone'
+# Define whitelisted internal folders
+ALLOWED_DIRS = {
+    'dropzone': '/orchestrate_user/dropzone',
+    'system_docs': '/orchestrate_user/system_docs'  # INTERNAL ONLY — not user-writable
+}
 
 def read_file(params):
+    folder = params.get('folder', 'dropzone')
     filename = params.get('filename')
+
+    if folder not in ALLOWED_DIRS:
+        return {'status': 'error', 'message': f'❌ Unknown folder: {folder}'}
+
+    dir_path = ALLOWED_DIRS[folder]
 
     if filename:
         safe_name = os.path.basename(filename)
-        path = os.path.join(DROPZONE_DIR, safe_name)
+        path = os.path.join(dir_path, safe_name)
         if not os.path.isfile(path):
-            return {'status': 'error', 'message': '❌ File not found in dropzone.'}
+            return {'status': 'error', 'message': f'❌ File not found in {folder}.'}
     else:
-        # Fallback to most recent file
-        files = [f for f in os.listdir(DROPZONE_DIR) if os.path.isfile(os.path.join(DROPZONE_DIR, f))]
+        # Fallback to most recent file in the requested folder
+        files = [f for f in os.listdir(dir_path) if os.path.isfile(os.path.join(dir_path, f))]
         if not files:
-            return {'status': 'error', 'message': '❌ Dropzone is empty.'}
-        files.sort(key=lambda f: os.path.getmtime(os.path.join(DROPZONE_DIR, f)), reverse=True)
-        path = os.path.join(DROPZONE_DIR, files[0])
+            return {'status': 'error', 'message': f'❌ No files found in {folder}.'}
+        files.sort(key=lambda f: os.path.getmtime(os.path.join(dir_path, f)), reverse=True)
+        path = os.path.join(dir_path, files[0])
 
     try:
         with open(path, 'r', encoding='utf-8') as f:
