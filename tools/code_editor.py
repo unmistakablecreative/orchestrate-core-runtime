@@ -185,6 +185,20 @@ def compile_blueprint_to_script_file(params):
     return {'status': 'success', 'message': f'✅ Compiled {output_path}'}
 
 
+
+def read_code_file(params):
+    path = params.get('path')
+    if not path:
+        return {'status': 'error', 'message': '❌ Path parameter is required.'}
+    try:
+        with open(path, 'r', encoding='utf-8') as f:
+            content = f.read()
+        return {'status': 'success', 'code': content}
+    except Exception as e:
+        return {'status': 'error', 'message': f'❌ Failed to read file: {str(e)}'}
+
+
+
 def add_function_to_code_file(params):
     filename = params['filename']
     function_name = params['function_name']
@@ -472,6 +486,8 @@ def add_to_action_map_in_file(params):
 
 
 
+
+
 def main():
     import argparse
     parser = argparse.ArgumentParser(description='Orchestrate Code Editor Tool')
@@ -504,7 +520,8 @@ def main():
         'add_endpoint_to_fastapi_file': add_endpoint_to_fastapi_file,
         'add_import_statement_to_file': add_import_statement_to_file,
         'add_to_action_map_in_file': add_to_action_map_in_file,
-        'append_code_to_file': append_code_to_file
+        'append_code_to_file': append_code_to_file,
+        'read_code_file': read_code_file  # ✅ Newly added action
     }
 
     if args.action in action_map:
