@@ -16,7 +16,7 @@
     "steps": {
       "step_1": {
         "title": "📂 Load Your Workspace",
-        "narration": "We’ll start by loading your workspace — tasks and saved items.",
+        "narration": "We’ll start by loading your workspace — tasks and saved items.\n\n🟢 You’ve also been given **3 free unlock credits**. That’s enough to unlock your first tool — no referrals needed. You can use them anytime to explore what Orchestrate can do.",
         "action": {
           "tool": "json_manager",
           "action": "read_json_file",
