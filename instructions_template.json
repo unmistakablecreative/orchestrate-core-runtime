@@ -61,6 +61,17 @@
               "filename": "secondbrain.json"
             }
           }
+        },
+        {
+          "tool": "${SAFE_DOMAIN}__jit_plugin",
+          "action": "executeTask",
+          "params": {
+            "tool_name": "json_manager",
+            "action": "read_json_file",
+            "params": {
+              "filename": "unlock_nudges.json"
+            }
+          }
         }
       ],
       "display": [
