@@ -16,7 +16,7 @@
     "steps": {
       "step_1": {
         "title": "📂 Load Your Workspace",
-        "narration": "We’ll start by loading your workspace — tasks and saved items.\n\n🟢 You’ve also been given **3 free unlock credits**. That’s enough to unlock your first tool — no referrals needed. You can use them anytime to explore what Orchestrate can do.",
+        "narration": "We’ll start by loading your workspace — tasks and saved items.",
         "action": {
           "tool": "json_manager",
           "action": "read_json_file",
@@ -77,8 +77,15 @@
         "next": "step_5"
       },
       "step_5": {
-        "title": "⬇️ Use the Drop Zone",
-        "narration": "Now let’s explore your Drop Zone. It’s a special folder on your machine that Orchestrate watches for new files.\n\n🗂 You’ll find it at:\n**~/Documents/Orchestrate/dropzone**\n\nYou can drop **any text or markdown file** in there — tasks, notes, even old journals. I’ll scan and find them automatically.",
+        "title": "📥 Drop a File Into the Drop Zone",
+        "narration": "Let’s explore your **Drop Zone** — a special folder Orchestrate watches for new content.\n\n🗂 You’ll find it at:\n**~/Documents/Orchestrate/dropzone**\n\nYou can drop any `.txt` or `.md` file in there — tasks, old notes, journal entries, project outlines, even transcripts. Think of it like **Dropbox on steroids**.\n\n🔹 Orchestrate can **read and search** any file in this folder.\n🔹 But treat it as your **important workspace inbox**, not a junk drawer.\n\n📌 Please drop in at least one file before continuing — we’ll use it next.",
+        "prompt": "Let me know when you’ve dropped a file into your Drop Zone and we’ll continue.",
+        "requires_user_input": true,
+        "next": "step_6"
+      },
+      "step_6": {
+        "title": "🔍 Scan the Drop Zone",
+        "narration": "Great — now let’s scan the Drop Zone for what you’ve added.",
         "action": {
           "tool": "file_finder",
           "action": "search_files",
@@ -86,9 +93,9 @@
             "keyword": "*"
           }
         },
-        "next": "step_6"
+        "next": "step_7"
       },
-      "step_6": {
+      "step_7": {
         "title": "📖 Read a File",
         "narration": "Let’s open one of the files from your Drop Zone.",
         "action_template": {
@@ -98,9 +105,9 @@
             "filename": "{{found_file}}"
           }
         },
-        "next": "step_7"
+        "next": "step_8"
       },
-      "step_7": {
+      "step_8": {
         "title": "🧠 Save an Insight from the File",
         "narration": "Want to capture something from that file? I’ll log it instantly.",
         "prompt": "What insight do you want to save?",
@@ -117,9 +124,9 @@
           }
         },
         "requires_user_input": true,
-        "next": "step_8"
+        "next": "step_9"
       },
-      "step_8": {
+      "step_9": {
         "title": "🔮 Predict Your Future",
         "narration": "Let’s play MASH — the legendary game that predicts your future. You choose the options, and I’ll spin the wheel.",
         "prompt": "List 4 options for each: \n- Where you might live (e.g. Mansion, Apartment...)\n- What you might drive (e.g. Tesla, Bike...)\n- Dream jobs (e.g. Astronaut, DJ...)\n- Life partners (real or fictional)\n\nThen pick a number from 1–10 for the spin.",
@@ -137,9 +144,9 @@
           }
         },
         "requires_user_input": true,
-        "next": "step_9"
+        "next": "step_10"
       },
-      "step_9": {
+      "step_10": {
         "title": "🎁 Refer a Friend — Add to the System",
         "narration": "Want to refer someone? Just give me their name and email, and I’ll log it to `referrals.json` so they can be invited and both of you unlock tools.",
         "prompt": "Enter the name and email of the person you'd like to refer (e.g. John Smith, john@example.com):",
@@ -156,12 +163,19 @@
           }
         },
         "requires_user_input": true,
+        "next": "step_11"
+      },
+      "step_11": {
+        "title": "🪙 Unlock a New Tool",
+        "narration": "🎉 You’ve now completed your core setup.\n\n🟢 You’ve also been granted **3 unlock credits**.\n\nYou can use them to unlock tools like Outline Editor, Buffer Engine, Blog Assembler, and more — no referrals needed.",
+        "prompt": "Would you like to see what tools are available to unlock now?",
+        "requires_user_input": true,
         "next": "outro"
       }
     },
     "outro": {
       "title": "✅ You’re Set Up",
-      "narration": "You’ve created a task, saved a note, dropped in a file, captured insight, predicted your future, and referred someone. Your Orchestrate workspace is now live.",
+      "narration": "You’ve created a task, saved a note, added a file, captured insight, predicted your future, referred someone, and explored unlocks. Your Orchestrate workspace is now live.",
       "action": {
         "tool": "json_manager",
         "action": "list_json_entries",
