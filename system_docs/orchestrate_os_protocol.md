@@ -1,4 +1,8 @@
-Sure! Here's a revised version of the OrchestrateOS GPT Protocol, with the blog manifest section properly added:
+Absolutely. Here's the **fully revised `orchestrate_os_protocol.md`**, incorporating your updates to:
+
+* ✅ Blog assembly format
+* ✅ Universal Integrator curl command requirement
+* ✅ Correct Composer dispatch via `dispatcher`
 
 ---
 
@@ -21,8 +25,19 @@ This file is loaded at startup to define the core behavioral expectations, const
 
 ### 🎼 Composer Tool
 
-* ✅ Use: `create_composer_batch`, `add_composer_action`, `update_composer_action`, `dispatch_batch`
+* ✅ Use: `create_composer_batch`, `add_composer_action`, `update_composer_action`
 * ❌ **Cardinal Rule:** Never use `json_manager` to create or manipulate Composer batches.
+* ✅ All Composer batches must be dispatched using:
+
+  ```json
+  {
+    "tool_name": "dispatcher",
+    "action": "dispatch_batch",
+    "params": {
+      "filename": "your_batch.json"
+    }
+  }
+  ```
 * ✅ Always separate scaffolding vs. mutation batches.
 * ✅ Valid compositions require 3+ chained actions or reusable logic.
 * 🧠 Reference: `Orchestrate Composer Usage Guide` (doc ID: `d56c72cc-a3e4-4070-821f-1b9a24cdaa91`)
@@ -39,84 +54,93 @@ This file is loaded at startup to define the core behavioral expectations, const
 
 ---
 
+### 🔌 Universal Integrator
+
+* ✅ Always use explicit `curl` commands to call external APIs.
+* ❌ Never run CLI-style commands (e.g. `dropbox search`) — they will fail.
+* ✅ Embed credentials using secure placeholders where supported:
+
+  ```bash
+  "Authorization: Bearer {{dropbox_access_token}}"
+  ```
+* 🧠 Future versions may auto-inject known credentials from `credentials.json` if referenced properly.
+
+---
+
 ## 🔐 Credentials
 
 * All API and tool credentials are stored in `credentials.json`.
 * ✅ Modifications may **only** be made using the `system_settings.set_credential` tool.
 * ❌ Never attempt to directly create or edit `credentials.json` via `json_manager`.
-* Casing matters — tool scripts expect exact key match (e.g. `buffer_access_token` must be lowercase).
+* ✅ Credential keys must be lowercase (e.g. `twitter_access_token`, `buffer_access_token`) to match runtime script expectations.
+* ⚠️ Uppercase `.env` style keys are automatically normalized by `system_settings`.
 
 ---
 
 ## 📝 Memory Structure
 
-* Notes live in: `notes.json`.
-* Tasks and structured memory live in: `secondbrain.json`.
-* 🧠 Use `"tags": ["insight"]` for logged observations unless instructed otherwise.
-* ✅ Use `add_json_entry` to save concepts.
-* ❌ Do not create memory files manually.
+* Notes live in: `notes.json`
+* Tasks and structured memory live in: `secondbrain.json`
+* 🧠 Use `"tags": ["insight"]` for logged observations unless instructed otherwise
+* ✅ Use `add_json_entry` to save concepts
+* ❌ Do not create memory files manually
 
 ---
 
 ## 🧠 Blog Assembly Guidelines
 
-* Blog section drafts live in: `/blog_draft/`.
-* All blog manifests must be filled from `blog_manifest_template.json`.
+* Blog section drafts must exist under: `/blog_draft/`
 
-  * ✅ You may populate this.
-  * ❌ Do not create new manifest structures from scratch.
-* Image URLs must be **pre-generated** and hosted externally (e.g. GitHub).
-* Ephemeral image URLs (e.g. from Ideogram) may not be used in final posts.
-* ⚡ Full pipeline flows should be handled via Composer or dedicated producer scripts.
-* 🧠 The blog manifest should include the following key attributes:
+* ✅ All blog manifests must be individual JSON files named:
 
-  * **`title`**: The title of the blog post.
-  * **`author`**: The author’s name.
-  * **`date`**: Date when the draft is being written.
-  * **`content`**: A detailed and structured breakdown of the blog’s content, divided into sections (e.g. intro, body, conclusion).
-  * **`tags`**: Relevant tags or categories for the blog (e.g. "AI", "Orchestrate", "Tech News").
-  * **`image_urls`**: An array of links to pre-generated images that support the blog content.
-  * **`meta_description`**: A brief SEO-optimized description of the blog.
-* 🧠 Example Blog Manifest Structure (from `blog_manifest_template.json`):
+  ```
+  manifest_<slug>.json
+  ```
 
-  ```json
-  {
-    "title": "Understanding the Future of AI with OrchestrateOS",
-    "author": "John Doe",
-    "date": "2025-06-21",
-    "content": {
-      "sections": [
-        {
-          "header": "Introduction",
-          "body": "OrchestrateOS is a new operating system powered by AI, designed to streamline tasks and processes."
-        },
-        {
-          "header": "How OrchestrateOS Works",
-          "body": "It integrates multiple tools for code generation, memory storage, and real-time operations."
-        }
-      ]
-    },
-    "tags": ["AI", "OrchestrateOS", "Tech"],
-    "image_urls": ["https://example.com/image1.jpg", "https://example.com/image2.jpg"],
-    "meta_description": "Explore how OrchestrateOS is changing the AI landscape and streamlining complex operations."
+* ✅ The structure must consist of **flat keys per section**, each containing:
+
+```json
+{
+  "part1": {
+    "file": "your_section1.md",
+    "image_url": "https://yourdomain.com/images/image1.png"
+  },
+  "part2": {
+    "file": "your_section2.md",
+    "image_url": "https://yourdomain.com/images/image2.png"
   }
+}
+```
+
+* ❌ Do not wrap entries in an `"entries"` object
+* ❌ Do not use `title`, `author`, or `meta_description` keys — those are deprecated
+* ✅ Image URLs must be externally hosted and persistent
+* ❌ Never use Ideogram ephemeral image links in final compiled posts
+* ✅ Slug used to run assembly (e.g. `"gpt_demo_post"`) must exactly match the manifest filename (minus `manifest_`)
+* ✅ Output will be written to:
+
+  ```
+  /orchestrate_user/orchestrate_exports/markdown/compiled_<slug>.md
   ```
 
 ---
 
 ## ⚠️ Timing & Async Handling
 
-* Tools like `ideogram_tool` have async delays (\~10–15s per image).
-* ❌ Never include `ideogram_tool` inside Composer batch logic.
-* ✅ Generate images *before* post assembly, or outside the Composer system.
+* Tools like `ideogram_tool` may incur async delays (10–15s per image)
+* ❌ Never include `ideogram_tool` inside Composer batch logic
+* ✅ Generate images *before* post assembly or outside the Composer system
 
 ---
 
 ## 🔁 General Best Practices
 
-* Prefer natural language when instructing GPT behavior.
-* Use JSON strictly for params or payloads — not for behavioral logic.
-* Use templates wherever possible (e.g. `blog_manifest_template.json`, `code_blueprint.json`).
+* Prefer natural language when instructing GPT behavior
+* Use JSON strictly for `params` or payloads — not for behavioral logic
+* Use templates wherever possible:
+
+  * ✅ `blog_manifest_template.json`
+  * ✅ `code_blueprint.json`
 
 ---
 
@@ -128,3 +152,4 @@ This file is loaded at startup to define the core behavioral expectations, const
 
 ---
 
+Let me know when you want to drop this version into `orchestrate_os_protocol.md`.
