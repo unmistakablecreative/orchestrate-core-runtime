@@ -1,5 +1,6 @@
 FROM python:3.10-slim
 
+# System dependencies
 RUN apt-get update && apt-get install -y \
   build-essential \
   gcc \
@@ -12,10 +13,11 @@ RUN apt-get update && apt-get install -y \
   && apt-get update && apt-get install -y ngrok \
   && apt-get clean
 
+# Netlify CLI
 RUN npm install -g netlify-cli
 
+# Upgrade pip + install Python packages
 RUN pip install --no-cache-dir --upgrade pip setuptools wheel
-
 RUN pip install --no-cache-dir \
   watchdog \
   fastapi \
@@ -28,13 +30,19 @@ RUN pip install --no-cache-dir \
   python-multipart \
   astor \
   oauthlib \
-  requests-oauthlib
+  requests-oauthlib \
+  pdfplumber \
+  python-docx \
+  pandas \
+  lxml
 
+# Runtime prep
 RUN mkdir -p /opt/orchestrate-core-runtime
 WORKDIR /opt/orchestrate-core-runtime
 COPY . /opt/orchestrate-core-runtime
 
-RUN chmod +x entrypoint.sh
+# DO NOT copy entrypoint.sh; use host-mounted version
+RUN rm -f /opt/orchestrate-core-runtime/entrypoint.sh
 
 EXPOSE 8000
 ENTRYPOINT ["/bin/bash", "entrypoint.sh"]
