@@ -2,12 +2,20 @@ import os
 import subprocess
 import json
 import argparse
-from system_settings import load_credential
 
-GITHUB_TOKEN = load_credential("github_token")
-if GITHUB_TOKEN:
-    os.environ["GITHUB_TOKEN"] = GITHUB_TOKEN
+# === Load GitHub token from local credentials.json ===
+SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
+CREDENTIAL_PATH = os.path.join(SCRIPT_DIR, "credentials.json")
 
+def load_credential(key):
+    try:
+        with open(CREDENTIAL_PATH, "r") as f:
+            data = json.load(f)
+            return data.get(key)
+    except Exception:
+        return None
+
+GITHUB_TOKEN = load_credential("github_access_token")
 
 # --- Core Functions ---
 
@@ -46,13 +54,31 @@ def commit(path, message):
     except subprocess.CalledProcessError as e:
         return {"status": "error", "message": str(e)}
 
+def patch_remote_url(path):
+    if not GITHUB_TOKEN:
+        return {"status": "error", "message": "❌ GitHub token not found in credentials."}
+    
+    try:
+        result = subprocess.run(["git", "remote", "get-url", "origin"], cwd=path, capture_output=True, text=True, check=True)
+        url = result.stdout.strip()
+        if "@" not in url:
+            patched_url = url.replace("https://", f"https://{GITHUB_TOKEN}@")
+            subprocess.run(["git", "remote", "set-url", "origin", patched_url], cwd=path, check=True)
+        return {"status": "success"}
+    except subprocess.CalledProcessError as e:
+        return {"status": "error", "message": f"❌ Failed to patch remote URL: {str(e)}"}
+
 def push(path, branch):
     if not os.path.isdir(path):
         return {"status": "error", "message": f"❌ Invalid repo path: {path}"}
     
+    patch_result = patch_remote_url(path)
+    if patch_result["status"] != "success":
+        return patch_result
+
     branch = branch or "main"
     try:
-        subprocess.run(["git", "push", "origin", branch], cwd=path, check=True)
+        subprocess.run(["git", "push", "-u", "origin", branch], cwd=path, check=True)
         return {"status": "success", "message": f"✅ Pushed to {branch}"}
     except subprocess.CalledProcessError as e:
         return {"status": "error", "message": str(e)}
@@ -101,7 +127,6 @@ def archive_repo(path):
 
 # --- Action Router ---
 if __name__ == "__main__":
-    import argparse, json
     parser = argparse.ArgumentParser()
     parser.add_argument("action")
     parser.add_argument("--params")
