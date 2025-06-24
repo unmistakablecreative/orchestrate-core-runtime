@@ -1,6 +1,6 @@
 FROM python:3.10-slim
 
-# System dependencies
+# Install system packages
 RUN apt-get update && apt-get install -y \
   build-essential \
   gcc \
@@ -14,13 +14,13 @@ RUN apt-get update && apt-get install -y \
   && apt-get update && apt-get install -y ngrok \
   && apt-get clean
 
-# Install Netlify CLI globally
+# Install Netlify CLI
 RUN npm install -g netlify-cli
 
 # Upgrade pip
 RUN pip install --no-cache-dir --upgrade pip setuptools wheel
 
-# Python packages (new + existing)
+# Python packages (original + new)
 RUN pip install --no-cache-dir \
   watchdog \
   fastapi \
@@ -39,13 +39,15 @@ RUN pip install --no-cache-dir \
   pandas \
   lxml
 
-# Runtime directory
+# Prepare runtime
 RUN mkdir -p /opt/orchestrate-core-runtime
 WORKDIR /opt/orchestrate-core-runtime
 COPY . /opt/orchestrate-core-runtime
 
-# Make entrypoint executable
+# Set executable permissions
 RUN chmod +x entrypoint.sh
 
 EXPOSE 8000
+
+# Keep the original entrypoint path
 ENTRYPOINT ["/bin/bash", "entrypoint.sh"]
