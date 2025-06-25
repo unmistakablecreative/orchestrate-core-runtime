@@ -52,22 +52,15 @@ def write_article_to_file(filename):
 
 
 
+
 def main(params):
     action = params.get("action")
-    filename = params.get("filename")
-
-    if action == "create":
-        return create_article_blueprint(filename)
-    elif action == "add":
-        return add_blog_section(filename, params["section_id"], params["text"], params["image_url"])
-    elif action == "assemble":
-        return assemble_article(filename)
-    elif action == "write":
-        return write_article_to_file(filename)
+    if action in action_map:
+        return action_map[action](**params)
     else:
         return {"status": "error", "message": f"Unknown action '{action}'"}
 
-# ➕ Required for Orchestrate dispatch to work
+# ➕ Required for Orchestrate dispatch and CLI
 action_map = {
     "create_article_blueprint": create_article_blueprint,
     "add_blog_section": add_blog_section,
