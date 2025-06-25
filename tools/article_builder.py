@@ -51,6 +51,7 @@ def write_article_to_file(filename):
     return {"status": "success", "path": output_path}
 
 
+
 def main(params):
     action = params.get("action")
     filename = params.get("filename")
@@ -66,6 +67,13 @@ def main(params):
     else:
         return {"status": "error", "message": f"Unknown action '{action}'"}
 
+# ➕ Required for Orchestrate dispatch to work
+action_map = {
+    "create_article_blueprint": create_article_blueprint,
+    "add_blog_section": add_blog_section,
+    "assemble_article": assemble_article,
+    "write_article_to_file": write_article_to_file
+}
 
 def cli():
     import argparse, json
