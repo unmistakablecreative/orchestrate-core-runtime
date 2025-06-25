@@ -52,9 +52,8 @@ def write_article_to_file(filename):
 
 
 
-
 def main(params):
-    action = params.get("action")
+    action = params.pop("action", None)  # ✅ Strip 'action' before dispatch
     if action in action_map:
         return action_map[action](**params)
     else:
@@ -87,3 +86,6 @@ def cli():
 
 if __name__ == "__main__":
     cli()
+
+
+
