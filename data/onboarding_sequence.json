@@ -78,14 +78,14 @@
       },
       "step_5": {
         "title": "📥 Drop a File Into the Drop Zone",
-        "narration": "Let’s explore your **Drop Zone** — a special folder Orchestrate watches for new content.\n\n🗂 You’ll find it at:\n**~/Documents/Orchestrate/dropzone**\n\nYou can drop any `.txt` or `.md` file in there — tasks, old notes, journal entries, project outlines, even transcripts. Think of it like **Dropbox on steroids**.\n\n🔹 Orchestrate can **read and search** any file in this folder.\n🔹 But treat it as your **important workspace inbox**, not a junk drawer.\n\n📌 Please drop in at least one file before continuing — we’ll use it next.",
-        "prompt": "Let me know when you’ve dropped a file into your Drop Zone and we’ll continue.",
+        "narration": "Let’s explore the **Drop Zone** — one of the most powerful parts of Orchestrate.\n\n🧠 It’s not just a folder — it’s a live capture stream.\n\n🗂 You’ll find it here:\n**~/Documents/Orchestrate/dropzone**\n\nYou can drop in:\n- `.txt`, `.md`, `.docx` — notes, outlines, transcripts\n- `.pdf` — research papers, scanned docs\n- `.csv`, `.tsv` — tables, datasets, form exports\n- `.json`, `.log`, `.config` — structured app data\n\n📡 Orchestrate will watch this folder and auto-index, scan, and prep anything you drop in — across multiple tools.\n\n🧩 Think of it like a **real-time API input** for your brain.\n\n📌 Drop in **any file you want to work with**, then let me know when you're ready.",
+        "prompt": "Say 'ready' once you’ve dropped something in — we’ll use it next.",
         "requires_user_input": true,
         "next": "step_6"
       },
       "step_6": {
-        "title": "🔍 Scan the Drop Zone",
-        "narration": "Great — now let’s scan the Drop Zone for what you’ve added.",
+        "title": "🔍 Scan & Index the Drop Zone",
+        "narration": "Now let’s scan the Drop Zone and index what you’ve added.\n\n🧠 This builds a live map of your file inbox — so you can read, tag, extract, or reuse anything in seconds.",
         "action": {
           "tool": "file_finder",
           "action": "search_files",
@@ -96,8 +96,8 @@
         "next": "step_7"
       },
       "step_7": {
-        "title": "📖 Read a File",
-        "narration": "Let’s open one of the files from your Drop Zone.",
+        "title": "📖 Smart File Handling",
+        "narration": "Pick a file to open — Orchestrate will route it to the right tool based on type:\n\n- `.pdf` → auto-text extraction\n- `.csv` → table parsing\n- `.txt/.md` → open and editable\n- `.json` → searchable and storable\n\nLet’s open one now.",
         "action_template": {
           "tool": "read_file",
           "action": "read_file",
