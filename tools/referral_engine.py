@@ -43,14 +43,21 @@ def build_and_deploy_zip(referrer_id, name, email):
             shutil.copy2(src, dest)
 
     identity_path = '/container_state/system_identity.json'
-    user_id = "unknown"
+
+    # Default fallback
+    user_id = referrer_id  # use referral key as fallback ID
+
     if os.path.exists(identity_path):
-        with open(identity_path) as idf:
-            try:
+        try:
+            with open(identity_path) as idf:
                 identity = json.load(idf)
-                user_id = identity.get("user_id", "unknown")
-            except Exception as e:
-                print(f"⚠️ Failed to read system identity: {e}")
+                loaded_id = identity.get("user_id")
+                if loaded_id and loaded_id.lower() != "unknown":
+                    user_id = loaded_id
+                else:
+                    print(f"⚠️ system_identity.json returned empty or 'unknown' — falling back to referral key: {referrer_id}")
+        except Exception as e:
+            print(f"⚠️ Failed to read system identity: {e} — using fallback ID: {referrer_id}")
 
     with open(os.path.join(TEMP_DIR, 'referrer.txt'), 'w') as f:
         f.write(user_id)
@@ -68,6 +75,7 @@ def build_and_deploy_zip(referrer_id, name, email):
     os.chdir(OUTPUT_DIR)
     deploy_cmd = [
         "/usr/local/bin/netlify", "deploy",
+        "--auth", os.environ.get("NETLIFY_AUTH_TOKEN", ""),
         "--dir=.", "--prod",
         "--message", f"referral_{referrer_id}",
         "--site", NETLIFY_SITE
@@ -102,6 +110,9 @@ def build_and_deploy_zip(referrer_id, name, email):
             print(f"❌ Exception sending webhook: {e}")
     else:
         print("❌ Netlify deploy failed.")
+
+
+
 
 
 class ReferralHandler(FileSystemEventHandler):
