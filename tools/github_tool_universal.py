@@ -6,6 +6,7 @@ from typing import List
 
 # === Load GitHub token ===
 CREDENTIAL_PATH = os.path.join(os.path.dirname(__file__), "credentials.json")
+
 def load_credential(key):
     try:
         with open(CREDENTIAL_PATH, "r") as f:
@@ -15,60 +16,63 @@ def load_credential(key):
 
 GITHUB_TOKEN = load_credential("github_access_token")
 
-# === Git Functions ===
+# === Helper Functions ===
+
+def run_git(command: List[str], path: str):
+    try:
+        result = subprocess.run(command, cwd=path, capture_output=True, text=True, check=True)
+        return {"status": "success", "output": result.stdout.strip()}
+    except subprocess.CalledProcessError as e:
+        return {
+            "status": "error",
+            "message": e.stderr.strip() or str(e),
+            "command": " ".join(command)
+        }
+
+def ensure_git_identity(path: str):
+    subprocess.run(["git", "config", "user.name", "unmistakablecreative"], cwd=path)
+    subprocess.run(["git", "config", "user.email", "srini@unmistakablemedia.com"], cwd=path)
+
+# === Git Actions ===
 
 def clone_repo(url, path):
-    try:
-        subprocess.run(["git", "clone", url, path], check=True)
-        return {"status": "success", "message": f"✅ Cloned to {path}"}
-    except subprocess.CalledProcessError as e:
-        return {"status": "error", "message": f"❌ Clone failed: {str(e)}"}
+    return run_git(["git", "clone", url, path], ".")
 
 def init_repo(path):
     os.makedirs(path, exist_ok=True)
-    try:
-        subprocess.run(["git", "init"], cwd=path, check=True)
-        return {"status": "success", "message": f"✅ Initialized Git repo at {path}"}
-    except subprocess.CalledProcessError as e:
-        return {"status": "error", "message": f"❌ Init failed: {str(e)}"}
+    result = run_git(["git", "init"], path)
+    ensure_git_identity(path)
+    return result
 
 def set_remote(path, url):
-    try:
-        subprocess.run(["git", "remote", "add", "origin", url], cwd=path, check=True)
-        return {"status": "success", "message": f"🔗 Remote set to {url}"}
-    except subprocess.CalledProcessError as e:
-        return {"status": "error", "message": f"❌ Remote config failed: {str(e)}"}
+    return run_git(["git", "remote", "add", "origin", url], path)
 
 def add_files(path, files: List[str]):
-    try:
-        subprocess.run(["git", "add"] + files, cwd=path, check=True)
-        return {"status": "success", "message": f"✅ Added files to staging."}
-    except subprocess.CalledProcessError as e:
-        return {"status": "error", "message": f"❌ git add failed: {str(e)}"}
+    return run_git(["git", "add"] + files, path)
 
 def commit_repo(path, message):
-    try:
-        subprocess.run(["git", "commit", "-m", message], cwd=path, check=True)
-        return {"status": "success", "message": f"✅ Commit successful."}
-    except subprocess.CalledProcessError as e:
-        return {"status": "error", "message": f"❌ Commit failed: {str(e)}"}
+    ensure_git_identity(path)
+    return run_git(["git", "commit", "-m", message], path)
 
 def push_repo(path, branch="main"):
-    patch = patch_remote_token(path)
-    if patch["status"] != "success":
-        return patch
-    try:
-        subprocess.run(["git", "push", "-u", "origin", branch], cwd=path, check=True)
-        return {"status": "success", "message": f"✅ Pushed to {branch}"}
-    except subprocess.CalledProcessError as e:
-        return {"status": "error", "message": f"❌ Push failed: {str(e)}"}
+    ensure_git_identity(path)
+
+    # Ensure main branch exists
+    branch_check = run_git(["git", "rev-parse", "--verify", branch], path)
+    if branch_check["status"] == "error":
+        created = run_git(["git", "checkout", "-b", branch], path)
+        if created["status"] != "success":
+            return created
+
+    # Patch token into remote
+    patched = patch_remote_token(path)
+    if patched["status"] != "success":
+        return patched
+
+    return run_git(["git", "push", "-u", "origin", branch], path)
 
 def pull_repo(path, branch="main"):
-    try:
-        subprocess.run(["git", "pull", "origin", branch], cwd=path, check=True)
-        return {"status": "success", "message": f"✅ Pulled from {branch}"}
-    except subprocess.CalledProcessError as e:
-        return {"status": "error", "message": f"❌ Pull failed: {str(e)}"}
+    return run_git(["git", "pull", "origin", branch], path)
 
 def patch_remote_token(path):
     if not GITHUB_TOKEN:
@@ -78,7 +82,7 @@ def patch_remote_token(path):
         url = result.stdout.strip()
         if "@" not in url:
             authed = url.replace("https://", f"https://{GITHUB_TOKEN}@")
-            subprocess.run(["git", "remote", "set-url", "origin", authed], cwd=path, check=True)
+            subprocess.run(["git", "remote", "set-url", "origin", authed], cwd=path)
         return {"status": "success"}
     except subprocess.CalledProcessError as e:
         return {"status": "error", "message": f"❌ Failed to patch token: {str(e)}"}
@@ -93,10 +97,10 @@ def list_repos(root="./projects"):
                 "path": dirpath,
                 "branch": branch.stdout.strip() if branch.returncode == 0 else "unknown"
             })
-            dirnames[:] = []  # Don't recurse further
+            dirnames[:] = []  # Avoid recursion
     return {"status": "success", "repos": entries}
 
-# === Dispatch ===
+# === Dispatcher ===
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
