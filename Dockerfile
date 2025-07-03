@@ -28,4 +28,4 @@ RUN mkdir -p /opt/orchestrate-core-runtime
 WORKDIR /opt/orchestrate-core-runtime
 
 # Entry handled externally
-ENTRYPOINT ["/bin/bash", "/app/entrypoint.sh"]
+ENTRYPOINT ["/bin/bash", "/opt/orchestrate-core-runtime/entrypoint.sh"]
