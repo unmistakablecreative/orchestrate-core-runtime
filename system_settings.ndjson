@@ -108,3 +108,5 @@
 {"tool": "terminal", "action": "stream", "script_path": "tools/terminal.py", "params": ["command"], "example": {"tool_name": "terminal", "action": "stream", "params": {"command": "ping google.com"}}}
 {"tool": "terminal", "action": "tail", "script_path": "tools/terminal.py", "params": ["command", "n"], "example": {"tool_name": "terminal", "action": "tail", "params": {"command": "cat log.txt", "n": 10}}}
 {"tool": "universal_integrator", "action": "run_terminal_command", "script_path": "tools/universal_integrator.py", "params": ["command"], "example": {"tool_name": "universal_integrator", "action": "run_terminal_command", "params": {"command": "echo Hello World"}}}
+{"tool": "unlock_tool", "action": "unlock_tool", "script_path": "tools/unlock_tool.py", "params": ["tool_name"]}
+
