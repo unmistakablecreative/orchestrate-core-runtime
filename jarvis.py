@@ -2,6 +2,8 @@ from fastapi import FastAPI, HTTPException, Request
 from fastapi.responses import JSONResponse
 from datetime import datetime
 import subprocess, json, os, logging
+from fastapi.staticfiles import StaticFiles
+
 
 # === BASE DIR ===
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -21,6 +23,9 @@ EXEC_HUB_PATH = f"{BASE_DIR}/execution_hub.py"
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 
+## Mount for URL Access to Dropzone
+DROPZONE_DIR = "/orchestrate_user/dropzone"
+app.mount("/dropzone", StaticFiles(directory=DROPZONE_DIR), name="dropzone")
 
 # === Repo Sync + Registry Merge ===
 def sync_repo_and_merge_registry():
