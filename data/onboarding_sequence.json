@@ -105,6 +105,18 @@
             "filename": "{{found_file}}"
           }
         },
+        "next": "step_7b"
+      },
+      "step_7b": {
+        "title": "🖼️ View an Image from the Drop Zone",
+        "narration": "Want to see something cool? Drop a `.png` or `.jpg` into the **dropzone**, and I’ll render it right here.\n\n🔗 Just give me the filename (e.g. `punchout.png`).",
+        "prompt": "What image filename should I render?",
+        "requires_user_input": true,
+        "next": "step_7c"
+      },
+      "step_7c": {
+        "title": "🌐 Live Image Preview",
+        "narration": "Here’s your image, pulled directly from the Drop Zone.\n\n📸 You can access it using this URL format:\n\n```\nhttps://grossly-guiding-elk.ngrok-free.app/dropzone/{{user_input}}\n```\n\nAnd in Markdown:\n\n```\n![Your Image](https://grossly-guiding-elk.ngrok-free.app/dropzone/{{user_input}})\n```\n\n👇 Rendered here:\n\n![User Image](https://grossly-guiding-elk.ngrok-free.app/dropzone/{{user_input}})\n\nAny `.png` or `.jpg` file dropped in is instantly viewable like this.",
         "next": "step_8"
       },
       "step_8": {
