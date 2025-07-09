@@ -1,5 +1,5 @@
 {"tool": "json_manager", "action": "__tool__", "script_path": "tools/json_manager.py", "locked": false, "referral_unlock_cost": 0, "description": "Save and manage tasks, notes, ideas, or any other structured info across your workspace."}
-{"tool": "system_settings", "action": "__tool__", "script_path": "tools/system_settings.py", "locked": false, "referral_unlock_cost": 0, "description": "Manage core config — tools, memory files, routing, and credentials."}\
+{"tool": "system_settings", "action": "__tool__", "script_path": "tools/system_settings.py", "locked": false, "referral_unlock_cost": 0, "description": "Manage core config — tools, memory files, routing, and credentials."}
 {"tool": "file_ops_tool", "action": "__tool__", "script_path": "tools/file_ops_tool.py", "locked": false, "referral_unlock_cost": 0, "description": "Move, rename, or resolve container-local files across Orchestrate volumes."}
 {"tool": "read_file", "action": "__tool__", "script_path": "tools/read_file.py", "locked": false, "referral_unlock_cost": 0, "description": "Open and display the full contents of any local file."}
 {"tool": "file_finder", "action": "__tool__", "script_path": "tools/file_finder.py", "locked": false, "referral_unlock_cost": 0, "description": "Quickly locate any file using smart search — no path needed."}
