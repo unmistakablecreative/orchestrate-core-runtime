@@ -59,6 +59,14 @@ def main(params=None):
         print(result)
     except Exception as e:
         print(f"❌ Error during '{action}': {e}")
-
+        
 if __name__ == "__main__":
-    main()
+    import sys
+    import json
+    try:
+        # Attempt to read from stdin
+        raw = sys.stdin.read()
+        params = json.loads(raw)
+        main(params)
+    except Exception as e:
+        print(f"❌ No params passed to main(). This script must be run via Orchestrate. {e}")
