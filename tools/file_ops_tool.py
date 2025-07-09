@@ -1,8 +1,8 @@
 import os
 import shutil
-import argparse
+import json
+import sys
 
-# --- Search Paths ---
 SEARCH_DIRS = [
     "/orchestrate_user/dropzone",
     "/orchestrate_user/vault/watch_books",
@@ -13,7 +13,7 @@ SEARCH_DIRS = [
     "/app"
 ]
 
-# --- Core Utilities ---
+# --- Core Functions ---
 def resolve_path(filename):
     for dir in SEARCH_DIRS:
         full_path = os.path.join(dir, filename)
@@ -21,47 +21,45 @@ def resolve_path(filename):
             return full_path
     raise FileNotFoundError(f"'{filename}' not found in any configured search path.")
 
-def read_file(filename):
-    path = resolve_path(filename)
+def read_file(params):
+    path = resolve_path(params["filename"])
     with open(path, 'r', encoding='utf-8') as f:
         return f.read()
 
-def rename_file(filename, new_name):
-    path = resolve_path(filename)
-    dest_path = os.path.join(os.path.dirname(path), new_name)
+def rename_file(params):
+    path = resolve_path(params["filename"])
+    dest_path = os.path.join(os.path.dirname(path), params["new_name"])
     os.rename(path, dest_path)
-    return f"✅ Renamed '{filename}' to '{new_name}'"
+    return f"✅ Renamed '{params['filename']}' to '{params['new_name']}'"
 
-def move_file(filename, destination_dir):
-    path = resolve_path(filename)
-    os.makedirs(destination_dir, exist_ok=True)
-    dest_path = os.path.join(destination_dir, os.path.basename(path))
+def move_file(params):
+    path = resolve_path(params["filename"])
+    os.makedirs(params["destination_dir"], exist_ok=True)
+    dest_path = os.path.join(params["destination_dir"], os.path.basename(path))
     shutil.move(path, dest_path)
-    return f"✅ Moved '{filename}' to '{destination_dir}'"
+    return f"✅ Moved '{params['filename']}' to '{params['destination_dir']}'"
+
+# --- Action Map ---
+ACTION_MAP = {
+    "read_file": read_file,
+    "rename_file": rename_file,
+    "move_file": move_file,
+    "resolve_path": lambda params: resolve_path(params["filename"]),
+}
+
+def main(params=None):
+    if params is None:
+        params = json.loads(sys.stdin.read())
+    action = params.get("action")
+    if action not in ACTION_MAP:
+        print(f"❌ Unknown action: {action}")
+        return
+    try:
+        result = ACTION_MAP[action](params)
+        print(result)
+    except Exception as e:
+        print(f"❌ Error during '{action}': {e}")
 
 # --- Entrypoint ---
-def main():
-    parser = argparse.ArgumentParser()
-    parser.add_argument("--key", required=True)
-    parser.add_argument("--filename")
-    parser.add_argument("--new_name")
-    parser.add_argument("--destination_dir")
-    args = parser.parse_args()
-
-    dispatch = {
-        "resolve_path": lambda: resolve_path(args.filename),
-        "read_file": lambda: read_file(args.filename),
-        "rename_file": lambda: rename_file(args.filename, args.new_name),
-        "move_file": lambda: move_file(args.filename, args.destination_dir),
-    }
-
-    try:
-        action = dispatch[args.key]()
-        print(action)
-    except KeyError:
-        print(f"❌ Unknown key: {args.key}")
-    except Exception as e:
-        print(f"❌ Error: {e}")
-
 if __name__ == "__main__":
     main()
