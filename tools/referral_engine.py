@@ -15,6 +15,7 @@ OUTPUT_DIR = '/opt/orchestrate-core-runtime/app'
 WATCH_PATH = '/opt/orchestrate-core-runtime/data'
 NETLIFY_SITE = '36144ab8-5036-40bf-837e-c678a5da2be0'  # Netlify Site ID
 
+
 def build_and_deploy_zip(referrer_id, name, email):
     import requests
 
@@ -38,14 +39,14 @@ def build_and_deploy_zip(referrer_id, name, email):
         src = os.path.join(BASE_DIR, file)
         dest = os.path.join(TEMP_DIR, file)
         if os.path.isdir(src):
+            if os.path.exists(dest):
+                shutil.rmtree(dest)
             shutil.copytree(src, dest)
         else:
             shutil.copy2(src, dest)
 
     identity_path = '/container_state/system_identity.json'
-
-    # Default fallback
-    user_id = referrer_id  # use referral key as fallback ID
+    user_id = referrer_id  # fallback if identity file missing
 
     if os.path.exists(identity_path):
         try:
@@ -110,8 +111,6 @@ def build_and_deploy_zip(referrer_id, name, email):
             print(f"❌ Exception sending webhook: {e}")
     else:
         print("❌ Netlify deploy failed.")
-
-
 
 
 
