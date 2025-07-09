@@ -1,5 +1,6 @@
 {"tool": "json_manager", "action": "__tool__", "script_path": "tools/json_manager.py", "locked": false, "referral_unlock_cost": 0, "description": "Save and manage tasks, notes, ideas, or any other structured info across your workspace."}
-{"tool": "system_settings", "action": "__tool__", "script_path": "tools/system_settings.py", "locked": false, "referral_unlock_cost": 0, "description": "Manage core config — tools, memory files, routing, and credentials."}
+{"tool": "system_settings", "action": "__tool__", "script_path": "tools/system_settings.py", "locked": false, "referral_unlock_cost": 0, "description": "Manage core config — tools, memory files, routing, and credentials."}\
+{"tool": "file_ops_tool", "action": "__tool__", "script_path": "tools/file_ops_tool.py", "locked": false, "referral_unlock_cost": 0, "description": "Move, rename, or resolve container-local files across Orchestrate volumes."}
 {"tool": "read_file", "action": "__tool__", "script_path": "tools/read_file.py", "locked": false, "referral_unlock_cost": 0, "description": "Open and display the full contents of any local file."}
 {"tool": "file_finder", "action": "__tool__", "script_path": "tools/file_finder.py", "locked": false, "referral_unlock_cost": 0, "description": "Quickly locate any file using smart search — no path needed."}
 {"tool": "dispatcher", "action": "__tool__", "script_path": "tools/orchestrate_dispatcher.py", "locked": false, "referral_unlock_cost": 0, "description": "Execute composer batches or multi-action workflows on demand."}
@@ -112,4 +113,7 @@
 {"tool": "terminal", "action": "tail", "script_path": "tools/terminal.py", "params": ["command", "n"], "example": {"tool_name": "terminal", "action": "tail", "params": {"command": "cat log.txt", "n": 10}}}
 {"tool": "universal_integrator", "action": "run_terminal_command", "script_path": "tools/universal_integrator.py", "params": ["command"], "example": {"tool_name": "universal_integrator", "action": "run_terminal_command", "params": {"command": "echo Hello World"}}}
 {"tool": "unlock_tool", "action": "unlock_tool", "script_path": "tools/unlock_tool.py", "params": ["tool_name"]}
+{"tool": "file_ops_tool", "action": "read_file", "script_path": "tools/file_ops_tool.py", "params": ["filename"]}
+{"tool": "file_ops_tool", "action": "rename_file", "script_path": "tools/file_ops_tool.py", "params": ["filename", "new_name"]}
+{"tool": "file_ops_tool", "action": "move_file", "script_path": "tools/file_ops_tool.py", "params": ["filename", "destination_dir"]}
 
