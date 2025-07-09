@@ -1,5 +1,7 @@
 import os
 import shutil
+import json
+import argparse
 
 SEARCH_DIRS = [
     "/orchestrate_user/dropzone",
@@ -19,48 +21,64 @@ def resolve_path(filename):
     raise FileNotFoundError(f"'{filename}' not found in any configured search path.")
 
 def read_file(params):
-    path = resolve_path(params["filename"])
-    with open(path, 'r', encoding='utf-8') as f:
-        return f.read()
+    try:
+        path = resolve_path(params["filename"])
+        with open(path, 'r', encoding='utf-8') as f:
+            return {
+                "status": "success",
+                "filename": os.path.basename(path),
+                "data": f.read()
+            }
+    except Exception as e:
+        return {"status": "error", "message": f"❌ Read error: {str(e)}"}
 
 def rename_file(params):
-    path = resolve_path(params["filename"])
-    dest_path = os.path.join(os.path.dirname(path), params["new_name"])
-    os.rename(path, dest_path)
-    return f"✅ Renamed '{params['filename']}' to '{params['new_name']}'"
+    try:
+        path = resolve_path(params["filename"])
+        dest_path = os.path.join(os.path.dirname(path), params["new_name"])
+        os.rename(path, dest_path)
+        return {
+            "status": "success",
+            "message": f"✅ Renamed '{params['filename']}' to '{params['new_name']}'"
+        }
+    except Exception as e:
+        return {"status": "error", "message": f"❌ Rename error: {str(e)}"}
 
 def move_file(params):
-    path = resolve_path(params["filename"])
-    os.makedirs(params["destination_dir"], exist_ok=True)
-    dest_path = os.path.join(params["destination_dir"], os.path.basename(path))
-    shutil.move(path, dest_path)
-    return f"✅ Moved '{params['filename']}' to '{params['destination_dir']}'"
-
-# --- Orchestrate Action Map ---
-ACTION_MAP = {
-    "read_file": read_file,
-    "rename_file": rename_file,
-    "move_file": move_file,
-    "resolve_path": lambda params: resolve_path(params["filename"]),
-}
-
-def main(params=None):
-    if params is None:
-        print("❌ No params passed to main().")
-        return
-    action = params.get("action")
-    if action not in ACTION_MAP:
-        print(f"❌ Unknown action: {action}")
-        return
     try:
-        result = ACTION_MAP[action](params)
-        if isinstance(result, (dict, list)):
-            import json
-            print(json.dumps(result))
-        else:
-            print(result)
+        path = resolve_path(params["filename"])
+        os.makedirs(params["destination_dir"], exist_ok=True)
+        dest_path = os.path.join(params["destination_dir"], os.path.basename(path))
+        shutil.move(path, dest_path)
+        return {
+            "status": "success",
+            "message": f"✅ Moved '{params['filename']}' to '{params['destination_dir']}'"
+        }
     except Exception as e:
-        print(f"❌ Error during '{action}': {e}")
+        return {"status": "error", "message": f"❌ Move error: {str(e)}"}
+
+def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument("action")
+    parser.add_argument("--params", type=str)
+    args = parser.parse_args()
+
+    try:
+        params = json.loads(args.params) if args.params else {}
+    except json.JSONDecodeError:
+        print(json.dumps({"status": "error", "message": "❌ Invalid JSON."}, indent=4))
+        return
+
+    if args.action == "read_file":
+        result = read_file(params)
+    elif args.action == "rename_file":
+        result = rename_file(params)
+    elif args.action == "move_file":
+        result = move_file(params)
+    else:
+        result = {"status": "error", "message": f"❌ Unknown action: {args.action}"}
+
+    print(json.dumps(result, indent=4))
 
 if __name__ == "__main__":
-    print("❌ This tool must be run by Orchestrate. CLI execution not supported.")
+    main()
