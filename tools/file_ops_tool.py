@@ -46,10 +46,10 @@ ACTION_MAP = {
     "move_file": move_file,
     "resolve_path": lambda params: resolve_path(params["filename"]),
 }
-
 def main(params=None):
     if params is None:
-        params = json.loads(sys.stdin.read())
+        print("❌ No params passed to main(). This script must be run via Orchestrate.")
+        return
     action = params.get("action")
     if action not in ACTION_MAP:
         print(f"❌ Unknown action: {action}")
@@ -60,6 +60,5 @@ def main(params=None):
     except Exception as e:
         print(f"❌ Error during '{action}': {e}")
 
-# --- Entrypoint ---
 if __name__ == "__main__":
     main()
