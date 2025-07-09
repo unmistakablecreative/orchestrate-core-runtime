@@ -1,7 +1,8 @@
 import os
 import shutil
+import argparse
 
-# --- Container-Aware Search Paths ---
+# --- Search Paths ---
 SEARCH_DIRS = [
     "/orchestrate_user/dropzone",
     "/orchestrate_user/vault/watch_books",
@@ -12,14 +13,13 @@ SEARCH_DIRS = [
     "/app"
 ]
 
-# --- Core Functions ---
-
+# --- Core Utilities ---
 def resolve_path(filename):
     for dir in SEARCH_DIRS:
         full_path = os.path.join(dir, filename)
         if os.path.exists(full_path):
             return full_path
-    raise FileNotFoundError(f"'{filename}' not found in container search paths.")
+    raise FileNotFoundError(f"'{filename}' not found in any configured search path.")
 
 def read_file(filename):
     path = resolve_path(filename)
@@ -39,27 +39,29 @@ def move_file(filename, destination_dir):
     shutil.move(path, dest_path)
     return f"✅ Moved '{filename}' to '{destination_dir}'"
 
-# --- CLI Entrypoint ---
-
+# --- Entrypoint ---
 def main():
-    import argparse
     parser = argparse.ArgumentParser()
     parser.add_argument("--key", required=True)
-    parser.add_argument("--destination_dir")
     parser.add_argument("--filename")
     parser.add_argument("--new_name")
+    parser.add_argument("--destination_dir")
     args = parser.parse_args()
 
-    if args.key == "resolve_path":
-        print(resolve_path(args.filename))
-    elif args.key == "read_file":
-        print(read_file(args.filename))
-    elif args.key == "rename_file":
-        print(rename_file(args.filename, args.new_name))
-    elif args.key == "move_file":
-        print(move_file(args.filename, args.destination_dir))
-    else:
+    dispatch = {
+        "resolve_path": lambda: resolve_path(args.filename),
+        "read_file": lambda: read_file(args.filename),
+        "rename_file": lambda: rename_file(args.filename, args.new_name),
+        "move_file": lambda: move_file(args.filename, args.destination_dir),
+    }
+
+    try:
+        action = dispatch[args.key]()
+        print(action)
+    except KeyError:
         print(f"❌ Unknown key: {args.key}")
+    except Exception as e:
+        print(f"❌ Error: {e}")
 
 if __name__ == "__main__":
     main()
