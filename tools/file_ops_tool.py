@@ -1,8 +1,7 @@
 import os
 import shutil
-import json
-import sys
 
+# --- Container-Aware Search Paths ---
 SEARCH_DIRS = [
     "/orchestrate_user/dropzone",
     "/orchestrate_user/vault/watch_books",
@@ -39,34 +38,25 @@ def move_file(params):
     shutil.move(path, dest_path)
     return f"✅ Moved '{params['filename']}' to '{params['destination_dir']}'"
 
-# --- Action Map ---
+# --- Orchestrate Action Map ---
 ACTION_MAP = {
     "read_file": read_file,
     "rename_file": rename_file,
     "move_file": move_file,
     "resolve_path": lambda params: resolve_path(params["filename"]),
 }
+
 def main(params=None):
     if params is None:
-        print("❌ No params passed to main(). This script must be run via Orchestrate.")
-        return
+        return "❌ No params passed to main(). This tool must be called via Orchestrate."
     action = params.get("action")
     if action not in ACTION_MAP:
-        print(f"❌ Unknown action: {action}")
-        return
+        return f"❌ Unknown action: {action}"
     try:
-        result = ACTION_MAP[action](params)
-        print(result)
+        return ACTION_MAP[action](params)
     except Exception as e:
-        print(f"❌ Error during '{action}': {e}")
-        
+        return f"❌ Error during '{action}': {e}"
+
+# --- No CLI entry ---
 if __name__ == "__main__":
-    import sys
-    import json
-    try:
-        # Attempt to read from stdin
-        raw = sys.stdin.read()
-        params = json.loads(raw)
-        main(params)
-    except Exception as e:
-        print(f"❌ No params passed to main(). This script must be run via Orchestrate. {e}")
+    print("❌ This tool must be run by Orchestrate with parameters. CLI execution not supported.")
