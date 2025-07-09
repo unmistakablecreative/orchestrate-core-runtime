@@ -1,7 +1,6 @@
 import os
 import shutil
 
-# --- Container-Aware Search Paths ---
 SEARCH_DIRS = [
     "/orchestrate_user/dropzone",
     "/orchestrate_user/vault/watch_books",
@@ -12,7 +11,6 @@ SEARCH_DIRS = [
     "/app"
 ]
 
-# --- Core Functions ---
 def resolve_path(filename):
     for dir in SEARCH_DIRS:
         full_path = os.path.join(dir, filename)
@@ -48,15 +46,21 @@ ACTION_MAP = {
 
 def main(params=None):
     if params is None:
-        return "❌ No params passed to main(). This tool must be called via Orchestrate."
+        print("❌ No params passed to main().")
+        return
     action = params.get("action")
     if action not in ACTION_MAP:
-        return f"❌ Unknown action: {action}"
+        print(f"❌ Unknown action: {action}")
+        return
     try:
-        return ACTION_MAP[action](params)
+        result = ACTION_MAP[action](params)
+        if isinstance(result, (dict, list)):
+            import json
+            print(json.dumps(result))
+        else:
+            print(result)
     except Exception as e:
-        return f"❌ Error during '{action}': {e}"
+        print(f"❌ Error during '{action}': {e}")
 
-# --- No CLI entry ---
 if __name__ == "__main__":
-    print("❌ This tool must be run by Orchestrate with parameters. CLI execution not supported.")
+    print("❌ This tool must be run by Orchestrate. CLI execution not supported.")
