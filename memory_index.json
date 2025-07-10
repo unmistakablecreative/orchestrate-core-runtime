@@ -1,6 +1,4 @@
-{
-  "entries": [
-    "data/master_template_index.json",
-    "data/Orchestrate System Constitution v1.md"
-  ]
-}
+[
+  "data/secondbrain.json",
+  "data/master_index.json"
+]
