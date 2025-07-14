@@ -9,10 +9,24 @@ class FileFinder:
         keyword = params.get('keyword', '').lower()
         matched_files = []
 
-        for filename in os.listdir(DROPZONE_DIR):
-            path = os.path.join(DROPZONE_DIR, filename)
+        dropzone_path = DROPZONE_DIR
+        if not os.path.isdir(dropzone_path):
+            return {
+                'status': 'error',
+                'message': f'❌ Dropzone not found at expected path: {dropzone_path}. Make sure it is mounted correctly.'
+            }
+
+        for filename in os.listdir(dropzone_path):
+            path = os.path.join(dropzone_path, filename)
             if not os.path.isfile(path):
                 continue
+
+            # Match by filename
+            if keyword in filename.lower():
+                matched_files.append(filename)
+                continue
+
+            # Match by file content (text files only)
             try:
                 with open(path, 'r', encoding='utf-8') as f:
                     content = f.read().lower()
@@ -27,6 +41,7 @@ class FileFinder:
         if action == 'search_files':
             return self.search_files(params)
         return {'status': 'error', 'message': '❌ Unsupported action'}
+
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
