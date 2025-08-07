@@ -1,10 +1,14 @@
+import os
 import sys
 import json
 import subprocess
-import os
+import argparse
+import pdfplumber
+import docx
+import pandas as pd
+from bs4 import BeautifulSoup
 
 DROPZONE_PATH = "/orchestrate_user/dropzone"
-
 
 def find_file(filename_fragment):
     result = subprocess.run(
@@ -14,7 +18,6 @@ def find_file(filename_fragment):
         text=True
     )
     matches = result.stdout.strip().splitlines()
-
     if matches:
         return {
             "match_count": len(matches),
@@ -27,46 +30,66 @@ def find_file(filename_fragment):
         }
 
 
-def read_file(filename_fragment):
-    result = find_file(filename_fragment)
-    if "selected" not in result:
-        return {"error": "File not found."}
+def extract_pdf(path):
+    try:
+        with pdfplumber.open(path) as pdf:
+            return '\n'.join(page.extract_text() or '' for page in pdf.pages)
+    except Exception as e:
+        return f"❌ PDF read error: {str(e)}"
 
-    path = result["selected"]
-    content = subprocess.run(
-        ['cat', path],
-        stdout=subprocess.PIPE,
-        stderr=subprocess.PIPE,
-        text=True
-    )
+def extract_docx(path):
+    try:
+        doc = docx.Document(path)
+        return '\n'.join([para.text for para in doc.paragraphs])
+    except Exception as e:
+        return f"❌ DOCX read error: {str(e)}"
+
+def extract_csv(path):
+    try:
+        df = pd.read_csv(path)
+        return df.to_string(index=False)
+    except Exception as e:
+        return f"❌ CSV read error: {str(e)}"
+
+def extract_html(path):
+    try:
+        with open(path, 'r', encoding='utf-8') as f:
+            soup = BeautifulSoup(f, 'html.parser')
+            return soup.get_text()
+    except Exception as e:
+        return f"❌ HTML read error: {str(e)}"
+
+def extract_text(path):
+    try:
+        with open(path, 'r', encoding='utf-8') as f:
+            return f.read()
+    except Exception as e:
+        return f"❌ Text read error: {str(e)}"
+
+def read_file(filename_fragment):
+    match = find_file(filename_fragment)
+    path = match.get("selected")
+    if not path:
+        return {"error": "No matching file found to read."}
+
+    ext = os.path.splitext(path)[1].lower()
+
+    if ext == '.pdf':
+        content = extract_pdf(path)
+    elif ext == '.docx':
+        content = extract_docx(path)
+    elif ext in ['.csv', '.tsv']:
+        content = extract_csv(path)
+    elif ext == '.html':
+        content = extract_html(path)
+    else:
+        content = extract_text(path)
+
     return {
         "filename": os.path.basename(path),
-        "content": content.stdout.strip()
+        "extension": ext,
+        "content": content
     }
-
-
-def rename_file(filename_fragment, new_name):
-    result = find_file(filename_fragment)
-    if "selected" not in result:
-        return {"error": "File not found."}
-
-    old_path = result["selected"]
-    new_path = os.path.join(os.path.dirname(old_path), new_name)
-    subprocess.run(['mv', old_path, new_path], check=True)
-    return {"renamed_from": os.path.basename(old_path), "renamed_to": new_name}
-
-
-def move_file(filename_fragment, destination_dir):
-    result = find_file(filename_fragment)
-    if "selected" not in result:
-        return {"error": "File not found."}
-
-    src = result["selected"]
-    os.makedirs(destination_dir, exist_ok=True)
-    dest = os.path.join(destination_dir, os.path.basename(src))
-    subprocess.run(['mv', src, dest], check=True)
-    return {"moved_file": os.path.basename(src), "destination": destination_dir}
-
 
 def main():
     try:
