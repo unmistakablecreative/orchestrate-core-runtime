@@ -1,4 +1,3 @@
-
 {
   "entries": {
     "meta": {
@@ -15,21 +14,198 @@
       "next": "step_1"
     },
     "steps": {
-      "step_1": { "title": "📂 Load Your Workspace", "narration": "We’ll start by loading your workspace — tasks and saved items.", "action": { "tool": "json_manager", "action": "read_json_file", "params": { "filename": "secondbrain.json" } }, "next": "step_2" },
-      "step_2": { "title": "✏️ Create Your First Task", "narration": "What’s something you need to remember or take action on? Let’s save your first task.", "prompt": "What task should I remember for you?", "action_template": { "tool": "json_manager", "action": "add_json_entry", "params": { "filename": "secondbrain.json", "entry_key": "user_task_1", "entry_data": { "title": "{{user_input}}", "status": "active" } } }, "requires_user_input": true, "next": "step_3" },
-      "step_3": { "title": "📓 Open Your Notes", "narration": "Your notes live here. I’ve already dropped in a few sample entries that explain how the notes system works — no setup required.", "action": { "tool": "json_manager", "action": "read_json_file", "params": { "filename": "notes.json" } }, "next": "step_4" },
-      "step_4": { "title": "🧠 Save Your First Note", "narration": "Let’s explore how notes work in Orchestrate. 🧠 Notes are your system-wide scratchpad — ideal for insights, ideas, or things you want to remember later. You don’t need to organize them manually — I’ll help you retrieve or connect them using tags and search.\n\nNow — what’s something you just realized or learned? I’ll save it as your first note.", "prompt": "Type any new idea you want to capture:", "action_template": { "tool": "json_manager", "action": "add_json_entry", "params": { "filename": "notes.json", "entry_key": "insight_1", "entry_data": { "title": "{{user_input}}", "tags": ["insight"] } } }, "requires_user_input": true, "next": "step_5" },
-      "step_5": { "title": "📥 Drop a File Into the Drop Zone", "narration": "Let’s explore the **Drop Zone** — your real-time file inbox. Drop any file into `~/Documents/Orchestrate/dropzone`, then say 'ready'.", "prompt": "Say 'ready' once you’ve dropped something in — we’ll use it next.", "requires_user_input": true, "next": "step_6" },
-      "step_6": { "title": "🔍 Scan & Index the Drop Zone", "narration": "Scanning for new files...", "action": { "tool": "file_finder", "action": "search_files", "params": { "keyword": "*" } }, "next": "step_7" },
-      "step_7": { "title": "📖 Smart File Handling", "narration": "Let’s open a file and route it automatically based on type.", "action_template": { "tool": "read_file", "action": "read_file", "params": { "filename": "{{found_file}}" } }, "next": "step_7b" },
-      "step_7b": { "title": "🖼️ View an Image from the Drop Zone", "narration": "Drop in a `.png` or `.jpg`, then give me the filename.", "prompt": "What image filename should I render?", "requires_user_input": true, "next": "step_7c" },
-      "step_7c": { "title": "🌐 Live Image Preview", "narration": "Here’s your image. Viewable at:\n\n`https://grossly-guiding-elk.ngrok-free.app/dropzone/{{user_input}}`", "next": "step_8" },
-      "step_8": { "title": "🧠 Save an Insight from the File", "narration": "What’s something you just learned or want to capture from that file?", "prompt": "What insight do you want to save?", "action_template": { "tool": "json_manager", "action": "add_json_entry", "params": { "filename": "notes.json", "entry_key": "insight_from_file", "entry_data": { "title": "{{user_input}}", "tags": ["insight"] } } }, "requires_user_input": true, "next": "step_9" },
-      "step_9": { "title": "🔮 Predict Your Future", "narration": "Play MASH — choose 4 options per category + a spin number (1–10).", "prompt": "List 4 each: homes, vehicles, careers, partners + a spin number.", "action_template": { "tool": "mash_tool", "action": "spin_game", "params": { "params": { "home": "{{user_input.home}}", "car": "{{user_input.car}}", "career": "{{user_input.career}}", "partner": "{{user_input.partner}}", "spin": "{{user_input.spin}}" } } }, "requires_user_input": true, "next": "step_10" },
-      "step_10": { "title": "🎁 Refer a Friend — Add to the System", "narration": "Want to refer someone and unlock tools for both of you?", "prompt": "Enter name and email (e.g. Alex Smith, alex@example.com):", "action_template": { "tool": "json_manager", "action": "add_json_entry", "params": { "filename": "referrals.json", "entry_key": "{{user_input.name | slug}}", "entry_data": { "name": "{{user_input.name}}", "email": "{{user_input.email}}" } } }, "requires_user_input": true, "next": "step_11" },
-      "step_11": { "title": "🪙 Unlock a New Tool", "narration": "You’ve earned 3 unlock credits. Use them to activate tools like Outline Editor, Blog Assembler, and more.", "prompt": "Want to see the tools you can unlock?", "requires_user_input": true, "next": "step_12" },
-      "step_12": { "title": "🧠 Build Working Memory", "narration": "Now let’s build your short-term memory map from `memory_index.json`.", "prompt": "Ready to load key files into working memory?", "requires_user_input": true, "action": { "tool": "system_settings", "action": "build_working_memory", "params": {} }, "next": "step_13" },
-      "step_13": { "title": "🗺 Teach Me a Phrase", "narration": "Want to say things like 'show me my tax docs' and have it *just work*?\n\nAdd a file to `master_index.json` and map the phrase in `orchestrate_intent_routes.json`. I’ll link it behind the scenes.", "prompt": "Want to try creating a custom phrase next?", "requires_user_input": true, "action": { "tool": "json_manager", "action": "read_json_file", "params": { "filename": "master_index.json" } }, "next": "outro" }
+      "step_1": {
+        "title": "📂 Load Your Workspace",
+        "narration": "We’ll start by loading your workspace — tasks and saved items.",
+        "action": {
+          "tool": "json_manager",
+          "action": "read_json_file",
+          "params": { "filename": "secondbrain.json" }
+        },
+        "next": "step_2"
+      },
+      "step_2": {
+        "title": "✏️ Create Your First Task",
+        "narration": "What’s something you need to remember or take action on? Let’s save your first task.",
+        "prompt": "What task should I remember for you?",
+        "action_template": {
+          "tool": "json_manager",
+          "action": "add_json_entry",
+          "params": {
+            "filename": "secondbrain.json",
+            "entry_key": "user_task_1",
+            "entry_data": {
+              "title": "{{user_input}}",
+              "status": "active"
+            }
+          }
+        },
+        "requires_user_input": true,
+        "next": "step_3"
+      },
+      "step_3": {
+        "title": "📓 Open Your Notes",
+        "narration": "Your notes live here. I’ve already dropped in a few sample entries that explain how the notes system works — no setup required.",
+        "action": {
+          "tool": "json_manager",
+          "action": "read_json_file",
+          "params": { "filename": "notes.json" }
+        },
+        "next": "step_4"
+      },
+      "step_4": {
+        "title": "🧠 Save Your First Note",
+        "narration": "Let’s explore how notes work in Orchestrate. 🧠 Notes are your system-wide scratchpad — ideal for insights, ideas, or things you want to remember later. You don’t need to organize them manually — I’ll help you retrieve or connect them using tags and search.\n\nNow — what’s something you just realized or learned? I’ll save it as your first note.",
+        "prompt": "Type any new idea you want to capture:",
+        "action_template": {
+          "tool": "json_manager",
+          "action": "add_json_entry",
+          "params": {
+            "filename": "notes.json",
+            "entry_key": "insight_1",
+            "entry_data": {
+              "title": "{{user_input}}",
+              "tags": ["insight"]
+            }
+          }
+        },
+        "requires_user_input": true,
+        "next": "step_5"
+      },
+      "step_5": {
+        "title": "📥 Drop a File Into the Drop Zone",
+        "narration": "Let’s explore the **Drop Zone** — your real-time file inbox. Drop any file into `~/Documents/Orchestrate/dropzone`, then say 'ready'.",
+        "prompt": "Say 'ready' once you’ve dropped something in — we’ll use it next.",
+        "requires_user_input": true,
+        "next": "step_6"
+      },
+      "step_6": {
+        "title": "🔍 Scan & Index the Drop Zone",
+        "narration": "Scanning for new files...",
+        "prompt": "Give me a partial filename or keyword from the file you dropped:",
+        "requires_user_input": true,
+        "action_template": {
+          "tool": "file_ops_tool",
+          "action": "find_file",
+          "params": {
+            "filename": "{{user_input}}"
+          }
+        },
+        "next": "step_7"
+      },
+      "step_7": {
+        "title": "📖 Smart File Handling",
+        "narration": "Let’s open a file and route it automatically based on type.",
+        "action_template": {
+          "tool": "file_ops_tool",
+          "action": "read_file",
+          "params": {
+            "filename": "{{user_input}}"
+          }
+        },
+        "next": "step_7b"
+      },
+      "step_7b": {
+        "title": "🖼️ View an Image from the Drop Zone",
+        "narration": "Drop in a `.png` or `.jpg`, then give me the filename.",
+        "prompt": "What image filename should I render?",
+        "requires_user_input": true,
+        "next": "step_7c"
+      },
+      "step_7c": {
+        "title": "🌐 Live Image Preview",
+        "narration": "Here’s your image. Viewable at:\n\n`https://grossly-guiding-elk.ngrok-free.app/dropzone/{{user_input}}`",
+        "next": "step_8"
+      },
+      "step_8": {
+        "title": "🧠 Save an Insight from the File",
+        "narration": "What’s something you just learned or want to capture from that file?",
+        "prompt": "What insight do you want to save?",
+        "action_template": {
+          "tool": "json_manager",
+          "action": "add_json_entry",
+          "params": {
+            "filename": "notes.json",
+            "entry_key": "insight_from_file",
+            "entry_data": {
+              "title": "{{user_input}}",
+              "tags": ["insight"]
+            }
+          }
+        },
+        "requires_user_input": true,
+        "next": "step_9"
+      },
+      "step_9": {
+        "title": "🔮 Predict Your Future",
+        "narration": "Play MASH — choose 4 options per category + a spin number (1–10).",
+        "prompt": "List 4 each: homes, vehicles, careers, partners + a spin number.",
+        "action_template": {
+          "tool": "mash_tool",
+          "action": "spin_game",
+          "params": {
+            "params": {
+              "home": "{{user_input.home}}",
+              "car": "{{user_input.car}}",
+              "career": "{{user_input.career}}",
+              "partner": "{{user_input.partner}}",
+              "spin": "{{user_input.spin}}"
+            }
+          }
+        },
+        "requires_user_input": true,
+        "next": "step_10"
+      },
+      "step_10": {
+        "title": "🎁 Refer a Friend — Add to the System",
+        "narration": "Want to refer someone and unlock tools for both of you?",
+        "prompt": "Enter name and email (e.g. Alex Smith, alex@example.com):",
+        "action_template": {
+          "tool": "json_manager",
+          "action": "add_json_entry",
+          "params": {
+            "filename": "referrals.json",
+            "entry_key": "{{user_input.name | slug}}",
+            "entry_data": {
+              "name": "{{user_input.name}}",
+              "email": "{{user_input.email}}"
+            }
+          }
+        },
+        "requires_user_input": true,
+        "next": "step_11"
+      },
+      "step_11": {
+        "title": "🪙 Unlock a New Tool",
+        "narration": "You’ve earned 3 unlock credits. Use them to activate tools like Outline Editor, Blog Assembler, and more.",
+        "prompt": "Want to see the tools you can unlock?",
+        "requires_user_input": true,
+        "next": "step_12"
+      },
+      "step_12": {
+        "title": "🧠 Build Working Memory",
+        "narration": "Now let’s build your short-term memory map from `memory_index.json`.",
+        "prompt": "Ready to load key files into working memory?",
+        "requires_user_input": true,
+        "action": {
+          "tool": "system_settings",
+          "action": "build_working_memory",
+          "params": {}
+        },
+        "next": "step_13"
+      },
+      "step_13": {
+        "title": "🗺 Teach Me a Phrase",
+        "narration": "Want to say things like 'show me my tax docs' and have it *just work*?\n\nAdd a file to `master_index.json` and map the phrase in `orchestrate_intent_routes.json`. I’ll link it behind the scenes.",
+        "prompt": "Want to try creating a custom phrase next?",
+        "requires_user_input": true,
+        "action": {
+          "tool": "json_manager",
+          "action": "read_json_file",
+          "params": { "filename": "master_index.json" }
+        },
+        "next": "outro"
+      }
     },
     "outro": {
       "title": "✅ You’re Set Up",
@@ -37,9 +213,7 @@
       "action": {
         "tool": "json_manager",
         "action": "list_json_entries",
-        "params": {
-          "filename": "secondbrain.json"
-        }
+        "params": { "filename": "secondbrain.json" }
       }
     }
   }
