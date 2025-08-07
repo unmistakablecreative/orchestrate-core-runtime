@@ -71,40 +71,26 @@ def move_file(filename_fragment, destination_dir):
 
 
 def main():
+    import sys
+    import json
     try:
-        if not sys.argv[1:] and not sys.stdin.isatty():
-            raw = sys.stdin.read()
-            data = json.loads(raw)
-            key = data.get("key")
-            filename = data.get("filename")
-            destination_dir = data.get("destination_dir")
-            new_name = data.get("new_name")
-        else:
-            import argparse
-            parser = argparse.ArgumentParser()
-            parser.add_argument("--key", required=True)
-            parser.add_argument("--filename")
-            parser.add_argument("--destination_dir")
-            parser.add_argument("--new_name")
-            args = parser.parse_args()
-            key = args.key
-            filename = args.filename
-            destination_dir = args.destination_dir
-            new_name = args.new_name
+        raw = sys.stdin.read()
+        data = json.loads(raw)
+        key = data.get("key")
+        filename = data.get("filename")
+        destination_dir = data.get("destination_dir")
+        new_name = data.get("new_name")
 
-        output = ""
         if key == "find_file":
-            output = find_file(filename)
+            print(find_file(filename))
         elif key == "read_file":
-            output = read_file(filename)
+            print(read_file(filename))
         elif key == "rename_file":
-            output = rename_file(filename, new_name)
+            print(rename_file(filename, new_name))
         elif key == "move_file":
-            output = move_file(filename, destination_dir)
+            print(move_file(filename, destination_dir))
         else:
-            output = json.dumps({"error": f"Unknown key: {key}"})
-
-        print(output)
+            print(json.dumps({"error": f"Unknown key: {key}"}))
 
     except Exception as e:
         print(json.dumps({"error": str(e)}))
