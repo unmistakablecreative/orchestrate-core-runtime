@@ -15,11 +15,6 @@
 {"tool": "terminal", "action": "__tool__", "script_path": "tools/terminal.py", "locked": true, "referral_unlock_cost": 14, "description": "Run safe shell commands, tail logs, or stream live output."}
 {"tool": "code_editor", "action": "__tool__", "script_path": "tools/code_editor.py", "locked": true, "referral_unlock_cost": 24, "description": "Create, modify, or patch Python-based tools and scripts."}
 {"tool": "universal_integrator", "action": "__tool__", "script_path": "tools/universal_integrator.py", "locked": true, "referral_unlock_cost": 32, "description": "Call any API or webhook — connect GPT to unsupported platforms."}
-
-
-
-
-
 {"tool": "article_builder_tool", "action": "add_blog_section", "script_path": "tools/article_builder.py", "params": ["filename", "section_id", "text", "image_url"], "example": {"tool_name": "article_builder_tool", "action": "add_blog_section", "params": {"filename": "demo_article.json", "section_id": "intro", "text": "Welcome to the blog.", "image_url": "https://example.com/cover.png"}}}
 {"tool": "article_builder_tool", "action": "assemble_article", "script_path": "tools/article_builder.py", "params": ["filename"], "example": {"tool_name": "article_builder_tool", "action": "assemble_article", "params": {"filename": "demo_article.json"}}}
 {"tool": "article_builder_tool", "action": "create_article_blueprint", "script_path": "tools/article_builder.py", "params": ["filename"], "example": {"tool_name": "article_builder_tool", "action": "create_article_blueprint", "params": {"filename": "demo_article.json"}}}
