@@ -113,7 +113,7 @@
 {"tool": "terminal", "action": "tail", "script_path": "tools/terminal.py", "params": ["command", "n"], "example": {"tool_name": "terminal", "action": "tail", "params": {"command": "cat log.txt", "n": 10}}}
 {"tool": "universal_integrator", "action": "run_terminal_command", "script_path": "tools/universal_integrator.py", "params": ["command"], "example": {"tool_name": "universal_integrator", "action": "run_terminal_command", "params": {"command": "echo Hello World"}}}
 {"tool": "unlock_tool", "action": "unlock_tool", "script_path": "tools/unlock_tool.py", "params": ["tool_name"]}
+{"tool": "file_ops_tool", "action": "find_file", "script_path": "tools/file_ops_tool.py", "params": ["filename"]}
 {"tool": "file_ops_tool", "action": "read_file", "script_path": "tools/file_ops_tool.py", "params": ["filename"]}
 {"tool": "file_ops_tool", "action": "rename_file", "script_path": "tools/file_ops_tool.py", "params": ["filename", "new_name"]}
 {"tool": "file_ops_tool", "action": "move_file", "script_path": "tools/file_ops_tool.py", "params": ["filename", "destination_dir"]}
-
