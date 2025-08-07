@@ -1,84 +1,68 @@
+import subprocess
 import os
-import shutil
-import json
-import argparse
 
-SEARCH_DIRS = [
-    "/orchestrate_user/dropzone",
-    "/orchestrate_user/vault/watch_books",
-    "/orchestrate_user/vault/watch_transcripts",
-    "/orchestrate_user/orchestrate_exports/markdown",
-    "/opt/orchestrate-core-runtime/code_blueprints",
-    "/opt/orchestrate-core-runtime/compositions",
-    "/app"
-]
+DROPZONE_PATH = "/orchestrate_user/dropzone"
 
-def resolve_path(filename):
-    for dir in SEARCH_DIRS:
-        full_path = os.path.join(dir, filename)
-        if os.path.exists(full_path):
-            return full_path
-    raise FileNotFoundError(f"'{filename}' not found in any configured search path.")
+def find_file(filename_fragment):
+    result = subprocess.run(
+        ['find', DROPZONE_PATH, '-iname', f'*{filename_fragment}*'],
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+        text=True
+    )
+    matches = result.stdout.strip().splitlines()
+    if matches:
+        if len(matches) == 1:
+            return matches[0]
+        else:
+            print("⚠️ Multiple matches found. Returning the first:")
+            print("\n".join(matches))
+            return matches[0]
+    else:
+        raise FileNotFoundError(f"❌ No file matching '{filename_fragment}' found in dropzone.")
 
-def read_file(params):
-    try:
-        path = resolve_path(params["filename"])
-        with open(path, 'r', encoding='utf-8') as f:
-            return {
-                "status": "success",
-                "filename": os.path.basename(path),
-                "data": f.read()
-            }
-    except Exception as e:
-        return {"status": "error", "message": f"❌ Read error: {str(e)}"}
+def read_file(filename_fragment):
+    path = find_file(filename_fragment)
+    result = subprocess.run(
+        ['cat', path],
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+        text=True
+    )
+    return result.stdout.strip()
 
-def rename_file(params):
-    try:
-        path = resolve_path(params["filename"])
-        dest_path = os.path.join(os.path.dirname(path), params["new_name"])
-        os.rename(path, dest_path)
-        return {
-            "status": "success",
-            "message": f"✅ Renamed '{params['filename']}' to '{params['new_name']}'"
-        }
-    except Exception as e:
-        return {"status": "error", "message": f"❌ Rename error: {str(e)}"}
+def rename_file(filename_fragment, new_name):
+    path = find_file(filename_fragment)
+    dest_path = os.path.join(os.path.dirname(path), new_name)
+    subprocess.run(['mv', path, dest_path], check=True)
+    return f"✅ Renamed '{os.path.basename(path)}' to '{new_name}'"
 
-def move_file(params):
-    try:
-        path = resolve_path(params["filename"])
-        os.makedirs(params["destination_dir"], exist_ok=True)
-        dest_path = os.path.join(params["destination_dir"], os.path.basename(path))
-        shutil.move(path, dest_path)
-        return {
-            "status": "success",
-            "message": f"✅ Moved '{params['filename']}' to '{params['destination_dir']}'"
-        }
-    except Exception as e:
-        return {"status": "error", "message": f"❌ Move error: {str(e)}"}
+def move_file(filename_fragment, destination_dir):
+    path = find_file(filename_fragment)
+    os.makedirs(destination_dir, exist_ok=True)
+    dest_path = os.path.join(destination_dir, os.path.basename(path))
+    subprocess.run(['mv', path, dest_path], check=True)
+    return f"✅ Moved '{os.path.basename(path)}' to '{destination_dir}'"
 
 def main():
+    import argparse
     parser = argparse.ArgumentParser()
-    parser.add_argument("action")
-    parser.add_argument("--params", type=str)
+    parser.add_argument("--key", required=True)
+    parser.add_argument("--destination_dir")
+    parser.add_argument("--filename")
+    parser.add_argument("--new_name")
     args = parser.parse_args()
 
-    try:
-        params = json.loads(args.params) if args.params else {}
-    except json.JSONDecodeError:
-        print(json.dumps({"status": "error", "message": "❌ Invalid JSON."}, indent=4))
-        return
-
-    if args.action == "read_file":
-        result = read_file(params)
-    elif args.action == "rename_file":
-        result = rename_file(params)
-    elif args.action == "move_file":
-        result = move_file(params)
+    if args.key == "find_file":
+        print(find_file(args.filename))
+    elif args.key == "read_file":
+        print(read_file(args.filename))
+    elif args.key == "rename_file":
+        print(rename_file(args.filename, args.new_name))
+    elif args.key == "move_file":
+        print(move_file(args.filename, args.destination_dir))
     else:
-        result = {"status": "error", "message": f"❌ Unknown action: {args.action}"}
-
-    print(json.dumps(result, indent=4))
+        print(f"❌ Unknown key: {args.key}")
 
 if __name__ == "__main__":
     main()
