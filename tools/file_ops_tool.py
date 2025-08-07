@@ -3,7 +3,9 @@ import os
 
 DROPZONE_PATH = "/orchestrate_user/dropzone"
 
+
 def find_file(filename_fragment):
+    import json
     result = subprocess.run(
         ['find', DROPZONE_PATH, '-iname', f'*{filename_fragment}*'],
         stdout=subprocess.PIPE,
@@ -11,15 +13,19 @@ def find_file(filename_fragment):
         text=True
     )
     matches = result.stdout.strip().splitlines()
+    
     if matches:
-        if len(matches) == 1:
-            return matches[0]
-        else:
-            print("⚠️ Multiple matches found. Returning the first:")
-            print("\n".join(matches))
-            return matches[0]
+        # Always return JSON — even with multiple results
+        return json.dumps({
+            "match_count": len(matches),
+            "matches": matches,
+            "selected": matches[0]
+        })
     else:
-        raise FileNotFoundError(f"❌ No file matching '{filename_fragment}' found in dropzone.")
+        # Return JSON error message for consistent parsing
+        return json.dumps({
+            "error": f"No file matching '{filename_fragment}' found in dropzone."
+        })
 
 def read_file(filename_fragment):
     path = find_file(filename_fragment)
