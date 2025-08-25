@@ -4,7 +4,6 @@ from datetime import datetime
 import subprocess, json, os, logging
 from fastapi.staticfiles import StaticFiles
 
-
 # === BASE DIR ===
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
@@ -17,15 +16,51 @@ app = FastAPI()
 
 SYSTEM_REGISTRY = f"{BASE_DIR}/system_settings.ndjson"
 WORKING_MEMORY_PATH = f"{BASE_DIR}/data/working_memory.json"
-REFERRAL_PATH = f"{BASE_DIR}/container_state/referrals.json"
+UNLOCK_STATUS_PATH = os.path.join(BASE_DIR, "data", "unlock_status.json")
+TOOL_UI_PATH = os.path.join(BASE_DIR, "data", "orchestrate_tool_ui.json")
+MERGED_UI_PATH = os.path.join(BASE_DIR, "data", "merged_tool_ui.json")
 NGROK_CONFIG_PATH = os.path.join(BASE_DIR, "data", "ngrok.json")
 EXEC_HUB_PATH = f"{BASE_DIR}/execution_hub.py"
+REFERRAL_PATH = os.path.join(BASE_DIR, "container_state", "referrals.json")
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 
-## Mount for URL Access to Dropzone
+# === Dropzone Mount ===
 DROPZONE_DIR = "/orchestrate_user/dropzone"
 app.mount("/dropzone", StaticFiles(directory=DROPZONE_DIR), name="dropzone")
+
+# === Merge Logic ===
+def merge_tool_ui_with_unlocks():
+    try:
+        with open(TOOL_UI_PATH, "r") as f:
+            raw = json.load(f)
+            tool_ui = raw.get("entries", {})
+
+        if os.path.exists(UNLOCK_STATUS_PATH):
+            with open(UNLOCK_STATUS_PATH, "r") as f:
+                unlock_data = json.load(f)
+                unlocked = set(unlock_data.get("tools_unlocked", []))
+        else:
+            unlocked = set()
+
+        merged = []
+        for tool_name, meta in tool_ui.items():
+            merged.append({
+                "name": tool_name,
+                "label": meta.get("label", tool_name),
+                "description": meta.get("description", ""),
+                "priority": meta.get("priority", 0),
+                "referral_unlock_cost": meta.get("referral_unlock_cost", 0),
+                "locked": tool_name not in unlocked
+            })
+
+        with open(MERGED_UI_PATH, "w") as out:
+            json.dump(merged, out, indent=2)
+
+        logging.info("✅ Merged tool UI written to merged_tool_ui.json")
+
+    except Exception as e:
+        logging.warning(f"⚠️ Failed to merge tool UI: {e}")
 
 # === Repo Sync + Registry Merge ===
 def sync_repo_and_merge_registry():
@@ -62,7 +97,6 @@ def sync_repo_and_merge_registry():
     except Exception as e:
         logging.error(f"❌ Repo sync failed: {e}")
 
-
 # === Tool Executor ===
 def run_script(tool_name, action, params):
     command = ["python3", EXEC_HUB_PATH, "execute_task", "--params", json.dumps({
@@ -76,16 +110,15 @@ def run_script(tool_name, action, params):
     except Exception as e:
         return {"error": "Execution failed", "details": str(e)}
 
-
-# === Startup Sequence ===
-# === Startup Sequence ===
+# === Startup Hook ===
 @app.on_event("startup")
 def startup_routines():
     try:
         logging.info("🔥 FASTAPI STARTUP HOOK TRIGGERED")
         sync_repo_and_merge_registry()
+        merge_tool_ui_with_unlocks()
     except Exception as e:
-        logging.warning(f"⚠️ Sync failed on startup: {e}")
+        logging.warning(f"⚠️ Startup routines failed: {e}")
 
     # === Start ngrok (if not already running) ===
     try:
@@ -105,8 +138,6 @@ def startup_routines():
     except Exception as e:
         logging.warning(f"⚠️ Ngrok relaunch failed: {e}")
 
-
-
 # === Start Referral Engine subprocess ===
 try:
     referral_script = os.path.join(BASE_DIR, "tools", "referral_engine.py")
@@ -114,9 +145,6 @@ try:
     logging.info("📣 Referral engine launched unconditionally.")
 except Exception as e:
     logging.warning(f"⚠️ Failed to launch referral engine: {e}")
-
-
-
 
 # === Execute Task ===
 @app.post("/execute_task")
@@ -144,12 +172,12 @@ async def execute_task(request: Request):
     except Exception as e:
         return JSONResponse(status_code=500, content={"error": "Execution failed", "details": str(e)})
 
-
 # === Supported Actions + Messages ===
 @app.get("/get_supported_actions")
 def get_supported_actions():
     try:
         sync_repo_and_merge_registry()
+        merge_tool_ui_with_unlocks()
 
         with open(SYSTEM_REGISTRY, "r") as f:
             entries = [json.loads(line.strip()) for line in f if line.strip()]
@@ -171,7 +199,6 @@ def get_supported_actions():
         logging.error(f"🚨 Failed to load registry or update messages: {e}")
         raise HTTPException(status_code=500, detail="Could not load registry or update messages.")
 
-
 # === Memory Loader ===
 @app.post("/load_memory")
 def load_memory():
@@ -188,7 +215,6 @@ def load_memory():
             "error": "Cannot load working_memory.json",
             "details": str(e)
         })
-
 
 # === Health Check ===
 @app.get("/")
