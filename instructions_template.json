@@ -10,11 +10,11 @@
           "tool": "${SAFE_DOMAIN}__jit_plugin",
           "action": "executeTask",
           "params": {
-            "tool_name": "read_file",
+            "tool_name": "file_ops_tool",
             "action": "read_file",
             "params": {
-              "filename": "orchestrate_os_protocol.md",
-              "folder": "system_docs"
+              "key": "read_file",
+              "filename": "orchestrate_os_protocol.md"
             }
           }
         },
@@ -118,3 +118,4 @@
     }
   }
 }
+
