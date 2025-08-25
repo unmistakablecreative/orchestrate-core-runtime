@@ -2,22 +2,30 @@ import os
 import sys
 import json
 import subprocess
-import argparse
 import pdfplumber
 import docx
 import pandas as pd
 from bs4 import BeautifulSoup
 
-DROPZONE_PATH = "/orchestrate_user/dropzone"
+BASE_DIRECTORIES = [
+    "/orchestrate_user/dropzone",
+    "/opt/orchestrate-core-runtime/system_docs"
+]
 
 def find_file(filename_fragment):
-    result = subprocess.run(
-        ['find', DROPZONE_PATH, '-iname', f'*{filename_fragment}*'],
-        stdout=subprocess.PIPE,
-        stderr=subprocess.PIPE,
-        text=True
-    )
-    matches = result.stdout.strip().splitlines()
+    matches = []
+
+    for base_path in BASE_DIRECTORIES:
+        result = subprocess.run(
+            ['find', base_path, '-iname', f'*{filename_fragment}*'],
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            text=True
+        )
+        if result.stdout:
+            lines = result.stdout.strip().splitlines()
+            matches.extend(lines)
+
     if matches:
         return {
             "match_count": len(matches),
@@ -26,9 +34,8 @@ def find_file(filename_fragment):
         }
     else:
         return {
-            "error": f"No file matching '{filename_fragment}' found in dropzone."
+            "error": f"No file matching '{filename_fragment}' found in known directories."
         }
-
 
 def extract_pdf(path):
     try:
@@ -122,3 +129,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+
