@@ -29,6 +29,10 @@ logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(
 DROPZONE_DIR = "/orchestrate_user/dropzone"
 app.mount("/dropzone", StaticFiles(directory=DROPZONE_DIR), name="dropzone")
 
+# === System Identity Mount ===
+STATE_DIR = "/container_state"
+app.mount("/state", StaticFiles(directory=STATE_DIR), name="state")
+
 # === Merge Logic ===
 def merge_tool_ui_with_unlocks():
     try:
