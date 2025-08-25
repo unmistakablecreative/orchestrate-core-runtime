@@ -25,7 +25,7 @@
             "tool_name": "json_manager",
             "action": "read_json_file",
             "params": {
-              "filename": "orchestrate_tool_ui.json"
+              "filename": "merged_tool_ui.json"
             }
           }
         },
@@ -81,7 +81,7 @@
           "layout": "standard",
           "display_instructions": {
             "reference_type": "tool_ui_json",
-            "reference_doc": "orchestrate_tool_ui.json",
+            "reference_doc": "merged_tool_ui.json",
             "render": "markdown_table",
             "force_render": true,
             "title": "🧰 All Available Tools",
