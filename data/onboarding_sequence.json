@@ -10,7 +10,7 @@
     },
     "intro": {
       "title": "👋 Welcome to Orchestrate",
-      "narration": "You’re now inside Orchestrate — your command center for tasks, notes, and file tools. Let’s walk through how it works.",
+      "narration": "This is **not** a chatbot.\n\nOrchestrate is a natural language **runtime** — a command center where your words actually execute real tasks.\n\nYou're not here to have a conversation. You're here to run your system.\n\nAdd tasks. Move files. Trigger workflows. Build automations.\n\nYou say what you want — and I’ll run it.\n\nLet’s walk through how it works.",
       "next": "step_1"
     },
     "steps": {
@@ -110,11 +110,6 @@
         "narration": "Drop in a `.png` or `.jpg`, then give me the filename.",
         "prompt": "What image filename should I render?",
         "requires_user_input": true,
-        "next": "step_7c"
-      },
-      "step_7c": {
-        "title": "🌐 Live Image Preview",
-        "narration": "Here’s your image. Viewable at:\n\n`https://grossly-guiding-elk.ngrok-free.app/dropzone/{{user_input}}`",
         "next": "step_8"
       },
       "step_8": {
@@ -212,9 +207,17 @@
       "narration": "You’ve created a task, saved a note, processed files, logged insights, played MASH, referred a friend, unlocked tools, built working memory, and learned how to create natural-language commands.\n\n🎯 Your Orchestrate workspace is now fully live.",
       "action": {
         "tool": "json_manager",
-        "action": "list_json_entries",
-        "params": { "filename": "secondbrain.json" }
+        "action": "add_json_entry",
+        "params": {
+          "filename": "secondbrain.json",
+          "entry_key": "onboarding_status",
+          "entry_data": {
+            "complete": true,
+            "timestamp": "{{now}}"
+          }
+        }
       }
     }
   }
 }
+
