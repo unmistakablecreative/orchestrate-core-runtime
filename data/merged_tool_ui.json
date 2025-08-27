@@ -42,9 +42,9 @@
       "priority": 7,
       "referral_unlock_cost": 6
     },
-    "blog_assembler_tool": {
-      "label": "Blog Assembler",
-      "description": "Turn structured outlines into fully formatted, image-injected blog articles in seconds.",
+    "article_builder_tool": {
+      "label": "Article Builder",
+      "description": "Turn structured outlines into fully formatted, image-injected blog articles.",
       "priority": 8,
       "referral_unlock_cost": 6
     },
@@ -72,23 +72,11 @@
       "priority": 12,
       "referral_unlock_cost": 8
     },
-    "composer": {
-      "label": "Composer",
-      "description": "Chain multiple actions into a reusable automation — build repeatable workflows fast.",
-      "priority": 13,
-      "referral_unlock_cost": 12
-    },
     "code_editor": {
       "label": "Code Editor",
       "description": "Create, patch, or inject code into live tools — works with blueprints or raw scripts.",
-      "priority": 14,
+      "priority": 13,
       "referral_unlock_cost": 24
-    },
-    "universal_integrator": {
-      "label": "Universal Integrator",
-      "description": "Send API requests to any service — connect GPT with platforms not yet formally supported.",
-      "priority": 15,
-      "referral_unlock_cost": 32
     }
   },
   "display_mode": "table",
