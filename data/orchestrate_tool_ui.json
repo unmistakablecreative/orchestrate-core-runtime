@@ -77,6 +77,18 @@
       "description": "Create, patch, or inject code into live tools — works with blueprints or raw scripts.",
       "priority": 13,
       "referral_unlock_cost": 24
+    },
+    "nylasinbox": {
+      "label": "Nylas Inbox",
+      "description": "Read, send, and manage emails directly inside your system using structured API control.",
+      "priority": 14,
+      "referral_unlock_cost": 16
+    },
+    "notion_tool": {
+      "label": "Notion",
+      "description": "Create pages, update tasks, or search workspace content using Orchestrate-powered flows.",
+      "priority": 15,
+      "referral_unlock_cost": 2
     }
   },
   "display_mode": "table",
