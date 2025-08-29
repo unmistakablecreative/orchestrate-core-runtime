@@ -1,4 +1,3 @@
-
 | Tool Name              | Description                                                   | Status                    | 🔑 Credits                  |
 |------------------------|---------------------------------------------------------------|---------------------------|-----------------------------|
 | **Find File**          | Search filenames by keyword to quickly locate assets.         | ✅ Free                    | —                           |
@@ -10,12 +9,13 @@
 | **Buffer Engine**      | Schedule and auto-post content to external platforms.         | {{status:buffer_engine}}  | {{credits:buffer_engine}}   |
 | **Article Builder**    | Compile a blog post from structured outlines and data.        | {{status:article_builder_tool}} | {{credits:article_builder_tool}} |
 | **Outline Editor**     | Create, manage, and publish structured content docs.          | {{status:outline_editor}} | {{credits:outline_editor}}  |
+| **Notion**             | Create structured Notion pages and databases via command.     | {{status:notion_tool}}    | {{credits:notion_tool}}     |
 | **Mem**                | Syncs with Mem for note storage and retrieval.                | {{status:mem_tool}}       | {{credits:mem_tool}}        |
+| **Nylas Inbox**        | Send, read, and organize email using Nylas API integration.   | {{status:nylasinbox}}     | {{credits:nylasinbox}}      |
 | **Github**             | Clone, commit, and push repos from GPT-managed workflows.     | {{status:github_tool_universal}} | {{credits:github_tool_universal}} |
 | **Ideogram**           | Generates AI-enhanced visual assets from prompt input.        | {{status:ideogram_tool}}  | {{credits:ideogram_tool}}   |
 | **Code Editor**        | Create, patch, and modify code live in the Orchestrate env.   | {{status:code_editor}}    | {{credits:code_editor}}     |
 | **Check Credits**      | View your remaining unlock credits and tools currently unlocked. | ✅ Free                 | —                           |
-
 
 > **Tool Status (**`**Free**` **vs** `**Locked**`**) is dynamically rendered.**  
 > The `Status` and `Credits` columns in this table should be populated at runtime based on the `getSupportedActions` endpoint.
