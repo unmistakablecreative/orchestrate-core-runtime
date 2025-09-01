@@ -128,9 +128,11 @@ def unlock_tool(tool_name):
     }
 
 
+
 def unlock_marketplace_tool(tool_name):
     import subprocess
     import importlib.util
+    import re
 
     def install_dependencies(dependencies):
         installed = []
@@ -152,46 +154,80 @@ def unlock_marketplace_tool(tool_name):
                     }
         return {"status": "success", "message": f"✅ Installed: {', '.join(installed)}"}
 
+    def register_tool_and_actions(script_path, module_name):
+        abs_path = os.path.join("/opt/orchestrate-core-runtime", script_path)
+        if not os.path.exists(abs_path):
+            return {"status": "error", "message": f"Script path not found: {abs_path}"}
+
+        with open(abs_path, "r") as f:
+            code = f.read()
+
+        pattern = r"def (\w+)\(params\):"
+        matches = re.findall(pattern, code)
+
+        settings = load_ndjson(NDJSON_PATH)
+
+        tool_entry = {
+            "tool": module_name,
+            "action": "__tool__",
+            "script_path": script_path
+        }
+
+        actions = []
+        for name in matches:
+            if name.startswith("_"):
+                continue
+            actions.append({
+                "tool": module_name,
+                "action": name,
+                "script_path": script_path,
+                "params": [],
+                "example": {
+                    "tool_name": module_name,
+                    "action": name,
+                    "params": {}
+                }
+            })
+
+        settings.append(tool_entry)
+        settings.extend(actions)
+        save_ndjson(NDJSON_PATH, settings)
+
+        return {
+            "status": "success",
+            "message": f"✅ Registered tool '{module_name}' with {len(actions)} actions."
+        }
+
+    # === Step 1: Load user + store
     user_id = load_system_identity()
     ledger = get_ledger()
 
     if user_id not in ledger["installs"]:
         save_unlock_status({})
-        return {
-            "status": "error",
-            "message": "❌ User not found in install_ledger"
-        }
+        return {"status": "error", "message": "❌ User not found in install_ledger"}
 
     user = ledger["installs"][user_id]
     available_credits = user.get("referral_credits", 0)
 
     app_store_path = "/opt/orchestrate-core-runtime/data/orchestrate_app_store.json"
     if not os.path.exists(app_store_path):
-        return {
-            "status": "error",
-            "message": "❌ App store metadata not found in container."
-        }
+        return {"status": "error", "message": "❌ App store metadata not found in container."}
 
     with open(app_store_path, "r") as f:
         store_data = json.load(f)
 
     store_entry = store_data.get("entries", {}).get(tool_name)
     if not store_entry:
-        return {
-            "status": "error",
-            "message": f"❌ Tool '{tool_name}' not found in orchestrate_app_store.json"
-        }
+        return {"status": "error", "message": f"❌ Tool '{tool_name}' not found in app store."}
 
     cost = store_entry.get("referral_unlock_cost", 1)
     if available_credits < cost:
-        return {
-            "status": "locked",
-            "message": f"🚫 You need {cost} credits to unlock '{tool_name}'."
-        }
+        return {"status": "locked", "message": f"🚫 You need {cost} credits to unlock '{tool_name}'."}
 
-    # === STEP 2: Pull script from GitHub ===
+    # === Step 2: Pull tool script from GitHub
     github_url = f"https://raw.githubusercontent.com/unmistakablecreative/orchestrate-core-runtime/main/tools/{tool_name}.py"
     dest_path = f"/opt/orchestrate-core-runtime/tools/{tool_name}.py"
+    rel_path = f"tools/{tool_name}.py"
 
     try:
         response = requests.get(github_url)
@@ -199,12 +235,9 @@ def unlock_marketplace_tool(tool_name):
         with open(dest_path, "w") as f:
             f.write(response.text)
     except Exception as e:
-        return {
-            "status": "error",
-            "message": f"❌ Failed to fetch tool from GitHub: {str(e)}"
-        }
+        return {"status": "error", "message": f"❌ Failed to fetch script: {str(e)}"}
 
-    # === STEP 3: Install known dependencies (for now, manually listed)
+    # === Step 3: Install any needed dependencies
     known_dependencies = {
         "nylasinbox": ["markdown2"],
         "notion_tool": ["requests"],
@@ -215,26 +248,12 @@ def unlock_marketplace_tool(tool_name):
     if dep_result["status"] != "success":
         return dep_result
 
-    # === STEP 4: Call system_settings.install_tool() subprocess
-    try:
-        subprocess.run(
-            [
-                sys.executable,
-                "/opt/orchestrate-core-runtime/system_settings.py",
-                "install_tool",
-                "--params",
-                json.dumps({"script_path": f"tools/{tool_name}.py"})
-            ],
-            check=True
-        )
-    except Exception as e:
-        return {
-            "status": "error",
-            "message": f"❌ install_tool failed for '{tool_name}'",
-            "details": str(e)
-        }
+    # === Step 4: Register tool + actions directly
+    reg_result = register_tool_and_actions(rel_path, tool_name)
+    if reg_result["status"] != "success":
+        return reg_result
 
-    # === STEP 5: Debit credits + update ledger
+    # === Step 5: Debit credits and update user ledger
     user["referral_credits"] = available_credits - cost
     user["tools_unlocked"] = list(set(user.get("tools_unlocked", []) + [tool_name]))
     put_ledger(ledger)
@@ -245,8 +264,11 @@ def unlock_marketplace_tool(tool_name):
 
     return {
         "status": "success",
-        "message": f"✅ '{tool_name}' fully unlocked, registered, and dependencies installed."
+        "message": f"✅ '{tool_name}' fully installed, registered, and ready to use.",
+        "actions": reg_result.get("message")
     }
+
+
 
 
 # === Entrypoint Router ===
