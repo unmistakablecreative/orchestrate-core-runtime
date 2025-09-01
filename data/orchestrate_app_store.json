@@ -1,0 +1,20 @@
+{
+  "entries": {
+    "nylasinbox": {
+      "label": "Nylas Inbox",
+      "description": "Read, send, and manage emails directly inside your system using structured API control.",
+      "priority": 1,
+      "referral_unlock_cost": 16
+    },
+    "notion_tool": {
+      "label": "Notion",
+      "description": "Create pages, update tasks, or search workspace content using Orchestrate-powered flows.",
+      "priority": 2,
+      "referral_unlock_cost": 2
+    }
+  },
+  "display_mode": "table",
+  "theme": "dark",
+  "legend": true,
+  "sort_by": "custom"
+}
