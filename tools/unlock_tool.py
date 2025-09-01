@@ -130,34 +130,69 @@ def unlock_tool(tool_name):
 
 
 
-
-
 def unlock_marketplace_tool(tool_name):
     import subprocess
     import importlib.util
     import ast
+    import builtins
+
+    # === Config: tools that require API credentials
+    credential_warnings = {
+        "outline_editor": "⚠️ This tool requires your Outline API key. Use system_settings.set_credential() to set it.",
+        "ideogram_tool": "⚠️ This tool requires your Ideogram API key.",
+        "buffer_engine": "⚠️ This tool requires your Twitter API credentials.",
+        "readwise_tool": "⚠️ This tool requires your Readwise API key.",
+        "nylasinbox": "⚠️ This tool requires your Nylas API credentials.",
+        "notion_tool": "⚠️ This tool requires your Notion API token."
+    }
+
+    def infer_dependencies_from_script(script_path):
+        inferred = set()
+        with open(script_path, "r") as f:
+            for line in f:
+                line = line.strip()
+                if line.startswith("import "):
+                    parts = line.split()
+                    if len(parts) >= 2:
+                        inferred.add(parts[1].split(".")[0])
+                elif line.startswith("from "):
+                    parts = line.split()
+                    if len(parts) >= 2:
+                        inferred.add(parts[1].split(".")[0])
+        return list(inferred)
 
     def install_dependencies(dependencies):
         installed = []
-        for dep in dependencies:
-            if importlib.util.find_spec(dep) is None:
-                try:
-                    subprocess.run(
-                        [sys.executable, "-m", "pip", "install", dep],
-                        check=True,
-                        stdout=subprocess.PIPE,
-                        stderr=subprocess.PIPE
-                    )
-                    installed.append(dep)
-                except Exception as e:
-                    return {
-                        "status": "error",
-                        "message": f"❌ Failed to install dependency: {dep}",
-                        "details": str(e)
-                    }
-        return {"status": "success", "message": f"✅ Installed: {', '.join(installed)}"}
+        skipped = []
+        stdlib_modules = set(sys.builtin_module_names).union(set(dir(builtins)))
 
-    # === Load ledger and user ===
+        for dep in dependencies:
+            if dep in stdlib_modules:
+                skipped.append(dep)
+                continue
+            if importlib.util.find_spec(dep) is not None:
+                skipped.append(dep)
+                continue
+            try:
+                subprocess.run(
+                    [sys.executable, "-m", "pip", "install", dep],
+                    check=True,
+                    stdout=subprocess.PIPE,
+                    stderr=subprocess.PIPE
+                )
+                installed.append(dep)
+            except Exception as e:
+                return {
+                    "status": "error",
+                    "message": f"❌ Failed to install dependency: {dep}",
+                    "details": str(e)
+                }
+        return {
+            "status": "success",
+            "message": f"✅ Installed: {', '.join(installed)} | Skipped: {', '.join(skipped)}"
+        }
+
+    # === Load ledger and user
     user_id = load_system_identity()
     ledger = get_ledger()
 
@@ -196,7 +231,7 @@ def unlock_marketplace_tool(tool_name):
             "message": f"🚫 You need {cost} credits to unlock '{tool_name}'."
         }
 
-    # === STEP 2: Pull script from GitHub
+    # === STEP 1: Pull script from GitHub
     github_url = f"https://raw.githubusercontent.com/unmistakablecreative/orchestrate-core-runtime/main/tools/{tool_name}.py"
     dest_path = f"/opt/orchestrate-core-runtime/tools/{tool_name}.py"
 
@@ -211,18 +246,13 @@ def unlock_marketplace_tool(tool_name):
             "message": f"❌ Failed to fetch tool from GitHub: {str(e)}"
         }
 
-    # === STEP 3: Install known dependencies
-    known_dependencies = {
-        "nylasinbox": ["markdown2"],
-        "notion_tool": ["requests"],
-        "readwise_tool": ["requests"]
-    }
-    deps = known_dependencies.get(tool_name, [])
-    dep_result = install_dependencies(deps)
+    # === STEP 2: Install inferred dependencies
+    inferred_deps = infer_dependencies_from_script(dest_path)
+    dep_result = install_dependencies(inferred_deps)
     if dep_result["status"] != "success":
         return dep_result
 
-    # === STEP 4: Register tool + actions
+    # === STEP 3: Register tool + actions
     SETTINGS_FILE = "/opt/orchestrate-core-runtime/system_settings.ndjson"
 
     def load_settings():
@@ -236,11 +266,21 @@ def unlock_marketplace_tool(tool_name):
 
     def register_tool(tool_name, script_path):
         settings = load_settings()
-        settings.append({
-            "tool": tool_name,
-            "action": "__tool__",
-            "script_path": script_path
-        })
+        tool_entry_found = False
+        for entry in settings:
+            if entry["tool"] == tool_name and entry["action"] == "__tool__":
+                entry["locked"] = False
+                entry["referral_unlock_cost"] = 0
+                tool_entry_found = True
+                break
+        if not tool_entry_found:
+            settings.append({
+                "tool": tool_name,
+                "action": "__tool__",
+                "script_path": script_path,
+                "locked": False,
+                "referral_unlock_cost": 0
+            })
         return settings
 
     def extract_actions_from_script(script_path, tool_name):
@@ -248,7 +288,6 @@ def unlock_marketplace_tool(tool_name):
             tree = ast.parse(f.read(), filename=script_path)
 
         actions = []
-
         for node in tree.body:
             if isinstance(node, ast.FunctionDef):
                 fn_name = node.name
@@ -321,7 +360,7 @@ def unlock_marketplace_tool(tool_name):
             "message": f"❌ Failed to register tool + actions: {str(e)}"
         }
 
-    # === STEP 5: Debit credits + update ledger
+    # === STEP 4: Debit credits + update ledger
     user["referral_credits"] = available_credits - cost
     user["tools_unlocked"] = list(set(user.get("tools_unlocked", []) + [tool_name]))
     put_ledger(ledger)
@@ -330,11 +369,20 @@ def unlock_marketplace_tool(tool_name):
         "tools_unlocked": user["tools_unlocked"]
     })
 
+    # === Optional credential notice
+    credential_msg = credential_warnings.get(tool_name)
+
     return {
         "status": "success",
-        "message": f"✅ '{tool_name}' fully installed, registered, and ready to use.",
-        "actions": [a["action"] for a in actions]
+        "message": f"✅ '{tool_name}' fully installed, unlocked, and ready to use.",
+        "actions": [a["action"] for a in actions],
+        "dependencies": dep_result.get("message"),
+        "credentials": credential_msg if credential_msg else "—"
     }
+
+
+
+
 
 
 
