@@ -253,6 +253,37 @@ def build_working_memory(_):
 def list_supported_actions(_):
     return {"status": "success", "supported": list(dispatch_map.keys())}
 
+
+### APP STORE REFRESH
+def refresh_app_store_data(_):
+    import requests
+
+    FILES = {
+        "orchestrate_app_store.json": "https://raw.githubusercontent.com/unmistakablecreative/orchestrate-core-runtime/main/data/orchestrate_app_store.json",
+        "update_messages.json": "https://raw.githubusercontent.com/unmistakablecreative/orchestrate-core-runtime/main/data/update_messages.json"
+    }
+
+    results = []
+    data_dir = os.path.join(ROOT_DIR, "data")
+    os.makedirs(data_dir, exist_ok=True)
+
+    for filename, url in FILES.items():
+        try:
+            response = requests.get(url)
+            response.raise_for_status()
+            local_path = os.path.join(data_dir, filename)
+            with open(local_path, "w") as f:
+                f.write(response.text)
+            results.append(f"✅ {filename} refreshed.")
+        except Exception as e:
+            results.append(f"❌ Failed to refresh {filename}: {str(e)}")
+
+    return {
+        "status": "complete",
+        "messages": results
+    }
+
+
 # === Dispatch Map ===
 dispatch_map = {
     "set_credential": set_credential,
@@ -269,7 +300,8 @@ dispatch_map = {
     "remove_memory_file": remove_memory_file,
     "list_memory_files": list_memory_files,
     "build_working_memory": build_working_memory,
-    "list_supported_actions": list_supported_actions
+    "list_supported_actions": list_supported_actions,
+    "refresh_app_store_data": refresh_app_store_data  # ✅ New action added
 }
 
 # === Entrypoint ===
