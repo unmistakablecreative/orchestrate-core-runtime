@@ -129,10 +129,13 @@ def unlock_tool(tool_name):
 
 
 
+
+
+
 def unlock_marketplace_tool(tool_name):
     import subprocess
     import importlib.util
-    import re
+    import ast
 
     def install_dependencies(dependencies):
         installed = []
@@ -154,80 +157,48 @@ def unlock_marketplace_tool(tool_name):
                     }
         return {"status": "success", "message": f"✅ Installed: {', '.join(installed)}"}
 
-    def register_tool_and_actions(script_path, module_name):
-        abs_path = os.path.join("/opt/orchestrate-core-runtime", script_path)
-        if not os.path.exists(abs_path):
-            return {"status": "error", "message": f"Script path not found: {abs_path}"}
-
-        with open(abs_path, "r") as f:
-            code = f.read()
-
-        pattern = r"def (\w+)\(params\):"
-        matches = re.findall(pattern, code)
-
-        settings = load_ndjson(NDJSON_PATH)
-
-        tool_entry = {
-            "tool": module_name,
-            "action": "__tool__",
-            "script_path": script_path
-        }
-
-        actions = []
-        for name in matches:
-            if name.startswith("_"):
-                continue
-            actions.append({
-                "tool": module_name,
-                "action": name,
-                "script_path": script_path,
-                "params": [],
-                "example": {
-                    "tool_name": module_name,
-                    "action": name,
-                    "params": {}
-                }
-            })
-
-        settings.append(tool_entry)
-        settings.extend(actions)
-        save_ndjson(NDJSON_PATH, settings)
-
-        return {
-            "status": "success",
-            "message": f"✅ Registered tool '{module_name}' with {len(actions)} actions."
-        }
-
-    # === Step 1: Load user + store
+    # === Load ledger and user ===
     user_id = load_system_identity()
     ledger = get_ledger()
 
     if user_id not in ledger["installs"]:
         save_unlock_status({})
-        return {"status": "error", "message": "❌ User not found in install_ledger"}
+        return {
+            "status": "error",
+            "message": "❌ User not found in install_ledger"
+        }
 
     user = ledger["installs"][user_id]
     available_credits = user.get("referral_credits", 0)
 
+    # === Load app store metadata
     app_store_path = "/opt/orchestrate-core-runtime/data/orchestrate_app_store.json"
     if not os.path.exists(app_store_path):
-        return {"status": "error", "message": "❌ App store metadata not found in container."}
+        return {
+            "status": "error",
+            "message": "❌ App store metadata not found in container."
+        }
 
     with open(app_store_path, "r") as f:
         store_data = json.load(f)
 
     store_entry = store_data.get("entries", {}).get(tool_name)
     if not store_entry:
-        return {"status": "error", "message": f"❌ Tool '{tool_name}' not found in app store."}
+        return {
+            "status": "error",
+            "message": f"❌ Tool '{tool_name}' not found in orchestrate_app_store.json"
+        }
 
     cost = store_entry.get("referral_unlock_cost", 1)
     if available_credits < cost:
-        return {"status": "locked", "message": f"🚫 You need {cost} credits to unlock '{tool_name}'."}
+        return {
+            "status": "locked",
+            "message": f"🚫 You need {cost} credits to unlock '{tool_name}'."
+        }
 
-    # === Step 2: Pull tool script from GitHub
+    # === STEP 2: Pull script from GitHub
     github_url = f"https://raw.githubusercontent.com/unmistakablecreative/orchestrate-core-runtime/main/tools/{tool_name}.py"
     dest_path = f"/opt/orchestrate-core-runtime/tools/{tool_name}.py"
-    rel_path = f"tools/{tool_name}.py"
 
     try:
         response = requests.get(github_url)
@@ -235,9 +206,12 @@ def unlock_marketplace_tool(tool_name):
         with open(dest_path, "w") as f:
             f.write(response.text)
     except Exception as e:
-        return {"status": "error", "message": f"❌ Failed to fetch script: {str(e)}"}
+        return {
+            "status": "error",
+            "message": f"❌ Failed to fetch tool from GitHub: {str(e)}"
+        }
 
-    # === Step 3: Install any needed dependencies
+    # === STEP 3: Install known dependencies
     known_dependencies = {
         "nylasinbox": ["markdown2"],
         "notion_tool": ["requests"],
@@ -248,12 +222,106 @@ def unlock_marketplace_tool(tool_name):
     if dep_result["status"] != "success":
         return dep_result
 
-    # === Step 4: Register tool + actions directly
-    reg_result = register_tool_and_actions(rel_path, tool_name)
-    if reg_result["status"] != "success":
-        return reg_result
+    # === STEP 4: Register tool + actions
+    SETTINGS_FILE = "/opt/orchestrate-core-runtime/system_settings.ndjson"
 
-    # === Step 5: Debit credits and update user ledger
+    def load_settings():
+        with open(SETTINGS_FILE, "r") as f:
+            return [json.loads(line) for line in f if line.strip()]
+
+    def save_settings(data):
+        with open(SETTINGS_FILE, "w") as f:
+            for entry in data:
+                f.write(json.dumps(entry) + "\n")
+
+    def register_tool(tool_name, script_path):
+        settings = load_settings()
+        settings.append({
+            "tool": tool_name,
+            "action": "__tool__",
+            "script_path": script_path
+        })
+        return settings
+
+    def extract_actions_from_script(script_path, tool_name):
+        with open(script_path, "r") as f:
+            tree = ast.parse(f.read(), filename=script_path)
+
+        actions = []
+
+        for node in tree.body:
+            if isinstance(node, ast.FunctionDef):
+                fn_name = node.name
+                if fn_name in ("main", "run", "error") or fn_name.startswith("_"):
+                    continue
+
+                inferred_params = []
+                for arg in node.args.args:
+                    if arg.arg not in ("self", "params"):
+                        inferred_params.append(arg.arg)
+
+                for child in ast.walk(node):
+                    if isinstance(child, ast.Call):
+                        if (
+                            isinstance(child.func, ast.Attribute)
+                            and isinstance(child.func.value, ast.Name)
+                            and child.func.value.id == "params"
+                            and child.func.attr == "get"
+                            and len(child.args) >= 1
+                            and isinstance(child.args[0], ast.Str)
+                        ):
+                            key = child.args[0].s
+                            if key not in inferred_params:
+                                inferred_params.append(key)
+
+                        if (
+                            isinstance(child.func, ast.Attribute)
+                            and isinstance(child.func.value, ast.Call)
+                            and isinstance(child.func.value.func, ast.Attribute)
+                            and isinstance(child.func.value.func.value, ast.Name)
+                            and child.func.value.func.value.id == "params"
+                            and child.func.value.func.attr == "get"
+                            and isinstance(child.func.value.args[0], ast.Str)
+                            and len(child.args) >= 1
+                            and isinstance(child.args[0], ast.Str)
+                        ):
+                            nested = child.args[0].s
+                            parent = child.func.value.args[0].s
+                            flat_key = f"{parent}.{nested}"
+                            if flat_key not in inferred_params:
+                                inferred_params.append(flat_key)
+
+                example = {
+                    "tool_name": tool_name,
+                    "action": fn_name,
+                    "params": {k: f"<{k}>" for k in inferred_params}
+                }
+
+                actions.append({
+                    "tool": tool_name,
+                    "action": fn_name,
+                    "script_path": f"tools/{tool_name}.py",
+                    "params": inferred_params,
+                    "example": example
+                })
+
+        return actions
+
+    script_path = f"tools/{tool_name}.py"
+    abs_path = dest_path
+
+    try:
+        settings = register_tool(tool_name, script_path)
+        actions = extract_actions_from_script(abs_path, tool_name)
+        settings.extend(actions)
+        save_settings(settings)
+    except Exception as e:
+        return {
+            "status": "error",
+            "message": f"❌ Failed to register tool + actions: {str(e)}"
+        }
+
+    # === STEP 5: Debit credits + update ledger
     user["referral_credits"] = available_credits - cost
     user["tools_unlocked"] = list(set(user.get("tools_unlocked", []) + [tool_name]))
     put_ledger(ledger)
@@ -265,9 +333,8 @@ def unlock_marketplace_tool(tool_name):
     return {
         "status": "success",
         "message": f"✅ '{tool_name}' fully installed, registered, and ready to use.",
-        "actions": reg_result.get("message")
+        "actions": [a["action"] for a in actions]
     }
-
 
 
 
