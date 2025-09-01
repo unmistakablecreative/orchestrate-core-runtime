@@ -247,6 +247,66 @@ def build_working_memory(_):
 
 
 
+def install_tool(params):
+    import importlib.util
+    import re
+
+    script_path = params.get("script_path")
+    if not script_path:
+        error("Missing 'script_path'")
+
+    abs_path = os.path.join(ROOT_DIR, script_path)
+    if not os.path.exists(abs_path):
+        error(f"Script path not found: {abs_path}")
+
+    module_name = os.path.splitext(os.path.basename(abs_path))[0]
+
+    # === Step 1: Register tool metadata
+    tool_entry = {
+        "tool": module_name,
+        "action": "__tool__",
+        "script_path": script_path
+    }
+
+    settings = load_settings()
+    settings.append(tool_entry)
+
+    # === Step 2: Load script and parse for functions
+    try:
+        with open(abs_path, "r") as f:
+            code = f.read()
+    except Exception as e:
+        error(f"Failed to read script: {str(e)}")
+
+    pattern = r"def (\w+)\(params\):"
+    matches = re.findall(pattern, code)
+
+    actions = []
+    for name in matches:
+        if name.startswith("_"):
+            continue
+        actions.append({
+            "tool": module_name,
+            "action": name,
+            "script_path": script_path,
+            "params": [],
+            "example": {
+                "tool_name": module_name,
+                "action": name,
+                "params": {}
+            }
+        })
+
+    # === Step 3: Append actions to settings
+    settings.extend(actions)
+    save_settings(settings)
+
+    return {
+        "status": "success",
+        "message": f"✅ Installed tool '{module_name}' with {len(actions)} actions.",
+        "actions": [a["action"] for a in actions]
+    }
+
 
 
 
@@ -284,6 +344,7 @@ def refresh_app_store_data(_):
     }
 
 
+
 # === Dispatch Map ===
 dispatch_map = {
     "set_credential": set_credential,
@@ -301,8 +362,10 @@ dispatch_map = {
     "list_memory_files": list_memory_files,
     "build_working_memory": build_working_memory,
     "list_supported_actions": list_supported_actions,
-    "refresh_app_store_data": refresh_app_store_data  # ✅ New action added
+    "refresh_app_store_data": refresh_app_store_data,
+    "install_tool": install_tool  # ✅ Just added
 }
+
 
 # === Entrypoint ===
 if __name__ == "__main__":
