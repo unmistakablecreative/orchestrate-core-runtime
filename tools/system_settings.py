@@ -314,29 +314,28 @@ def list_supported_actions(_):
     return {"status": "success", "supported": list(dispatch_map.keys())}
 
 
-### APP STORE REFRESH
+## App Store Refresh
+
 def refresh_orchestrate_runtime(_):
     import os
     import requests
     import json
-    import ndjson
     import ast
     from pathlib import Path
 
     ROOT_DIR = Path(__file__).resolve().parent.parent
     DATA_DIR = ROOT_DIR / "data"
     TOOLS_DIR = ROOT_DIR / "tools"
-    SYSTEM_SETTINGS_FILE = ROOT_DIR / "system_settings.ndjson"
+    SETTINGS_PATH = ROOT_DIR / "system_settings.ndjson"
+
     BASE_RAW = "https://raw.githubusercontent.com/unmistakablecreative/orchestrate-core-runtime/main/"
     GITHUB_API_TOOLS = "https://api.github.com/repos/unmistakablecreative/orchestrate-core-runtime/contents/tools"
 
     results = []
-    new_actions = []
     updated = 0
-    skipped = 0
-    errors = 0
+    new_actions = []
 
-    # === Refresh static data files ===
+    # === Refresh shared data files ===
     data_files = {
         "data/orchestrate_app_store.json": DATA_DIR / "orchestrate_app_store.json",
         "data/update_messages.json": DATA_DIR / "update_messages.json"
@@ -349,51 +348,48 @@ def refresh_orchestrate_runtime(_):
             response.raise_for_status()
             local_path.parent.mkdir(parents=True, exist_ok=True)
             local_path.write_text(response.text)
-            results.append(f"✅ Refreshed: {remote_path}")
+            results.append(f"✅ Refreshed {remote_path}")
         except Exception as e:
             results.append(f"❌ Failed to refresh {remote_path}: {e}")
-            errors += 1
 
-    # === Load system_settings.ndjson (if exists) ===
-    existing_actions = []
-    existing_keys = set()
-
-    if SYSTEM_SETTINGS_FILE.exists():
-        try:
-            with open(SYSTEM_SETTINGS_FILE, "r") as f:
-                existing_actions = ndjson.load(f)
-                existing_keys = {(a["tool"], a["action"]) for a in existing_actions}
-            results.append("📄 Loaded existing system_settings.ndjson")
-        except Exception as e:
-            results.append(f"❌ Failed to read system_settings.ndjson: {e}")
-            errors += 1
+    # === Ensure credentials.json exists but never overwrite ===
+    creds_path = TOOLS_DIR / "credentials.json"
+    if not creds_path.exists():
+        creds_path.write_text("{}")
+        results.append("🛡️ Created blank credentials.json")
     else:
-        results.append("📄 No system_settings.ndjson found — will create new")
+        results.append("⏭️ Skipped credentials.json (already exists)")
 
-    # === Helper: extract function defs from a tool file ===
-    def extract_tool_actions(tool_path):
-        with open(tool_path, "r") as f:
-            tree = ast.parse(f.read(), filename=str(tool_path))
-        actions = []
-        for node in tree.body:
-            if isinstance(node, ast.FunctionDef) and not node.name.startswith("_"):
-                params = [arg.arg for arg in node.args.args if arg.arg != "_"]
-                actions.append({"action": node.name, "params": params})
-        return actions
+    # === Load existing system settings (line-by-line JSON) ===
+    if SETTINGS_PATH.exists():
+        with open(SETTINGS_PATH, "r") as f:
+            existing_lines = f.readlines()
+        try:
+            settings = [json.loads(line) for line in existing_lines]
+        except Exception as e:
+            results.append(f"❌ Failed to parse existing system_settings.ndjson: {e}")
+            settings = []
+    else:
+        settings = []
 
-    # === Download and process tool files ===
+    existing_keys = {(s["tool"], s["action"]) for s in settings}
+
+    # === Helper to extract function defs from tool file ===
+    def extract_actions(path):
+        with open(path, "r") as f:
+            tree = ast.parse(f.read())
+        return [
+            {"action": node.name, "params": [arg.arg for arg in node.args.args if arg.arg != "_"]}
+            for node in tree.body
+            if isinstance(node, ast.FunctionDef) and not node.name.startswith("_")
+        ]
+
+    # === Pull and process tools ===
     try:
-        response = requests.get(GITHUB_API_TOOLS)
-        response.raise_for_status()
-        tool_entries = response.json()
-
-        if not isinstance(tool_entries, list):
-            raise Exception("Invalid response from GitHub API (not a list)")
-
+        tool_entries = requests.get(GITHUB_API_TOOLS).json()
         for entry in tool_entries:
             name = entry.get("name", "")
             if not name.endswith(".py") or name == "credentials.json":
-                skipped += 1
                 continue
 
             try:
@@ -404,56 +400,42 @@ def refresh_orchestrate_runtime(_):
                 updated += 1
 
                 tool_name = name.replace(".py", "")
-                actions = extract_tool_actions(tool_path)
+                actions = extract_actions(tool_path)
 
                 for act in actions:
                     key = (tool_name, act["action"])
-                    entry_obj = {
-                        "tool": tool_name,
-                        "action": act["action"],
-                        "script": f"tools/{name}",
-                        "params": act["params"],
-                        "example": {
-                            "tool_name": tool_name,
-                            "action": act["action"],
-                            "params": {p: f"<{p}>" for p in act["params"]}
-                        }
-                    }
-
                     if key not in existing_keys:
-                        existing_actions.append(entry_obj)
+                        entry_obj = {
+                            "tool": tool_name,
+                            "action": act["action"],
+                            "script_path": f"tools/{name}",
+                            "params": act["params"]
+                        }
+                        settings.append(entry_obj)
                         existing_keys.add(key)
-                        new_actions.append(f"➕ {tool_name}.{act['action']}")
-                    else:
-                        # Optionally update existing action (you could diff here)
-                        pass
+                        new_actions.append(f"{tool_name}.{act['action']}")
 
             except Exception as e:
-                results.append(f"❌ Failed to process tool '{name}': {e}")
-                errors += 1
-
+                results.append(f"❌ Failed to process {name}: {e}")
     except Exception as e:
-        results.append(f"❌ Could not fetch tools from GitHub: {e}")
-        errors += 1
+        results.append(f"❌ Could not fetch tools: {e}")
 
-    # === Save updated settings file ===
+    # === Write merged system_settings.ndjson ===
     try:
-        with open(SYSTEM_SETTINGS_FILE, "w") as f:
-            ndjson.dump(existing_actions, f)
-        results.append(f"✅ Saved updated system_settings.ndjson ({len(existing_actions)} actions)")
+        with open(SETTINGS_PATH, "w") as f:
+            for entry in settings:
+                f.write(json.dumps(entry) + "\n")
+        results.append(f"✅ Saved merged system_settings.ndjson with {len(settings)} actions")
     except Exception as e:
         results.append(f"❌ Failed to write system_settings.ndjson: {e}")
-        errors += 1
 
-    summary = f"🔧 Refresh complete — {updated} tools updated, {len(new_actions)} new actions added, {errors} errors"
+    summary = f"🧩 {updated} tools updated | ➕ {len(new_actions)} new actions registered"
     results.append(summary)
 
     return {
-        "status": "error" if errors else "success",
+        "status": "complete" if updated or new_actions else "noop",
         "messages": results
     }
-
-
 
 
 
