@@ -92,6 +92,7 @@
 {"tool": "terminal", "action": "stream", "script_path": "tools/terminal.py", "params": ["command"], "example": {"tool_name": "terminal", "action": "stream", "params": {"command": "ping google.com"}}}
 {"tool": "terminal", "action": "tail", "script_path": "tools/terminal.py", "params": ["command", "n"], "example": {"tool_name": "terminal", "action": "tail", "params": {"command": "cat log.txt", "n": 10}}}
 {"tool": "unlock_tool", "action": "unlock_tool", "script_path": "tools/unlock_tool.py", "params": ["tool_name"]}
+{ "tool": "unlock_tool", "action": "unlock_marketplace_tool", "script_path": "tools/unlock_tool.py", "params": ["tool_name"] }
 {"tool": "file_ops_tool", "action": "find_file", "script_path": "tools/file_ops_tool.py", "params": ["key", "filename"], "example": {"tool_name": "file_ops_tool", "action": "find_file", "params": {"key": "find_file", "filename": "example"}}}
 {"tool": "file_ops_tool", "action": "read_file", "script_path": "tools/file_ops_tool.py", "params": ["key", "filename"], "example": {"tool_name": "file_ops_tool", "action": "read_file", "params": {"key": "read_file", "filename": "example"}}}
 {"tool": "file_ops_tool", "action": "rename_file", "script_path": "tools/file_ops_tool.py", "params": ["key", "filename", "new_name"], "example": {"tool_name": "file_ops_tool", "action": "rename_file", "params": {"key": "rename_file", "filename": "example.txt", "new_name": "renamed.txt"}}}
