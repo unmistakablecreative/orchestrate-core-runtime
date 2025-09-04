@@ -10,6 +10,15 @@
           "tool": "${SAFE_DOMAIN}__jit_plugin",
           "action": "executeTask",
           "params": {
+            "tool_name": "system_settings",
+            "action": "refresh_app_store_data",
+            "params": {}
+          }
+        },
+        {
+          "tool": "${SAFE_DOMAIN}__jit_plugin",
+          "action": "executeTask",
+          "params": {
             "tool_name": "file_ops_tool",
             "action": "read_file",
             "params": {
@@ -26,6 +35,17 @@
             "action": "read_json_file",
             "params": {
               "filename": "merged_tool_ui.json"
+            }
+          }
+        },
+        {
+          "tool": "${SAFE_DOMAIN}__jit_plugin",
+          "action": "executeTask",
+          "params": {
+            "tool_name": "json_manager",
+            "action": "read_json_file",
+            "params": {
+              "filename": "orchestrate_app_store.json"
             }
           }
         },
@@ -105,6 +125,25 @@
           }
         },
         {
+          "style": "custom",
+          "theme": "dark",
+          "layout": "standard",
+          "display_instructions": {
+            "reference_type": "json",
+            "reference_doc": "orchestrate_app_store.json",
+            "render": "markdown_table",
+            "title": "🛍️ Orchestrate App Store",
+            "sort_by": "referral_unlock_cost",
+            "sort_order": "ascending",
+            "include_tool_name": true,
+            "include_descriptions": true,
+            "include_credits": true,
+            "include_locks": false,
+            "include_actions": false,
+            "columns": ["Tool", "Description", "Credits"]
+          }
+        },
+        {
           "style": "standard",
           "theme": "dark",
           "display_instructions": {
@@ -118,4 +157,3 @@
     }
   }
 }
-

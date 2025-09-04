@@ -11,6 +11,12 @@
       "description": "Create pages, update tasks, or search workspace content using Orchestrate-powered flows.",
       "priority": 2,
       "referral_unlock_cost": 2
+    },
+    "convertkit_tool": {
+      "label": "ConvertKit",
+      "description": "Create, update, and analyze email broadcasts and subscriber activity inside OrchestrateOS.",
+      "priority": 3,
+      "referral_unlock_cost": 20
     }
   },
   "display_mode": "table",
