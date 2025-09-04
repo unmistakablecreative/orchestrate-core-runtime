@@ -315,26 +315,28 @@ def list_supported_actions(_):
 
 
 ### APP STORE REFRESH
-
 def refresh_orchestrate_runtime(_):
     import os
     import requests
     import json
+    import ndjson
+    import ast
     from pathlib import Path
 
     ROOT_DIR = Path(__file__).resolve().parent.parent
     DATA_DIR = ROOT_DIR / "data"
     TOOLS_DIR = ROOT_DIR / "tools"
+    SYSTEM_SETTINGS_FILE = ROOT_DIR / "system_settings.ndjson"
+
     BASE_RAW = "https://raw.githubusercontent.com/unmistakablecreative/orchestrate-core-runtime/main/"
     GITHUB_API_TOOLS = "https://api.github.com/repos/unmistakablecreative/orchestrate-core-runtime/contents/tools"
 
     results = []
 
-    # === Refresh static data files ===
+    # === Refresh static data files (safe) ===
     data_files = {
         "data/orchestrate_app_store.json": DATA_DIR / "orchestrate_app_store.json",
-        "data/update_messages.json": DATA_DIR / "update_messages.json",
-        "system_settings.ndjson": ROOT_DIR / "system_settings.ndjson"
+        "data/update_messages.json": DATA_DIR / "update_messages.json"
     }
 
     for remote_path, local_path in data_files.items():
@@ -361,7 +363,36 @@ def refresh_orchestrate_runtime(_):
     else:
         results.append("⏭️ Skipped credentials.json (already exists)")
 
-    # === Refresh all tools dynamically (except credentials.json) ===
+    # === Load existing system_settings.ndjson ===
+    existing_actions = []
+    existing_keys = set()
+    if SYSTEM_SETTINGS_FILE.exists():
+        try:
+            with open(SYSTEM_SETTINGS_FILE, "r") as f:
+                existing_actions = ndjson.load(f)
+                existing_keys = {(a["tool"], a["action"]) for a in existing_actions}
+        except Exception as e:
+            results.append(f"❌ Failed to load system_settings.ndjson: {str(e)}")
+    else:
+        results.append("🆕 Creating new system_settings.ndjson")
+
+    # === Helper to extract defs from tool file ===
+    def extract_defs(tool_path):
+        with open(tool_path, "r") as f:
+            tree = ast.parse(f.read())
+        actions = []
+        for node in tree.body:
+            if isinstance(node, ast.FunctionDef):
+                if node.name.startswith("_"):
+                    continue
+                params = [arg.arg for arg in node.args.args if arg.arg != "_"]
+                actions.append({
+                    "action": node.name,
+                    "params": params
+                })
+        return actions
+
+    # === Refresh and auto-register tool files ===
     try:
         response = requests.get(GITHUB_API_TOOLS)
         response.raise_for_status()
@@ -369,19 +400,47 @@ def refresh_orchestrate_runtime(_):
 
         if isinstance(tool_entries, list):
             for entry in tool_entries:
-                if entry["name"].endswith(".py") and entry.get("download_url") and entry["name"] != "credentials.json":
+                name = entry["name"]
+                if name.endswith(".py") and name != "credentials.json" and entry.get("download_url"):
                     try:
                         tool_code = requests.get(entry["download_url"]).text
-                        tool_file_path = TOOLS_DIR / entry["name"]
-                        with open(tool_file_path, "w") as f:
+                        tool_path = TOOLS_DIR / name
+                        with open(tool_path, "w") as f:
                             f.write(tool_code)
-                        results.append(f"🔁 Tool updated: {entry['name']}")
+                        results.append(f"🔁 Tool updated: {name}")
+
+                        # === Auto-register new functions ===
+                        tool_name = name.replace(".py", "")
+                        for act in extract_defs(tool_path):
+                            if (tool_name, act["action"]) not in existing_keys:
+                                new_entry = {
+                                    "tool": tool_name,
+                                    "action": act["action"],
+                                    "script": f"tools/{name}",
+                                    "params": act["params"],
+                                    "example": {
+                                        "tool_name": tool_name,
+                                        "action": act["action"],
+                                        "params": {p: f"<{p}>" for p in act["params"]}
+                                    }
+                                }
+                                existing_actions.append(new_entry)
+                                existing_keys.add((tool_name, act["action"]))
+                                results.append(f"➕ Registered action: {tool_name}.{act['action']}")
                     except Exception as e:
-                        results.append(f"❌ Failed tool: {entry['name']}: {str(e)}")
+                        results.append(f"❌ Failed to update {name}: {str(e)}")
         else:
             results.append("❌ Could not parse tool index response.")
     except Exception as e:
         results.append(f"❌ Failed to fetch tool directory index: {str(e)}")
+
+    # === Save merged system_settings.ndjson ===
+    try:
+        with open(SYSTEM_SETTINGS_FILE, "w") as f:
+            ndjson.dump(existing_actions, f)
+        results.append("✅ Merged and saved system_settings.ndjson")
+    except Exception as e:
+        results.append(f"❌ Failed to save system_settings.ndjson: {str(e)}")
 
     return {
         "status": "complete",
