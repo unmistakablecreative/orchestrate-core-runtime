@@ -315,6 +315,7 @@ def list_supported_actions(_):
 
 
 ### APP STORE REFRESH
+
 def refresh_orchestrate_runtime(_):
     import os
     import requests
@@ -348,7 +349,19 @@ def refresh_orchestrate_runtime(_):
         except Exception as e:
             results.append(f"❌ Failed to refresh {remote_path}: {str(e)}")
 
-    # === Refresh all tools dynamically ===
+    # === Protect credentials.json ===
+    credentials_path = TOOLS_DIR / "credentials.json"
+    if not credentials_path.exists():
+        try:
+            with open(credentials_path, "w") as f:
+                f.write("{}")
+            results.append("🛡️ Created blank credentials.json (did not exist)")
+        except Exception as e:
+            results.append(f"❌ Could not create credentials.json: {str(e)}")
+    else:
+        results.append("⏭️ Skipped credentials.json (already exists)")
+
+    # === Refresh all tools dynamically (except credentials.json) ===
     try:
         response = requests.get(GITHUB_API_TOOLS)
         response.raise_for_status()
@@ -356,7 +369,7 @@ def refresh_orchestrate_runtime(_):
 
         if isinstance(tool_entries, list):
             for entry in tool_entries:
-                if entry["name"].endswith(".py") and entry.get("download_url"):
+                if entry["name"].endswith(".py") and entry.get("download_url") and entry["name"] != "credentials.json":
                     try:
                         tool_code = requests.get(entry["download_url"]).text
                         tool_file_path = TOOLS_DIR / entry["name"]
@@ -374,6 +387,8 @@ def refresh_orchestrate_runtime(_):
         "status": "complete",
         "messages": results
     }
+
+
 
 # === Dispatch Map ===
 dispatch_map = {
