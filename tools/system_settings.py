@@ -392,10 +392,10 @@ dispatch_map = {
     "list_memory_files": list_memory_files,
     "build_working_memory": build_working_memory,
     "list_supported_actions": list_supported_actions,
-    "refresh_app_store_data": refresh_app_store_data,
-    "refresh_orchestrate_runtime": refresh_orchestrate_runtime,  # ✅ NEW
-    "install_tool": install_tool  # ✅ Already present
+    "refresh_orchestrate_runtime": refresh_orchestrate_runtime,
+    "install_tool": install_tool
 }
+
 
 
 # === Entrypoint ===
