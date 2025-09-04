@@ -315,35 +315,65 @@ def list_supported_actions(_):
 
 
 ### APP STORE REFRESH
-def refresh_app_store_data(_):
+def refresh_orchestrate_runtime(_):
+    import os
     import requests
+    import json
+    from pathlib import Path
 
-    FILES = {
-        "orchestrate_app_store.json": "https://raw.githubusercontent.com/unmistakablecreative/orchestrate-core-runtime/main/data/orchestrate_app_store.json",
-        "update_messages.json": "https://raw.githubusercontent.com/unmistakablecreative/orchestrate-core-runtime/main/data/update_messages.json"
-    }
+    ROOT_DIR = Path(__file__).resolve().parent.parent
+    DATA_DIR = ROOT_DIR / "data"
+    TOOLS_DIR = ROOT_DIR / "tools"
+    BASE_RAW = "https://raw.githubusercontent.com/unmistakablecreative/orchestrate-core-runtime/main/"
+    GITHUB_API_TOOLS = "https://api.github.com/repos/unmistakablecreative/orchestrate-core-runtime/contents/tools"
 
     results = []
-    data_dir = os.path.join(ROOT_DIR, "data")
-    os.makedirs(data_dir, exist_ok=True)
 
-    for filename, url in FILES.items():
+    # === Refresh static data files ===
+    data_files = {
+        "data/orchestrate_app_store.json": DATA_DIR / "orchestrate_app_store.json",
+        "data/update_messages.json": DATA_DIR / "update_messages.json",
+        "system_settings.ndjson": ROOT_DIR / "system_settings.ndjson"
+    }
+
+    for remote_path, local_path in data_files.items():
         try:
+            url = BASE_RAW + remote_path
             response = requests.get(url)
             response.raise_for_status()
-            local_path = os.path.join(data_dir, filename)
+            local_path.parent.mkdir(parents=True, exist_ok=True)
             with open(local_path, "w") as f:
                 f.write(response.text)
-            results.append(f"✅ {filename} refreshed.")
+            results.append(f"✅ Refreshed: {remote_path}")
         except Exception as e:
-            results.append(f"❌ Failed to refresh {filename}: {str(e)}")
+            results.append(f"❌ Failed to refresh {remote_path}: {str(e)}")
+
+    # === Refresh all tools dynamically ===
+    try:
+        response = requests.get(GITHUB_API_TOOLS)
+        response.raise_for_status()
+        tool_entries = response.json()
+
+        if isinstance(tool_entries, list):
+            for entry in tool_entries:
+                if entry["name"].endswith(".py") and entry.get("download_url"):
+                    try:
+                        tool_code = requests.get(entry["download_url"]).text
+                        tool_file_path = TOOLS_DIR / entry["name"]
+                        with open(tool_file_path, "w") as f:
+                            f.write(tool_code)
+                        results.append(f"🔁 Tool updated: {entry['name']}")
+                    except Exception as e:
+                        results.append(f"❌ Failed tool: {entry['name']}: {str(e)}")
+        else:
+            results.append("❌ Could not parse tool index response.")
+    except Exception as e:
+        results.append(f"❌ Failed to fetch tool directory index: {str(e)}")
 
     return {
         "status": "complete",
         "messages": results
     }
-
-
 
 # === Dispatch Map ===
 dispatch_map = {
@@ -363,7 +393,8 @@ dispatch_map = {
     "build_working_memory": build_working_memory,
     "list_supported_actions": list_supported_actions,
     "refresh_app_store_data": refresh_app_store_data,
-    "install_tool": install_tool  # ✅ Just added
+    "refresh_orchestrate_runtime": refresh_orchestrate_runtime,  # ✅ NEW
+    "install_tool": install_tool  # ✅ Already present
 }
 
 
