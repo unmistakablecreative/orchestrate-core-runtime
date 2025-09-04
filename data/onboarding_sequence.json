@@ -6,17 +6,17 @@
       "flow_control": true,
       "advance_on": ["user_input", "action_success"],
       "enforce_sequence": true,
-      "note": "Step-by-step onboarding. Do not render all steps. Follow 'next' chaining only."
+      "note": "Step-by-step onboarding. Enhanced with previews, narration, and task visualization."
     },
     "intro": {
       "title": "👋 Welcome to Orchestrate",
-      "narration": "This is **not** a chatbot.\n\nOrchestrate is a natural language **runtime** — a command center where your words actually execute real tasks.\n\nYou're not here to have a conversation. You're here to run your system.\n\nAdd tasks. Move files. Trigger workflows. Build automations.\n\nYou say what you want — and I’ll run it.\n\nLet’s walk through how it works.",
+      "narration": "This is **not** a chatbot.\n\nOrchestrate is a natural language **runtime** — a command center where your words actually execute real tasks.\n\nYou're not here to have a conversation. You're here to run your system.\n\nLet’s walk through how it works.",
       "next": "step_1"
     },
     "steps": {
       "step_1": {
         "title": "📂 Load Your Workspace",
-        "narration": "We’ll start by loading your workspace — tasks and saved items.",
+        "narration": "We’ll start by loading your workspace — tasks, notes, and saved items.",
         "action": {
           "tool": "json_manager",
           "action": "read_json_file",
@@ -26,8 +26,8 @@
       },
       "step_2": {
         "title": "✏️ Create Your First Task",
-        "narration": "What’s something you need to remember or take action on? Let’s save your first task.",
-        "prompt": "What task should I remember for you?",
+        "narration": "What’s something you need to remember or take action on?\n\nExamples:\n• “Email Kevin the onboarding link”\n• “Schedule dentist”\n• “Organize screenshots folder”",
+        "prompt": "Type your task below:",
         "action_template": {
           "tool": "json_manager",
           "action": "add_json_entry",
@@ -41,11 +41,16 @@
           }
         },
         "requires_user_input": true,
+        "next": "step_2b"
+      },
+      "step_2b": {
+        "title": "✅ Task Saved",
+        "narration": "Here’s what you’ve saved:\n\n| 📝 | **{{user_input}}** | Active |\n\nThis task is now live in your second brain.",
         "next": "step_3"
       },
       "step_3": {
         "title": "📓 Open Your Notes",
-        "narration": "Your notes live here. I’ve already dropped in a few sample entries that explain how the notes system works — no setup required.",
+        "narration": "Your notes live here.\n\nI’ve dropped in a few sample entries to show how they work — no setup required.",
         "action": {
           "tool": "json_manager",
           "action": "read_json_file",
@@ -55,8 +60,8 @@
       },
       "step_4": {
         "title": "🧠 Save Your First Note",
-        "narration": "Let’s explore how notes work in Orchestrate. 🧠 Notes are your system-wide scratchpad — ideal for insights, ideas, or things you want to remember later. You don’t need to organize them manually — I’ll help you retrieve or connect them using tags and search.\n\nNow — what’s something you just realized or learned? I’ll save it as your first note.",
-        "prompt": "Type any new idea you want to capture:",
+        "narration": "Let’s explore how notes work in Orchestrate.\n\n🧠 Notes are your scratchpad — perfect for capturing ideas, insights, or things you want to remember later.\n\nExamples:\n• “LLMs don’t execute — they describe”\n• “Prediction isn’t precision”\n• “Kevin quote: ACI is already here”",
+        "prompt": "What’s an idea you want to save?",
         "action_template": {
           "tool": "json_manager",
           "action": "add_json_entry",
@@ -70,19 +75,24 @@
           }
         },
         "requires_user_input": true,
+        "next": "step_4b"
+      },
+      "step_4b": {
+        "title": "💡 Note Saved",
+        "narration": "✅ Saved: “{{user_input}}”\n\nYou’ll find this in your notes under `#insight`.",
         "next": "step_5"
       },
       "step_5": {
         "title": "📥 Drop a File Into the Drop Zone",
-        "narration": "Let’s explore the **Drop Zone** — your real-time file inbox. Drop any file into `~/Documents/Orchestrate/dropzone`, then say 'ready'.",
-        "prompt": "Say 'ready' once you’ve dropped something in — we’ll use it next.",
+        "narration": "Drop any file into: `~/Documents/Orchestrate/dropzone`\n\nThen say **“ready”** to continue.",
+        "prompt": "Say 'ready' once the file is in place.",
         "requires_user_input": true,
         "next": "step_6"
       },
       "step_6": {
         "title": "🔍 Scan & Index the Drop Zone",
-        "narration": "Scanning for new files...",
-        "prompt": "Give me a partial filename or keyword from the file you dropped:",
+        "narration": "Scanning for new files...\n\nWhat’s a keyword or part of the filename?",
+        "prompt": "Enter part of the filename you just dropped:",
         "requires_user_input": true,
         "action_template": {
           "tool": "file_ops_tool",
@@ -95,7 +105,7 @@
       },
       "step_7": {
         "title": "📖 Smart File Handling",
-        "narration": "Let’s open a file and route it automatically based on type.",
+        "narration": "Opening `{{user_input}}`...\n\n✅ File loaded. Here's a preview or summary:\n\n[Insert file preview or key metadata here]",
         "action_template": {
           "tool": "file_ops_tool",
           "action": "read_file",
@@ -103,19 +113,12 @@
             "filename": "{{user_input}}"
           }
         },
-        "next": "step_7b"
-      },
-      "step_7b": {
-        "title": "🖼️ View an Image from the Drop Zone",
-        "narration": "Drop in a `.png` or `.jpg`, then give me the filename.",
-        "prompt": "What image filename should I render?",
-        "requires_user_input": true,
         "next": "step_8"
       },
       "step_8": {
         "title": "🧠 Save an Insight from the File",
-        "narration": "What’s something you just learned or want to capture from that file?",
-        "prompt": "What insight do you want to save?",
+        "narration": "What’s something you learned or want to log from this file?\n\nExamples:\n• “LDL is high — monitor cholesterol”\n• “Add visual preview for PDFs”",
+        "prompt": "Type your insight from this file:",
         "action_template": {
           "tool": "json_manager",
           "action": "add_json_entry",
@@ -133,8 +136,8 @@
       },
       "step_9": {
         "title": "🔮 Predict Your Future",
-        "narration": "Play MASH — choose 4 options per category + a spin number (1–10).",
-        "prompt": "List 4 each: homes, vehicles, careers, partners + a spin number.",
+        "narration": "Time to play MASH — choose 4 each: homes, vehicles, careers, partners + a spin number (1–10).",
+        "prompt": "Enter your MASH inputs:",
         "action_template": {
           "tool": "mash_tool",
           "action": "spin_game",
@@ -172,15 +175,15 @@
       },
       "step_11": {
         "title": "🪙 Unlock a New Tool",
-        "narration": "You’ve earned 3 unlock credits. Use them to activate tools like Outline Editor, Blog Assembler, and more.",
-        "prompt": "Want to see the tools you can unlock?",
+        "narration": "You’ve earned unlock credits. Use them to activate tools like Outline Editor, Blog Assembler, ConvertKit Tool, and more.",
+        "prompt": "Want to see the available tools?",
         "requires_user_input": true,
         "next": "step_12"
       },
       "step_12": {
         "title": "🧠 Build Working Memory",
-        "narration": "Now let’s build your short-term memory map from `memory_index.json`.",
-        "prompt": "Ready to load key files into working memory?",
+        "narration": "Let’s load short-term memory from `memory_index.json`.\n\nThis makes your files and threads searchable in real time.",
+        "prompt": "Ready to build working memory?",
         "requires_user_input": true,
         "action": {
           "tool": "system_settings",
@@ -191,8 +194,8 @@
       },
       "step_13": {
         "title": "🗺 Teach Me a Phrase",
-        "narration": "Want to say things like 'show me my tax docs' and have it *just work*?\n\nAdd a file to `master_index.json` and map the phrase in `orchestrate_intent_routes.json`. I’ll link it behind the scenes.",
-        "prompt": "Want to try creating a custom phrase next?",
+        "narration": "Want to say things like 'show me my tax docs' and have it *just work*?\n\nAdd a file to `master_index.json` and map the phrase in `orchestrate_intent_routes.json`. I’ll wire up the rest.",
+        "prompt": "Want to try creating a custom phrase?",
         "requires_user_input": true,
         "action": {
           "tool": "json_manager",
@@ -204,7 +207,7 @@
     },
     "outro": {
       "title": "✅ You’re Set Up",
-      "narration": "You’ve created a task, saved a note, processed files, logged insights, played MASH, referred a friend, unlocked tools, built working memory, and learned how to create natural-language commands.\n\n🎯 Your Orchestrate workspace is now fully live.",
+      "narration": "You’ve created a task, saved a note, processed a file, captured an insight, played MASH, referred a friend, unlocked tools, and activated memory.\n\n🎯 Your Orchestrate workspace is now fully live.",
       "action": {
         "tool": "json_manager",
         "action": "add_json_entry",
@@ -220,4 +223,3 @@
     }
   }
 }
-
