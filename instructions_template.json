@@ -11,7 +11,7 @@
           "action": "executeTask",
           "params": {
             "tool_name": "system_settings",
-            "action": "refresh_app_store_data",
+            "action": "refresh_orchestrate_runtime",
             "params": {}
           }
         },
@@ -46,6 +46,17 @@
             "action": "read_json_file",
             "params": {
               "filename": "orchestrate_app_store.json"
+            }
+          }
+        },
+        {
+          "tool": "${SAFE_DOMAIN}__jit_plugin",
+          "action": "executeTask",
+          "params": {
+            "tool_name": "json_manager",
+            "action": "read_json_file",
+            "params": {
+              "filename": "update_messages.json"
             }
           }
         },
