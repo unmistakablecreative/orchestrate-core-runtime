@@ -4,16 +4,16 @@
       "run": [
         {
           "tool": "${SAFE_DOMAIN}__jit_plugin",
-          "action": "getSupportedActions"
-        },
-        {
-          "tool": "${SAFE_DOMAIN}__jit_plugin",
           "action": "executeTask",
           "params": {
             "tool_name": "system_settings",
             "action": "refresh_orchestrate_runtime",
             "params": {}
           }
+        },
+        {
+          "tool": "${SAFE_DOMAIN}__jit_plugin",
+          "action": "getSupportedActions"
         },
         {
           "tool": "${SAFE_DOMAIN}__jit_plugin",
@@ -101,27 +101,20 @@
           "layout": "standard",
           "display_instructions": {
             "reference_type": "json",
-            "reference_doc": "merged_tool_ui.json",
+            "reference_doc": "getSupportedActions",
             "render": "markdown_table",
-            "force_render": true,
-            "title": "🧰 All Available Tools",
-            "dynamic_fields": {
-              "status": "getSupportedActions"
+            "title": "🧰 All Available Tools (Live State)",
+            "filter": {
+              "action": "__tool__"
             },
-            "include_tool_name": "display_name",
-            "include_descriptions": true,
-            "include_locks": true,
-            "include_credits": true,
-            "include_actions": false,
-            "include_params": false,
             "sort_by": "referral_unlock_cost",
             "sort_order": "ascending",
-            "group_locked_tools": false,
-            "suppress_summary": false,
-            "lock_icon_locked": "🔒",
-            "lock_icon_unlocked": "✅",
-            "lock_icon_unknown": "—",
-            "columns": ["Tool", "Description", "Locked", "Credits"]
+            "columns": [
+              "tool",
+              "description",
+              "🔒 Lock State",
+              "referral_unlock_cost"
+            ]
           }
         },
         {
