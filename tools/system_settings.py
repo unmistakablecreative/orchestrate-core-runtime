@@ -352,6 +352,14 @@ def refresh_orchestrate_runtime(_):
         except Exception as e:
             results.append(f"❌ Failed to refresh {remote_path}: {e}")
 
+    # === Load app store metadata ===
+    try:
+        with open(DATA_DIR / "orchestrate_app_store.json", "r") as f:
+            app_store = json.load(f).get("entries", {})
+    except Exception as e:
+        app_store = {}
+        results.append(f"❌ Failed to load app store: {e}")
+
     # === Ensure credentials.json exists but never overwrite ===
     creds_path = TOOLS_DIR / "credentials.json"
     if not creds_path.exists():
@@ -360,7 +368,7 @@ def refresh_orchestrate_runtime(_):
     else:
         results.append("⏭️ Skipped credentials.json (already exists)")
 
-    # === Load existing system settings (line-by-line JSON) ===
+    # === Load existing system settings ===
     if SETTINGS_PATH.exists():
         with open(SETTINGS_PATH, "r") as f:
             existing_lines = f.readlines()
@@ -374,7 +382,7 @@ def refresh_orchestrate_runtime(_):
 
     existing_keys = {(s["tool"], s["action"]) for s in settings}
 
-    # === Helper to extract function defs from tool file ===
+    # === Helper to extract functions from tool ===
     def extract_actions(path):
         with open(path, "r") as f:
             tree = ast.parse(f.read())
@@ -384,12 +392,21 @@ def refresh_orchestrate_runtime(_):
             if isinstance(node, ast.FunctionDef) and not node.name.startswith("_")
         ]
 
-    # === Pull and process tools ===
+    # === Pull tools from GitHub ===
     try:
         tool_entries = requests.get(GITHUB_API_TOOLS).json()
         for entry in tool_entries:
             name = entry.get("name", "")
             if not name.endswith(".py") or name == "credentials.json":
+                continue
+
+            tool_name = name.replace(".py", "")
+            is_marketplace = tool_name in app_store
+            is_free = app_store.get(tool_name, {}).get("referral_unlock_cost", 1) == 0
+
+            if is_marketplace and not is_free:
+                # Tool is paid — skip unless unlocked manually
+                results.append(f"⏭️ Skipped locked marketplace tool: {tool_name}")
                 continue
 
             try:
@@ -399,9 +416,7 @@ def refresh_orchestrate_runtime(_):
                 results.append(f"🔁 Updated tool: {name}")
                 updated += 1
 
-                tool_name = name.replace(".py", "")
                 actions = extract_actions(tool_path)
-
                 for act in actions:
                     key = (tool_name, act["action"])
                     if key not in existing_keys:
