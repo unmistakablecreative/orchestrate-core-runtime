@@ -335,7 +335,7 @@ def refresh_orchestrate_runtime(_):
     updated = 0
     new_actions = []
 
-    # === Refresh shared data files ===
+    # === Refresh app store and updates ===
     data_files = {
         "data/orchestrate_app_store.json": DATA_DIR / "orchestrate_app_store.json",
         "data/update_messages.json": DATA_DIR / "update_messages.json"
@@ -360,7 +360,7 @@ def refresh_orchestrate_runtime(_):
         app_store = {}
         results.append(f"❌ Failed to load app store: {e}")
 
-    # === Ensure credentials.json exists but never overwrite ===
+    # === Ensure credentials.json exists ===
     creds_path = TOOLS_DIR / "credentials.json"
     if not creds_path.exists():
         creds_path.write_text("{}")
@@ -368,21 +368,21 @@ def refresh_orchestrate_runtime(_):
     else:
         results.append("⏭️ Skipped credentials.json (already exists)")
 
-    # === Load existing system settings ===
+    # === Load existing settings
     if SETTINGS_PATH.exists():
         with open(SETTINGS_PATH, "r") as f:
             existing_lines = f.readlines()
         try:
             settings = [json.loads(line) for line in existing_lines]
         except Exception as e:
-            results.append(f"❌ Failed to parse existing system_settings.ndjson: {e}")
+            results.append(f"❌ Failed to parse system_settings.ndjson: {e}")
             settings = []
     else:
         settings = []
 
     existing_keys = {(s["tool"], s["action"]) for s in settings}
 
-    # === Helper to extract functions from tool ===
+    # === Helper: extract function defs ===
     def extract_actions(path):
         with open(path, "r") as f:
             tree = ast.parse(f.read())
@@ -392,7 +392,7 @@ def refresh_orchestrate_runtime(_):
             if isinstance(node, ast.FunctionDef) and not node.name.startswith("_")
         ]
 
-    # === Pull tools from GitHub ===
+    # === Pull and process tool scripts ===
     try:
         tool_entries = requests.get(GITHUB_API_TOOLS).json()
         for entry in tool_entries:
@@ -404,11 +404,12 @@ def refresh_orchestrate_runtime(_):
             is_marketplace = tool_name in app_store
             is_free = app_store.get(tool_name, {}).get("referral_unlock_cost", 1) == 0
 
+            # ✅ Skip locked marketplace tools (don't even download them)
             if is_marketplace and not is_free:
-                # Tool is paid — skip unless unlocked manually
                 results.append(f"⏭️ Skipped locked marketplace tool: {tool_name}")
                 continue
 
+            # ✅ Only download allowed tools
             try:
                 tool_code = requests.get(entry["download_url"]).text
                 tool_path = TOOLS_DIR / name
@@ -416,6 +417,7 @@ def refresh_orchestrate_runtime(_):
                 results.append(f"🔁 Updated tool: {name}")
                 updated += 1
 
+                # === Extract + register actions
                 actions = extract_actions(tool_path)
                 for act in actions:
                     key = (tool_name, act["action"])
@@ -433,9 +435,9 @@ def refresh_orchestrate_runtime(_):
             except Exception as e:
                 results.append(f"❌ Failed to process {name}: {e}")
     except Exception as e:
-        results.append(f"❌ Could not fetch tools: {e}")
+        results.append(f"❌ Could not fetch tools list: {e}")
 
-    # === Write merged system_settings.ndjson ===
+    # === Save merged system_settings.ndjson ===
     try:
         with open(SETTINGS_PATH, "w") as f:
             for entry in settings:
@@ -451,7 +453,6 @@ def refresh_orchestrate_runtime(_):
         "status": "complete" if updated or new_actions else "noop",
         "messages": results
     }
-
 
 
 
