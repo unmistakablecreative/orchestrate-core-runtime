@@ -129,12 +129,15 @@ def unlock_tool(tool_name):
 
 
 
-
 def unlock_marketplace_tool(tool_name):
     import subprocess
     import importlib.util
     import ast
     import builtins
+    import requests
+    import json
+    import os
+    import sys
 
     # === Config: tools that require API credentials
     credential_warnings = {
@@ -225,6 +228,8 @@ def unlock_marketplace_tool(tool_name):
         }
 
     cost = store_entry.get("referral_unlock_cost", 1)
+    description = store_entry.get("description", "No description available.")
+
     if available_credits < cost:
         return {
             "status": "locked",
@@ -264,13 +269,14 @@ def unlock_marketplace_tool(tool_name):
             for entry in data:
                 f.write(json.dumps(entry) + "\n")
 
-    def register_tool(tool_name, script_path):
+    def register_tool(tool_name, script_path, description, cost):
         settings = load_settings()
         tool_entry_found = False
         for entry in settings:
             if entry["tool"] == tool_name and entry["action"] == "__tool__":
                 entry["locked"] = False
-                entry["referral_unlock_cost"] = 0
+                entry["referral_unlock_cost"] = cost
+                entry["description"] = description
                 tool_entry_found = True
                 break
         if not tool_entry_found:
@@ -279,7 +285,8 @@ def unlock_marketplace_tool(tool_name):
                 "action": "__tool__",
                 "script_path": script_path,
                 "locked": False,
-                "referral_unlock_cost": 0
+                "referral_unlock_cost": cost,
+                "description": description
             })
         return settings
 
@@ -350,7 +357,7 @@ def unlock_marketplace_tool(tool_name):
     abs_path = dest_path
 
     try:
-        settings = register_tool(tool_name, script_path)
+        settings = register_tool(tool_name, script_path, description, cost)
         actions = extract_actions_from_script(abs_path, tool_name)
         settings.extend(actions)
         save_settings(settings)
