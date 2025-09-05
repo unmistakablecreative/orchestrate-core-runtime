@@ -1,46 +1,58 @@
 {
   "entries": {
-    "file_finder": {
-      "display_name": "🗂️ Find File",
-      "description": "Instantly locate any system file using smart keyword search — no path memory needed.",
-      "locked": false,
-      "credits": 0
-    },
-    "read_file": {
-      "display_name": "📖 Read File",
-      "description": "View any file’s full contents instantly, cleanly formatted for direct use or review.",
-      "locked": false,
-      "credits": 0
-    },
     "json_manager": {
       "display_name": "🧠 JSON Manager",
-      "description": "Easily edit structured data — add, update, or delete entries without breaking format.",
+      "description": "Save and manage tasks, notes, ideas, or any other structured info across your workspace.",
       "locked": false,
       "credits": 0
     },
     "system_settings": {
       "display_name": "🛠️ System Settings",
-      "description": "Control core system behavior — manage tool registry, unlock logic, and execution routing.",
+      "description": "Manage core config — tools, memory files, routing, and credentials.",
       "locked": false,
       "credits": 0
     },
-    "terminal": {
-      "display_name": "💻 Terminal Tool",
-      "description": "Run safe shell commands from inside GPT — test, debug, or inspect the environment live.",
-      "locked": true,
-      "credits": 14
+    "file_ops_tool": {
+      "display_name": "📁 File Ops",
+      "description": "Move, rename, or resolve container-local files across Orchestrate volumes.",
+      "locked": false,
+      "credits": 0
+    },
+    "unlock_tool": {
+      "display_name": "🔓 Unlock Tool",
+      "description": "Manually unlock tools using credits or referral triggers.",
+      "locked": false,
+      "credits": 0
     },
     "mash_tool": {
-      "display_name": "🎲 MASH",
-      "description": "Play a nostalgic logic game that generates randomized future outcomes for fun or storytelling.",
+      "display_name": "🎲 MASH Game",
+      "description": "Play the classic MASH game — generate a random, funny future.",
       "locked": false,
       "credits": 0
     },
-    "buffer_engine": {
-      "display_name": "📤 Buffer Engine",
-      "description": "Draft, schedule, and auto-publish content to social channels — no manual posting needed.",
+    "check_credits": {
+      "display_name": "💰 Check Credits",
+      "description": "View your remaining unlock credits and tools currently unlocked.",
+      "locked": false,
+      "credits": 0
+    },
+    "outline_editor": {
+      "display_name": "🧱 Outline Editor",
+      "description": "Create structured content documents with sections, links, and collections.",
       "locked": true,
-      "credits": 6
+      "credits": 2
+    },
+    "mem_tool": {
+      "display_name": "🧠 Mem Tool",
+      "description": "Capture personal insights or notes and sync them into Mem.",
+      "locked": true,
+      "credits": 4
+    },
+    "readwise_tool": {
+      "display_name": "📚 Readwise Tool",
+      "description": "Import and explore highlights from your synced Readwise library.",
+      "locked": true,
+      "credits": 4
     },
     "article_builder_tool": {
       "display_name": "✍️ Article Builder",
@@ -48,39 +60,51 @@
       "locked": true,
       "credits": 6
     },
-    "outline_editor": {
-      "display_name": "🧱 Outline Editor",
-      "description": "Build, manage, and publish clean content documents with deep structure and backlinks.",
+    "buffer_engine": {
+      "display_name": "📤 Buffer Engine",
+      "description": "Schedule and auto-publish content to social media platforms.",
       "locked": true,
-      "credits": 2
-    },
-    "mem_tool": {
-      "display_name": "🧠 Mem",
-      "description": "Send notes, ideas, or transcripts directly into Mem — perfect for cross-app capture.",
-      "locked": true,
-      "credits": 4
+      "credits": 6
     },
     "github_tool_universal": {
-      "display_name": "📁 GitHub",
-      "description": "Push updates, clone repos, or commit changes — all through GPT-managed automation.",
+      "display_name": "📁 GitHub Universal",
+      "description": "Manage repos, commits, and pushes to GitHub from within GPT.",
       "locked": true,
       "credits": 8
     },
     "ideogram_tool": {
       "display_name": "🎨 Ideogram",
-      "description": "Generate beautiful AI-driven visuals from simple prompts — great for headers or assets.",
+      "description": "Generate beautiful AI-driven images for documents or social posts.",
       "locked": true,
       "credits": 8
     },
+    "composer": {
+      "display_name": "🎼 Composer",
+      "description": "Build and dispatch multi-step automations by chaining tool actions.",
+      "locked": true,
+      "credits": 12
+    },
+    "terminal": {
+      "display_name": "💻 Terminal",
+      "description": "Run safe shell commands, tail logs, or stream live output.",
+      "locked": true,
+      "credits": 14
+    },
     "code_editor": {
-      "display_name": "💻 Code Editor",
-      "description": "Create, patch, or inject code into live tools — works with blueprints or raw scripts.",
+      "display_name": "🧑‍💻 Code Editor",
+      "description": "Create, modify, or patch Python-based tools and scripts.",
       "locked": true,
       "credits": 24
+    },
+    "universal_integrator": {
+      "display_name": "🌐 Universal Integrator",
+      "description": "Trigger any API, connect webhooks, and orchestrate external systems.",
+      "locked": true,
+      "credits": 32
     }
   },
   "display_mode": "table",
   "theme": "dark",
   "legend": true,
-  "sort_by": "custom"
+  "sort_by": "referral_unlock_cost"
 }
