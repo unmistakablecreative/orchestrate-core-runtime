@@ -25,14 +25,8 @@
       "credits": 0
     },
     "mash_tool": {
-      "display_name": "🎲 MASH Game",
+      "display_name": "🎲 MASH",
       "description": "Play the classic MASH game — generate a random, funny future.",
-      "locked": false,
-      "credits": 0
-    },
-    "check_credits": {
-      "display_name": "💰 Check Credits",
-      "description": "View your remaining unlock credits and tools currently unlocked.",
       "locked": false,
       "credits": 0
     },
@@ -49,7 +43,7 @@
       "credits": 4
     },
     "readwise_tool": {
-      "display_name": "📚 Readwise Tool",
+      "display_name": "📚 Readwise",
       "description": "Import and explore highlights from your synced Readwise library.",
       "locked": true,
       "credits": 4
@@ -67,7 +61,7 @@
       "credits": 6
     },
     "github_tool_universal": {
-      "display_name": "📁 GitHub Universal",
+      "display_name": "📁 GitHub",
       "description": "Manage repos, commits, and pushes to GitHub from within GPT.",
       "locked": true,
       "credits": 8
@@ -96,6 +90,12 @@
       "locked": true,
       "credits": 24
     },
+    "check_credits": {
+      "display_name": "💰 Check Credits",
+      "description": "View your remaining unlock credits and tools currently unlocked.",
+      "locked": false,
+      "credits": 0
+    },
     "universal_integrator": {
       "display_name": "🌐 Universal Integrator",
       "description": "Trigger any API, connect webhooks, and orchestrate external systems.",
@@ -108,3 +108,4 @@
   "legend": true,
   "sort_by": "referral_unlock_cost"
 }
+
