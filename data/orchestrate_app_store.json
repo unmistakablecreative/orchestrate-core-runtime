@@ -17,6 +17,12 @@
       "description": "Create, update, and analyze email broadcasts and subscriber activity inside OrchestrateOS.",
       "priority": 3,
       "referral_unlock_cost": 20
+    },
+    "gamma_tool": {
+      "label": "Gamma",
+      "description": "Generate slide decks automatically from structured text using the Gamma API — no design skills needed.",
+      "priority": 4,
+      "referral_unlock_cost": 25
     }
   },
   "display_mode": "table",
