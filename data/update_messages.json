@@ -1,9 +1,9 @@
 {
-  "visible": true,
-  "message": "✨GPT you're a moron at writing code",
-  "timestamp": "2025-06-01T22:00:00Z",
-  "action": {
-    "label": "Unlock Media Manager",
-    "tool": "media_manager"
+  "entries": {
+    "update_2025_09_04": {
+      "visible": true,
+      "message": "✨ GPT you're a moron at writing code",
+      "timestamp": "2025-09-04T00:00:00Z"
+    }
   }
 }
