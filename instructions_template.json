@@ -34,17 +34,6 @@
             "tool_name": "json_manager",
             "action": "read_json_file",
             "params": {
-              "filename": "merged_tool_ui.json"
-            }
-          }
-        },
-        {
-          "tool": "${SAFE_DOMAIN}__jit_plugin",
-          "action": "executeTask",
-          "params": {
-            "tool_name": "json_manager",
-            "action": "read_json_file",
-            "params": {
               "filename": "orchestrate_app_store.json"
             }
           }
@@ -111,7 +100,7 @@
           "theme": "dark",
           "layout": "standard",
           "display_instructions": {
-            "reference_type": "tool_ui_json",
+            "reference_type": "json",
             "reference_doc": "merged_tool_ui.json",
             "render": "markdown_table",
             "force_render": true,
@@ -152,6 +141,17 @@
             "include_locks": false,
             "include_actions": false,
             "columns": ["Tool", "Description", "Credits"]
+          }
+        },
+        {
+          "style": "custom",
+          "theme": "dark",
+          "layout": "standard",
+          "display_instructions": {
+            "reference_type": "json",
+            "reference_doc": "update_messages.json",
+            "render": "json_panel",
+            "title": "🔔 System Updates"
           }
         },
         {
