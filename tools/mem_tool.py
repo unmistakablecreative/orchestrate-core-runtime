@@ -1,59 +1,90 @@
-import requests
-import json
+#!/usr/bin/env python3
 import os
+import json
 import argparse
+import requests
 
-CREDENTIALS_FILE = "credentials.json"
-MEM_API_URL = "https://api.mem.ai/v1/mems"  # Adjust endpoint if needed
+# === CONFIG ===
+BASE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+CREDENTIALS_PATH = os.path.join(BASE_DIR, "tools", "credentials.json")
 
-def load_api_key():
-    if os.path.exists(CREDENTIALS_FILE):
-        with open(CREDENTIALS_FILE, "r") as f:
-            creds = json.load(f)
-        return creds.get("mem_api_key")
-    return None
+API_BASE = "https://api.mem.ai/v2"
+HEADERS = {
+    "Content-Type": "application/json",
+    "Authorization": f"Bearer {json.load(open(CREDENTIALS_PATH)).get('MEM_API_KEY', '')}"
+}
 
-def execute_action(action, params):
-    api_key = load_api_key()
-    if not api_key:
-        return {"status": "error", "message": "Missing API key in credentials.json"}
+# === HELPERS ===
+def handle_response(res):
+    try:
+        res.raise_for_status()
+        return res.json()
+    except requests.exceptions.HTTPError:
+        return {"status": "error", "message": res.text}
+    except Exception as e:
+        return {"status": "error", "message": str(e)}
 
-    headers = {"Authorization": f"Bearer {api_key}", "Content-Type": "application/json"}
-    content = params.get("input", "")
+# === TOOL ACTIONS ===
+def create_note(params):
+    payload = {
+        "content": params.get("content")
+    }
+    return handle_response(requests.post(f"{API_BASE}/notes", headers=HEADERS, json=payload))
 
-    if action == "create_mem":
-        response = requests.post(MEM_API_URL, headers=headers, json={"content": content})
-        try:
-            return response.json() if response.status_code == 200 else {"status": "error", "message": "API request failed"}
-        except json.JSONDecodeError:
-            return {"status": "error", "message": "Invalid JSON response from Mem."}
-    else:
-        return {"status": "error", "message": "Invalid action or missing parameters."}
+def read_note(params):
+    note_id = params.get("note_id")
+    return handle_response(requests.get(f"{API_BASE}/notes/{note_id}", headers=HEADERS))
+
+def delete_note(params):
+    note_id = params.get("note_id")
+    return handle_response(requests.delete(f"{API_BASE}/notes/{note_id}", headers=HEADERS))
+
+def mem_it(params):
+    payload = {
+        "input": params.get("input")
+    }
+    if params.get("instructions"):
+        payload["instructions"] = params.get("instructions")
+    return handle_response(requests.post(f"{API_BASE}/mem-it", headers=HEADERS, json=payload))
+
+def create_collection(params):
+    payload = {
+        "title": params.get("title")
+    }
+    if params.get("description"):
+        payload["description"] = params.get("description")
+    return handle_response(requests.post(f"{API_BASE}/collections", headers=HEADERS, json=payload))
+
+def delete_collection(params):
+    cid = params.get("collection_id")
+    return handle_response(requests.delete(f"{API_BASE}/collections/{cid}", headers=HEADERS))
+
+def ping(_):
+    return handle_response(requests.get(f"{API_BASE}/notes/bogus-id", headers=HEADERS))
+
+# === CLI ENTRYPOINT ===
+ACTIONS = {
+    "create_note": create_note,
+    "read_note": read_note,
+    "delete_note": delete_note,
+    "mem_it": mem_it,
+    "create_collection": create_collection,
+    "delete_collection": delete_collection,
+    "ping": ping
+}
 
 def main():
-    parser = argparse.ArgumentParser(description="Mem Tool")
-    parser.add_argument("action", help="Action to perform")
-    parser.add_argument("--params", type=str, required=True, help="JSON-encoded parameters")
+    parser = argparse.ArgumentParser()
+    parser.add_argument("action", choices=list(ACTIONS.keys()))
+    parser.add_argument("--params", type=str, default="{}")
     args = parser.parse_args()
 
-    if args.action == "get_supported_actions":
-        output = {
-            "mem_tool": {
-                "description": "Creates notes inside your Mem workspace.",
-                "functions": ["create_mem"]
-            }
-        }
-        print(json.dumps(output, indent=4))
-        return
-
     try:
-        params_dict = json.loads(args.params)
-    except json.JSONDecodeError:
-        print(json.dumps({"status": "error", "message": "Invalid JSON format."}, indent=4))
-        return
-
-    result = execute_action(args.action, params_dict)
-    print(json.dumps(result, indent=4))
+        params = json.loads(args.params)
+        result = ACTIONS[args.action](params)
+        print(json.dumps(result, indent=2))
+    except Exception as e:
+        print(json.dumps({"status": "error", "message": str(e)}))
 
 if __name__ == "__main__":
     main()
