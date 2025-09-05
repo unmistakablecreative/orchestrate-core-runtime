@@ -177,6 +177,7 @@ async def execute_task(request: Request):
         return JSONResponse(status_code=500, content={"error": "Execution failed", "details": str(e)})
 
 # === Supported Actions + Messages ===
+
 @app.get("/get_supported_actions")
 def get_supported_actions():
     try:
@@ -185,6 +186,12 @@ def get_supported_actions():
 
         with open(SYSTEM_REGISTRY, "r") as f:
             entries = [json.loads(line.strip()) for line in f if line.strip()]
+
+        # 🔓 Inject readable lock status for display
+        for entry in entries:
+            if entry.get("action") == "__tool__":
+                is_locked = entry.get("locked", True)
+                entry["🔒 Lock State"] = "✅ Unlocked" if not is_locked else "❌ Locked"
 
         update_messages_path = os.path.join(BASE_DIR, "data", "update_messages.json")
         update_messages = []
@@ -202,6 +209,11 @@ def get_supported_actions():
     except Exception as e:
         logging.error(f"🚨 Failed to load registry or update messages: {e}")
         raise HTTPException(status_code=500, detail="Could not load registry or update messages.")
+
+
+
+
+
 
 # === Memory Loader ===
 @app.post("/load_memory")
