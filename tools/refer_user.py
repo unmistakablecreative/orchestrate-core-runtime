@@ -19,7 +19,12 @@ SECONDBRAIN_PATH = os.path.expanduser("~/Library/Application Support/Orchestrate
 OUTPUT_FOLDER = os.path.join(REPO_DIR)
 
 
-def refer_user(name, email):
+def refer_user(params):
+    name = params.get("name")
+    email = params.get("email")
+    if not name or not email:
+        return {"status": "error", "message": "Missing name or email"}
+
     if not os.path.exists(CREDENTIALS_PATH):
         return {"status": "error", "message": "Missing system_identity.json"}
 
@@ -31,7 +36,7 @@ def refer_user(name, email):
         brain = json.load(f)
     referrer_name = brain.get("entries", {}).get("user_profile", {}).get("full_name", "Unknown Referrer")
 
-    # Prepare ZIP folder
+    # === Prepare ZIP ===
     safe_name = name.lower().replace(" ", "_")
     zip_name = f"Orchestrate_Installer_for_{safe_name}.zip"
     zip_path = os.path.join(OUTPUT_FOLDER, zip_name)
@@ -52,11 +57,14 @@ def refer_user(name, email):
                 arcname = os.path.relpath(abs_path, temp_dir)
                 zipf.write(abs_path, arcname)
 
+    # === Push to GitHub ===
     os.chdir(REPO_DIR)
+    os.system("git pull origin main")
     os.system(f"git add '{zip_name}' && git commit -m 'Add referral zip for {name}' && git push origin main")
 
     zip_url = f"https://github.com/unmistakablecreative/orchestrate-user-referrals/raw/main/{zip_name}"
 
+    # === Send to Airtable ===
     airtable_payload = {
         "fields": {
             "referrer_id": referrer_id,
@@ -85,6 +93,7 @@ def refer_user(name, email):
     }
 
 
+# === CLI Support
 if __name__ == "__main__":
     import argparse
 
@@ -94,7 +103,7 @@ if __name__ == "__main__":
 
     try:
         params = json.loads(args.params)
-        result = refer_user(params["name"], params["email"])
+        result = refer_user(params)
         print(json.dumps(result, indent=2))
     except Exception as e:
         print(json.dumps({"status": "error", "message": str(e)}))
