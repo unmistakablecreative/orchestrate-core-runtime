@@ -27,7 +27,7 @@ AIRTABLE_BASE_ID = "appoNbgV6oY603cjb"
 AIRTABLE_TABLE_ID = "tblpa06yXMKwflL7m"
 
 def setup_git_repo():
-    """Clone or update the git repository"""
+    """Clone or update the git repository with authentication"""
     if os.path.exists(LOCAL_REPO_DIR):
         print(f"DEBUG: Repo exists, pulling latest changes...")
         os.chdir(LOCAL_REPO_DIR)
@@ -39,12 +39,22 @@ def setup_git_repo():
             shutil.rmtree(LOCAL_REPO_DIR)
             return setup_git_repo()
     else:
-        print(f"DEBUG: Cloning repo from {REPO_URL}...")
-        result = subprocess.run(["git", "clone", REPO_URL, LOCAL_REPO_DIR], 
+        print(f"DEBUG: Cloning repo with authentication...")
+        # Use HTTPS with token authentication
+        auth_url = f"https://{GITHUB_TOKEN}@github.com/unmistakablecreative/{REPO_NAME}.git"
+        result = subprocess.run(["git", "clone", auth_url, LOCAL_REPO_DIR], 
                               capture_output=True, text=True)
         if result.returncode != 0:
             raise Exception(f"Git clone failed: {result.stderr}")
         os.chdir(LOCAL_REPO_DIR)
+    
+    # Configure git for authenticated pushes
+    subprocess.run(["git", "config", "user.email", "action@github.com"], check=False)
+    subprocess.run(["git", "config", "user.name", "GitHub Action"], check=False)
+    
+    # Set the remote URL with token for future pushes
+    auth_url = f"https://{GITHUB_TOKEN}@github.com/unmistakablecreative/{REPO_NAME}.git"
+    subprocess.run(["git", "remote", "set-url", "origin", auth_url], check=False)
     
     # Verify DMG exists in repo
     dmg_path = os.path.join(LOCAL_REPO_DIR, DMG_FILENAME)
