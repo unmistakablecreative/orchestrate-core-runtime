@@ -19,12 +19,42 @@ DMG_SOURCE_PATH = os.path.join(RUNTIME_DIR, DMG_FILENAME)
 DMG_GITHUB_URL = "https://github.com/unmistakablecreative/orchestrate-core-runtime/raw/main/orchestrate_engine_final.dmg"
 
 # === DROPBOX CONFIG ===
-DROPBOX_ACCESS_TOKEN = "sl.u.AF-EcUL8ZRy49uy6tdWzKfggQ9z1Mlvlhg497ZC0ucOXArIpofveLTUMI6JQs_ZHH_Tk2fVGjsngq8gj0S7QkNx06yL66bO0Q7IiwGNKTc0-QYvaPKPkZWsfVyKNDwaq0V3JfPie1wGV86hYBwcgspULFZDZSGEdN3Co9Cn9BA-XiEExrr6BIjs7QOLwHKoYK1uOo6V5zSj95R_l0wujSMMKNOWxftOtGiZ5m3__qNw2ELsMf4pyT_qAeHlhz-5GhrzMr--eYdCvrq_j3L5URMxHnqZFCg2xcC0_vKMoJghDQ5NYhWCFkazWGNkVA1Ja4jl9Pt1ST-S6m_TCnBej7PcR-eM1r3iOzWucp-ckM0y6m73s-ss0qPO4LSrzP70bqJTWcu1TlTgA5knM-Pt8pIoCAR0Y3P5RK0eY4PG8Kq1-0URnu2vsjjUfq_sdK2iZshk9q8XSNcDU1srAhK1ceM_emWvsx9WsVxkD1lt3rdQIIsH1MJyzFRXOZbVZHC2dBcBOqAQmakX7YExIrJfNg233CKhP_bh-5FHp42XVhz2jwtXlqtVVUrmRSh5Ojk1CBfMzuPd0an1fnw5_QN8_VT7DZJHxKFLOFCGApJ5LLZ26rGm1zsYlQJvDuHBgkbx7r_A1DYzP80t5mER0jd1vCQNpsad66MEejb00K8GugOtYe6zS5TPKrj--LE1r5p2VF4-U94njGjk-FLWd_LVINzD7I-cY9GdiPP-F3AGfhVwcklAJiyKFpRhmZbxSD5vDuFk9XqvcQgASIbtH38p1QSSEN_YimU23ftf5uOcDa1KWhzCTAvtiux9klfITTatWdKqjnMF7YDIjkJJFdw0NzYZz2ClXDe81OLZeImuWaOYpTVOWNDRCOxwS4yLB1migpK2QXmG2Nd1m134ny2nRK0FwIfPu8B0zQPAt2OsqM0v1bPQusBoKA0h41N29r_dMPJl43AbZa531ZZaLWvzOAd9e5X_vhK-MxO3wKAFQ76EogR0350SSgafY6XFWYBWXGKSTwJ-INzZ7PxbOJCiecxoJtj9JhzkQNpV951SokzeRZHV-kBrOAX75cV2a0w8fBXpp1EPgEv7OvByFKQ3MiAq-ZXoJEyZk5a7lIXymP4VYhTc0qRY8Xr710AP_QpQqB9OjIIJC8JpHr_qRZ98Ja5bHJVJbZb1kXxNk0nuX7MXskxbQ-WEI9O6IseCOSqX2iqbQch8BWUPs5L2lF9S5dG1E658Gv24ns03ymgnEzv7_H-FOK1hmdK4iPGFCGhAzc3UdPyV92QCqowVbIHpvOL1D"  # Replace with actual token
+DROPBOX_APP_KEY = "t6as3o0q6oyj5ut"
+DROPBOX_APP_SECRET = "e8qbf60g23gxec2"
+DROPBOX_REFRESH_TOKEN = "1tRiwqZsTZ4AAAAAAAAAAfc27_wasvuLOTD7SzoBfLrcRL7srZm4tEnGc8NTysRG"
+
+# Current access token (will be refreshed automatically)
+DROPBOX_ACCESS_TOKEN = "sl.u.AF_mKkX5jtEBvANUVWjP1IDVPlTd7jXYZZ6pnQh0y2qAqvE1ySqGlp5TLp1onbCOotCB-hOT8kWR0nQpXyAtG9QAtRCOdApE5KWEzRg9yiRM5GOUTBtuSm8flzDyXgvL2NxgRqJ06yJsivFQcafphGUKeM65PRfq-7YlhcheYK7_bNEaJMwXQK1RLSPRo3swVpXPaTseuQa3GbVkSdY2ejYqRXXEXl5X_C8Le_p7igzyNNB6Y3kyxEMD2ykrHMR72qsN5EiutLYyYAwfAsrMP1VZ9EtP5hRUAONNXZVSNRq8RbOWQSa-F2LEGsVradWpmRzVLWex8DIcBJvV81I59XSZweUIEuleWH0LuHA-pmMchZK0gyhzBXbZd6IBefzqDk7mWuSbDiVqrLA-BEnwOOgK4yCNc0a0_H0hyPCsoIZUrPYPhieAwYkUIcPihDCWIYZ2bWs5Do0fp3Jq5v_j4GuD5-3Ni1_fboHN7r0GGS1UaQpbN_Y0DB0SkQgNEiNmFbnYf2bHuaA_CgT2tLhbduq4J-1jeibYrLjyUhySBtIsjTcyxK0GkjC7KJkykIkr6xkfk7zWSSZJsWSpW8E46JxCWAsDE2SPgONdZ_pd6WwrtKWiOeT0CO0j3LBxgZV7KXjinc1Kd0NOwouHqXN2c6shbpOWyU3nPr9h2MwG5a5jQVH2-_eB9Si9Pe0enIeM7UXYgJGcpRtueqX2Wb4RDy1NcllBz4ZY1UmCEJFhJubSBu0VCOwtR8FHEq0z8_vkqNhTOONcn0mHNtbXtee_eAxRC-gJkMCi610iHIJvE_LT1ii3Vq94K5wjvGdt-srX-NouYhtP4KE8L30XxtJU16D7PSZJ9ApGIcHwoGSv-WEYYT5vi6o1LE7RnqO9vPpSaVKG_dQV5wdBtC5mw1QSo_SUW7Q8uF9w70I5mxz8KajstxkwtKJwZ4ilj9Hc1xGu7ZyvD6LBgyascD2J2bntaoWQYXBZl-_uWGdtEupn2rsqA5tQ1TtjvlpNPHuNoXU5Lk-rsJyKHgoZMXV314Ndk0vk_j5noypYrO4WvGamKAyrC1GhB5XtinHES539n_jfc8s5VyqjDUM2gHJbytLvBEd2wvL0ogL1rtJOd5OkydeMXbAOYY-GcrIbII65HjzjDtUJxZ2ZQcl6ydYfMSD2MpQMZA38lTYQTrouo00TdJGLjLLTU2l_22nvmxp8vV3rTB02xoK-PHF6cJZ-oqL1iV7cWhQkpKmf2ZPdL8c5z3dQYM2GpmZ8aIOOutLaE1kPUOc2dM5Yd1wPvLxxsPU1Qh4k"
 
 # === AIRTABLE CONFIG ===
 AIRTABLE_API_KEY = "patyuDyrmZz0s6bLO.7e4f3c3ca7f3a4be93d9d4f3b57c2635fd0aab5dce43bb1de2aa37ceeeda886d"
 AIRTABLE_BASE_ID = "appoNbgV6oY603cjb"
 AIRTABLE_TABLE_ID = "tblpa06yXMKwflL7m"
+
+def refresh_dropbox_token():
+    """Get a new access token using the refresh token"""
+    try:
+        print("DEBUG: Refreshing Dropbox access token...")
+        
+        url = "https://api.dropbox.com/oauth2/token"
+        data = {
+            "grant_type": "refresh_token",
+            "refresh_token": DROPBOX_REFRESH_TOKEN,
+            "client_id": DROPBOX_APP_KEY,
+            "client_secret": DROPBOX_APP_SECRET
+        }
+        
+        response = requests.post(url, data=data, timeout=30)
+        response.raise_for_status()
+        
+        token_data = response.json()
+        new_access_token = token_data["access_token"]
+        
+        print("DEBUG: Dropbox token refreshed successfully")
+        return new_access_token
+        
+    except Exception as e:
+        raise Exception(f"Failed to refresh Dropbox token: {str(e)}")
 
 def get_valid_dropbox_token():
     """Get a valid Dropbox access token, refreshing if necessary"""
