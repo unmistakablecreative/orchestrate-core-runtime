@@ -157,43 +157,57 @@ def refer_user(params):
         # === Upload to GitHub via API ===
         try:
             print("DEBUG: Uploading to GitHub via API...")
+            print(f"DEBUG: Using token: {GITHUB_TOKEN}")
             
-            # Read the ZIP file and base64 encode it
+            # Read ZIP file and encode it
             with open(zip_path, 'rb') as f:
-                zip_content = base64.b64encode(f.read()).decode('utf-8')
+                file_content = f.read()
             
-            # GitHub API upload - exact format that worked in curl
+            encoded_content = base64.b64encode(file_content).decode('utf-8')
+            
+            # Prepare API request - exact same format as working curl
             api_url = f"https://api.github.com/repos/unmistakablecreative/{REPO_NAME}/contents/{zip_name}"
-            api_headers = {
+            
+            headers = {
                 "Authorization": f"Bearer {GITHUB_TOKEN}",
                 "Content-Type": "application/json"
             }
-            api_data = {
+            
+            payload = {
                 "message": f"Add referral package for {name}",
-                "content": zip_content
+                "content": encoded_content
             }
             
             print(f"DEBUG: API URL: {api_url}")
-            print(f"DEBUG: API Headers: {api_headers}")
-            print(f"DEBUG: Content length: {len(zip_content)}")
+            print(f"DEBUG: Full auth header: '{headers['Authorization']}'")
+            print(f"DEBUG: Content length: {len(encoded_content)}")
+            print(f"DEBUG: Payload keys: {list(payload.keys())}")
             
-            api_response = requests.put(api_url, headers=api_headers, json=api_data, timeout=30)
-            print(f"DEBUG: Response status: {api_response.status_code}")
-            print(f"DEBUG: Response text: {api_response.text}")
+            # Make the API call
+            response = requests.put(api_url, headers=headers, json=payload, timeout=30)
             
-            if api_response.status_code != 201:
+            print(f"DEBUG: Response status: {response.status_code}")
+            print(f"DEBUG: Response headers: {dict(response.headers)}")
+            print(f"DEBUG: Response text: {response.text}")
+            
+            if response.status_code == 201:
+                print("DEBUG: GitHub API upload successful")
+            else:
                 return {
                     "status": "error",
-                    "message": f"GitHub API upload failed: {api_response.status_code} {api_response.reason}",
-                    "response_text": api_response.text
+                    "message": f"GitHub API upload failed: {response.status_code} {response.reason}",
+                    "response_text": response.text,
+                    "debug_info": {
+                        "url": api_url,
+                        "auth_header": headers["Authorization"],
+                        "content_size": len(encoded_content)
+                    }
                 }
             
-            print("DEBUG: GitHub API upload successful")
-            
-        except requests.exceptions.RequestException as e:
+        except Exception as e:
             return {
                 "status": "error", 
-                "message": f"GitHub API upload failed: {str(e)}"
+                "message": f"GitHub API upload exception: {str(e)}"
             }
         
         # GitHub download URL
@@ -211,7 +225,7 @@ def refer_user(params):
             }
         }
         
-        headers = {
+        airtable_headers = {
             "Authorization": f"Bearer {AIRTABLE_API_KEY}",
             "Content-Type": "application/json"
         }
@@ -219,7 +233,7 @@ def refer_user(params):
         airtable_url = f"https://api.airtable.com/v0/{AIRTABLE_BASE_ID}/{AIRTABLE_TABLE_ID}"
         
         try:
-            response = requests.post(airtable_url, headers=headers, json=airtable_data, timeout=30)
+            response = requests.post(airtable_url, headers=airtable_headers, json=airtable_data, timeout=30)
             response.raise_for_status()
             print("DEBUG: Airtable submission successful")
         except requests.exceptions.RequestException as e:
@@ -237,11 +251,10 @@ def refer_user(params):
         }
         
     except Exception as e:
-        # Catch any unexpected errors
         import traceback
         return {
             "status": "error",
-            "message": f"Unexpected error in refer_user: {str(e)}",
+            "message": f"Unexpected error: {str(e)}",
             "traceback": traceback.format_exc()
         }
 
@@ -279,6 +292,5 @@ if __name__ == "__main__":
         print(json.dumps(result, indent=2))
         sys.stdout.flush()
     except Exception as e:
-        # Fallback if JSON serialization fails
         print(f'{{"status": "error", "message": "JSON output failed: {str(e)}"}}')
         sys.stdout.flush()
