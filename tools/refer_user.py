@@ -165,7 +165,7 @@ def refer_user(params):
             # GitHub API upload
             api_url = f"https://api.github.com/repos/unmistakablecreative/{REPO_NAME}/contents/{zip_name}"
             api_headers = {
-                "Authorization": f"token {GITHUB_TOKEN}",
+                "Authorization": f"Bearer {GITHUB_TOKEN}",
                 "Content-Type": "application/json"
             }
             api_data = {
