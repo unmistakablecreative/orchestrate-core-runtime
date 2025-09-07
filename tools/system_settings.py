@@ -30,8 +30,6 @@ def set_credential(params):
 
     value = params.get("value")
     script_path = params.get("script_path")
-
-    # ⛔️ Ignore key param if script_path is provided
     raw_key_block = "" if script_path else params.get("key", "")
 
     if not value:
@@ -39,16 +37,15 @@ def set_credential(params):
 
     expected_keys = set()
 
-    # === A. Extract keys from script ===
+    # === A. Parse all referenced keys as credentials ===
     if script_path and os.path.exists(script_path):
         try:
             with open(script_path, "r", encoding="utf-8") as f:
                 content = f.read()
 
-            # Match .get("key"), load_credential("key"), and creds["KEY"]
             pattern = re.compile(
-                r"""(?:\.get|load_credential)\(['"]([A-Za-z0-9_]{4,40})['"]\)|
-                    \[\s*['"]([A-Z0-9_]{4,40})['"]\s*\]""",
+                r"""(?:\.get|load_credential)\(['"]([A-Za-z0-9_]{3,40})['"]\)|
+                    \[\s*['"]([A-Za-z0-9_]{3,40})['"]\s*\]""",
                 re.IGNORECASE | re.VERBOSE
             )
 
@@ -56,20 +53,20 @@ def set_credential(params):
             for match in matches:
                 key = match[0] or match[1]
                 if key:
-                    expected_keys.add(key)  # Use key exactly as written in script
+                    expected_keys.add(key)
 
         except Exception as e:
             return {"status": "error", "message": f"Failed to parse script: {str(e)}"}
 
-    # === B. Fallback: Pasted block like `KEY: sk-xxx`
+    # === B. Fallback (only if no script or parse failure) ===
     if not expected_keys and raw_key_block:
-        pattern = re.compile(r"""([A-Z_]{4,40})\s*[:=]\s*['"]?(sk-[a-zA-Z0-9\-]{10,})""")
+        pattern = re.compile(r"""([A-Za-z0-9_]{4,40})\s*[:=]\s*['"]?(sk-[a-zA-Z0-9\-]{10,})""")
         matches = pattern.findall(raw_key_block)
         for key, _ in matches:
             expected_keys.add(key)
 
     if not expected_keys:
-        error("Could not determine credential key(s). Provide 'script_path' or valid formatted key string.")
+        error("❌ Could not determine credential key(s). Provide a script_path or valid fallback.")
 
     # === Inject into credentials.json ===
     creds = {}
@@ -86,7 +83,7 @@ def set_credential(params):
     return {
         "status": "success",
         "keys_set": list(expected_keys),
-        "message": f"✅ Credential value injected into {len(expected_keys)} key(s)."
+        "message": f"✅ Credential injected into {len(expected_keys)} key(s)."
     }
 
 
