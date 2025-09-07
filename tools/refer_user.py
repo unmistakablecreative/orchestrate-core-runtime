@@ -26,6 +26,27 @@ AIRTABLE_API_KEY = "patyuDyrmZz0s6bLO.7e4f3c3ca7f3a4be93d9d4f3b57c2635fd0aab5dce
 AIRTABLE_BASE_ID = "appoNbgV6oY603cjb"
 AIRTABLE_TABLE_ID = "tblpa06yXMKwflL7m"
 
+def get_valid_dropbox_token():
+    """Get a valid Dropbox access token, refreshing if necessary"""
+    global DROPBOX_ACCESS_TOKEN
+    
+    # Try current token first
+    test_url = "https://api.dropboxapi.com/2/users/get_current_account"
+    headers = {"Authorization": f"Bearer {DROPBOX_ACCESS_TOKEN}"}
+    
+    try:
+        response = requests.post(test_url, headers=headers, timeout=10)
+        if response.status_code == 200:
+            print("DEBUG: Current Dropbox token is valid")
+            return DROPBOX_ACCESS_TOKEN
+    except:
+        pass
+    
+    # Token expired or invalid, refresh it
+    print("DEBUG: Current token invalid, refreshing...")
+    DROPBOX_ACCESS_TOKEN = refresh_dropbox_token()
+    return DROPBOX_ACCESS_TOKEN
+
 def ensure_dmg_exists():
     """Download DMG from GitHub if it doesn't exist locally"""
     if os.path.exists(DMG_SOURCE_PATH):
