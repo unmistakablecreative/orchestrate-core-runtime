@@ -13,7 +13,7 @@ DMG_SOURCE_PATH = os.path.join(REPO_DIR, DMG_FILENAME)
 AIRTABLE_API_KEY = "patyuDyrmZz0s6bLO.7e4f3c3ca7f3a4be93d9d4f3b57c2635fd0aab5dce43bb1de2aa37ceeeda886d"
 AIRTABLE_BASE_ID = "appoNbgV6oY603cjb"
 AIRTABLE_TABLE_ID = "tblpa06yXMKwflL7m"
-CREDENTIALS_PATH = os.path.expanduser("~/Library/Application Support/OrchestrateEngine/state/system_identity.json")
+CREDENTIALS_PATH = os.path.join(os.path.expanduser("~"), "Library", "Application Support", "OrchestrateEngine", "state", "system_identity.json")
 SECONDBRAIN_PATH = os.path.expanduser("~/Library/Application Support/OrchestrateEngine/state/secondbrain.json")
 OUTPUT_FOLDER = os.path.join(REPO_DIR)
 
