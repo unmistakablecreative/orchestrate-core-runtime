@@ -43,7 +43,7 @@ def set_credential(params):
             with open(script_path, "r", encoding="utf-8") as f:
                 content = f.read()
 
-            # Matches .get("API_KEY"), load_credential("api_key"), and creds["API_KEY"]
+            # Matches: .get("key"), load_credential("key"), creds["KEY"]
             pattern = re.compile(
                 r"""(?:\.get|load_credential)\(['"]([A-Za-z0-9_]{4,40})['"]\)|
                     \[\s*['"]([A-Z0-9_]{4,40})['"]\s*\]""",
@@ -54,17 +54,17 @@ def set_credential(params):
             for match in matches:
                 key = match[0] or match[1]
                 if key:
-                    expected_keys.add(key.upper())
+                    expected_keys.add(key)  # 🧠 DO NOT uppercase
 
         except Exception as e:
             return {"status": "error", "message": f"Failed to parse script: {str(e)}"}
 
-    # === B. Fallback: Try to extract keys from pasted input like `KEY: sk-xxx` ===
+    # === B. Fallback: Try to extract keys from pasted `KEY: sk-xxx` style
     if not expected_keys and raw_key_block:
-        pattern = re.compile(r"""([A-Z0-9_]{4,40})\s*[:=]\s*['"]?(sk-[a-zA-Z0-9\-]{10,})""")
+        pattern = re.compile(r"""([A-Z_]{4,40})\s*[:=]\s*['"]?(sk-[a-zA-Z0-9\-]{10,})""")
         matches = pattern.findall(raw_key_block)
         for key, _ in matches:
-            expected_keys.add(key.upper())
+            expected_keys.add(key)
 
     if not expected_keys:
         error("Could not determine credential key(s). Provide 'script_path' or valid formatted key string.")
