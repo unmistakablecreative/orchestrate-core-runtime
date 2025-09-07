@@ -187,7 +187,7 @@ def refer_user(params):
                 "message": f"Git operation timed out: {str(e)}"
             }
         except subprocess.CalledProcessError as e:
-            error_msg = f"Git operation failed: {e.stderr if e.stderr else str(e)}"
+            error_msg = f"Git operation failed: {str(e)}"
             print(f"DEBUG: {error_msg}")
             return {
                 "status": "error", 
