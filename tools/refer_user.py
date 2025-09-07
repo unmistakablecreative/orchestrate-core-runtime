@@ -158,11 +158,11 @@ def refer_user(params):
         try:
             print("DEBUG: Uploading to GitHub via API...")
             
-            # Read the ZIP file
+            # Read the ZIP file and base64 encode it
             with open(zip_path, 'rb') as f:
                 zip_content = base64.b64encode(f.read()).decode('utf-8')
             
-            # GitHub API upload
+            # GitHub API upload - exact format that worked in curl
             api_url = f"https://api.github.com/repos/unmistakablecreative/{REPO_NAME}/contents/{zip_name}"
             api_headers = {
                 "Authorization": f"Bearer {GITHUB_TOKEN}",
@@ -180,7 +180,14 @@ def refer_user(params):
             api_response = requests.put(api_url, headers=api_headers, json=api_data, timeout=30)
             print(f"DEBUG: Response status: {api_response.status_code}")
             print(f"DEBUG: Response text: {api_response.text}")
-            api_response.raise_for_status()
+            
+            if api_response.status_code != 201:
+                return {
+                    "status": "error",
+                    "message": f"GitHub API upload failed: {api_response.status_code} {api_response.reason}",
+                    "response_text": api_response.text
+                }
+            
             print("DEBUG: GitHub API upload successful")
             
         except requests.exceptions.RequestException as e:
