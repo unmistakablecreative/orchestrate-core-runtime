@@ -42,13 +42,50 @@ def set_credential(params):
         with open(script_path, "r", encoding="utf-8") as f:
             content = f.read()
 
-        # ✅ Only capture .get("key") or load_credential("key")
-        pattern = re.compile(r"""(?:load_credential|get)\(['"]([a-zA-Z0-9_]{3,40})['"]\)""")
-        matches = pattern.findall(content)
+        # ✅ Comprehensive pattern matching for all credential access patterns
+        patterns = [
+            # load_credential("key") or load_credential('key')
+            r'load_credential\([\'"]([a-zA-Z0-9_]{3,40})[\'"]\)',
+            
+            # creds.get("key") or creds.get('key')
+            r'creds\.get\([\'"]([a-zA-Z0-9_]{3,40})[\'"]\)',
+            
+            # creds["key"] or creds['key']
+            r'creds\[[\'"]([a-zA-Z0-9_]{3,40})[\'"]\]',
+            
+            # Any variable assignment that looks like API key loading
+            r'([A-Z_]{3,40})\s*=\s*load_credential\(',
+            
+            # Direct string references that look like API keys in the code
+            r'[\'"]([a-zA-Z0-9_]*[aA][pP][iI][_][kK][eE][yY][a-zA-Z0-9_]*)[\'"]',
+            r'[\'"]([a-zA-Z0-9_]*[tT][oO][kK][eE][nN][a-zA-Z0-9_]*)[\'"]',
+            r'[\'"]([a-zA-Z0-9_]*[sS][eE][cC][rR][eE][tT][a-zA-Z0-9_]*)[\'"]',
+        ]
 
-        for match in matches:
-            if match:
-                expected_keys.add(match)
+        for pattern in patterns:
+            matches = re.findall(pattern, content, re.IGNORECASE)
+            for match in matches:
+                if match and len(match) >= 3:  # Minimum length check
+                    # Filter out common false positives
+                    if not any(exclude in match.lower() for exclude in [
+                        'content-type', 'application/json', 'user-agent', 
+                        'authorization', 'bearer', 'basic', 'http', 'https',
+                        'text/plain', 'multipart', 'form-data'
+                    ]):
+                        expected_keys.add(match)
+
+        # Additional specific pattern for variable names that end with common API key suffixes
+        var_patterns = [
+            r'(\w*[aA][pP][iI][_]?[kK][eE][yY])\s*=',
+            r'(\w*[tT][oO][kK][eE][nN])\s*=',
+            r'(\w*[sS][eE][cC][rR][eE][tT])\s*=',
+        ]
+        
+        for pattern in var_patterns:
+            matches = re.findall(pattern, content)
+            for match in matches:
+                if len(match) >= 3:
+                    expected_keys.add(match)
 
     except Exception as e:
         return {"status": "error", "message": f"❌ Failed to parse script: {str(e)}"}
@@ -56,20 +93,26 @@ def set_credential(params):
     if not expected_keys:
         return {
             "status": "error",
-            "message": "❌ No credential keys found in script. Use load_credential() or get()."
+            "message": "❌ No credential keys found in script. Supported patterns: load_credential(), creds.get(), creds[], or API_KEY variables."
         }
 
     # === Inject into credentials.json ===
-    creds_path = "credentials.json"
+    creds_path = os.path.join(os.path.dirname(script_path), "credentials.json")
+    if not os.path.exists(creds_path):
+        # Try the tools directory as fallback
+        creds_path = "tools/credentials.json"
+        if not os.path.exists(creds_path):
+            creds_path = "credentials.json"
+    
     creds = {}
-
     if os.path.exists(creds_path):
-        with open(creds_path, "r") as f:
-            try:
+        try:
+            with open(creds_path, "r") as f:
                 creds = json.load(f)
-            except:
-                creds = {}
+        except:
+            creds = {}
 
+    # Set all found keys to the same value
     for key in expected_keys:
         creds[key] = value
 
@@ -79,6 +122,7 @@ def set_credential(params):
     return {
         "status": "success",
         "keys_set": list(expected_keys),
+        "credentials_file": creds_path,
         "message": f"✅ Credential injected into: {', '.join(expected_keys)}"
     }
 
