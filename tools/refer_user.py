@@ -9,7 +9,7 @@ from datetime import datetime
 
 # === CONTAINER PATHS (Docker environment) ===
 CREDENTIALS_PATH = "/container_state/system_identity.json"
-SECONDBRAIN_PATH = "/container_state/secondbrain.json"
+SECONDBRAIN_PATH = "/opt/orchestrate-core-runtime/data/secondbrain.json"
 USER_MOUNT_DIR = "/orchestrate_user"
 RUNTIME_DIR = "/opt/orchestrate-core-runtime"
 
@@ -56,6 +56,9 @@ def ensure_dmg_exists():
 def upload_to_dropbox(file_path, dropbox_path):
     """Upload file to Dropbox and return download URL"""
     try:
+        # Get a valid access token
+        access_token = get_valid_dropbox_token()
+        
         # Read file content
         with open(file_path, 'rb') as f:
             file_content = f.read()
@@ -65,7 +68,7 @@ def upload_to_dropbox(file_path, dropbox_path):
         # Upload to Dropbox
         upload_url = "https://content.dropboxapi.com/2/files/upload"
         headers = {
-            "Authorization": f"Bearer {DROPBOX_ACCESS_TOKEN}",
+            "Authorization": f"Bearer {access_token}",
             "Content-Type": "application/octet-stream",
             "Dropbox-API-Arg": json.dumps({
                 "path": dropbox_path,
@@ -81,7 +84,7 @@ def upload_to_dropbox(file_path, dropbox_path):
         # Create shareable link
         share_url = "https://api.dropboxapi.com/2/sharing/create_shared_link_with_settings"
         share_headers = {
-            "Authorization": f"Bearer {DROPBOX_ACCESS_TOKEN}",
+            "Authorization": f"Bearer {access_token}",
             "Content-Type": "application/json"
         }
         share_data = {
