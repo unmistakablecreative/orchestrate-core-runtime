@@ -5,12 +5,13 @@ import requests
 import shutil
 import argparse
 import subprocess
+import base64
 from zipfile import ZipFile
 from datetime import datetime
 
 # === CONTAINER PATHS (Docker environment) ===
 CREDENTIALS_PATH = "/container_state/system_identity.json"
-SECONDBRAIN_PATH = "/container_state/secondbrain.json"  # if it exists
+SECONDBRAIN_PATH = "/container_state/secondbrain.json"
 USER_MOUNT_DIR = "/orchestrate_user"
 TEMP_DIR = "/tmp"
 
@@ -27,34 +28,15 @@ AIRTABLE_BASE_ID = "appoNbgV6oY603cjb"
 AIRTABLE_TABLE_ID = "tblpa06yXMKwflL7m"
 
 def setup_git_repo():
-    """Clone or update the git repository with authentication"""
+    """Clone the git repository"""
     if os.path.exists(LOCAL_REPO_DIR):
-        print(f"DEBUG: Repo exists, pulling latest changes...")
-        os.chdir(LOCAL_REPO_DIR)
-        result = subprocess.run(["git", "pull", "origin", "main"], 
-                              capture_output=True, text=True)
-        if result.returncode != 0:
-            print(f"DEBUG: Git pull failed: {result.stderr}")
-            # Try fresh clone
-            shutil.rmtree(LOCAL_REPO_DIR)
-            return setup_git_repo()
-    else:
-        print(f"DEBUG: Cloning repo with authentication...")
-        # Use HTTPS with token authentication
-        auth_url = f"https://{GITHUB_TOKEN}@github.com/unmistakablecreative/{REPO_NAME}.git"
-        result = subprocess.run(["git", "clone", auth_url, LOCAL_REPO_DIR], 
-                              capture_output=True, text=True)
-        if result.returncode != 0:
-            raise Exception(f"Git clone failed: {result.stderr}")
-        os.chdir(LOCAL_REPO_DIR)
+        shutil.rmtree(LOCAL_REPO_DIR)
     
-    # Configure git for authenticated pushes
-    subprocess.run(["git", "config", "user.email", "action@github.com"], check=False)
-    subprocess.run(["git", "config", "user.name", "GitHub Action"], check=False)
-    
-    # Set the remote URL with token for future pushes
-    auth_url = f"https://{GITHUB_TOKEN}@github.com/unmistakablecreative/{REPO_NAME}.git"
-    subprocess.run(["git", "remote", "set-url", "origin", auth_url], check=False)
+    print(f"DEBUG: Cloning repo...")
+    result = subprocess.run(["git", "clone", REPO_URL, LOCAL_REPO_DIR], 
+                          capture_output=True, text=True)
+    if result.returncode != 0:
+        raise Exception(f"Git clone failed: {result.stderr}")
     
     # Verify DMG exists in repo
     dmg_path = os.path.join(LOCAL_REPO_DIR, DMG_FILENAME)
@@ -172,67 +154,29 @@ def refer_user(params):
                 "message": f"Failed to create referral package: {str(e)}"
             }
         
-        # === Push to GitHub ===
+        # === Upload to GitHub via API ===
         try:
-            print("DEBUG: Starting git operations...")
-            os.chdir(repo_dir)
+            print("DEBUG: Uploading to GitHub via API...")
             
-            # Set up the authenticated remote URL explicitly
-            auth_url = f"https://{GITHUB_TOKEN}@github.com/unmistakablecreative/{REPO_NAME}.git"
-            subprocess.run(["git", "remote", "set-url", "origin", auth_url], check=True)
+            # Read the ZIP file
+            with open(zip_path, 'rb') as f:
+                zip_content = base64.b64encode(f.read()).decode('utf-8')
             
-            print("DEBUG: Git add...")
-            subprocess.run(["git", "add", zip_name], check=True, timeout=30)
-            
-            print("DEBUG: Git commit...")
-            subprocess.run(["git", "commit", "-m", f"Add referral package for {name}"], 
-                          check=True, timeout=30)
-            
-            print("DEBUG: Git push with explicit authentication...")
-            # Try git push first
-            try:
-                result = subprocess.run(["git", "push", auth_url, "main"], 
-                                      check=True, timeout=60, capture_output=True, text=True)
-                print("DEBUG: Git push successful")
-            except subprocess.CalledProcessError as push_error:
-                print(f"DEBUG: Git push failed, trying GitHub API upload...")
-                
-                # Fallback: Upload file directly via GitHub API
-                import base64
-                
-                # Read the ZIP file
-                with open(zip_path, 'rb') as f:
-                    zip_content = base64.b64encode(f.read()).decode('utf-8')
-                
-                # GitHub API upload
-                api_url = f"https://api.github.com/repos/unmistakablecreative/{REPO_NAME}/contents/{zip_name}"
-                api_headers = {
-                    "Authorization": f"token {GITHUB_TOKEN}",
-                    "Content-Type": "application/json"
-                }
-                api_data = {
-                    "message": f"Add referral package for {name}",
-                    "content": zip_content
-                }
-                
-                api_response = requests.put(api_url, headers=api_headers, json=api_data, timeout=30)
-                api_response.raise_for_status()
-                print("DEBUG: GitHub API upload successful")
-            
-            print("DEBUG: Git operations completed successfully")
-            
-        except subprocess.TimeoutExpired as e:
-            return {
-                "status": "error", 
-                "message": f"Git operation timed out: {str(e)}"
+            # GitHub API upload
+            api_url = f"https://api.github.com/repos/unmistakablecreative/{REPO_NAME}/contents/{zip_name}"
+            api_headers = {
+                "Authorization": f"token {GITHUB_TOKEN}",
+                "Content-Type": "application/json"
             }
-        except subprocess.CalledProcessError as e:
-            error_msg = f"Git operation failed: {str(e)}"
-            print(f"DEBUG: {error_msg}")
-            return {
-                "status": "error", 
-                "message": error_msg
+            api_data = {
+                "message": f"Add referral package for {name}",
+                "content": zip_content
             }
+            
+            api_response = requests.put(api_url, headers=api_headers, json=api_data, timeout=30)
+            api_response.raise_for_status()
+            print("DEBUG: GitHub API upload successful")
+            
         except requests.exceptions.RequestException as e:
             return {
                 "status": "error", 
