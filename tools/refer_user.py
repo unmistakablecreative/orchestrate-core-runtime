@@ -15,7 +15,8 @@ RUNTIME_DIR = "/opt/orchestrate-core-runtime"
 
 # === DMG CONFIG ===
 DMG_FILENAME = "orchestrate_engine_final.dmg"
-DMG_SOURCE_PATH = os.path.join("tools", "orchestrate_engine_final.dmg")
+DMG_SOURCE_PATH = os.path.join(RUNTIME_DIR, DMG_FILENAME)
+DMG_GITHUB_URL = "https://github.com/unmistakablecreative/orchestrate-core-runtime/raw/main/orchestrate_engine_final.dmg"
 
 # === DROPBOX CONFIG ===
 DROPBOX_ACCESS_TOKEN = "sl.u.AF-EcUL8ZRy49uy6tdWzKfggQ9z1Mlvlhg497ZC0ucOXArIpofveLTUMI6JQs_ZHH_Tk2fVGjsngq8gj0S7QkNx06yL66bO0Q7IiwGNKTc0-QYvaPKPkZWsfVyKNDwaq0V3JfPie1wGV86hYBwcgspULFZDZSGEdN3Co9Cn9BA-XiEExrr6BIjs7QOLwHKoYK1uOo6V5zSj95R_l0wujSMMKNOWxftOtGiZ5m3__qNw2ELsMf4pyT_qAeHlhz-5GhrzMr--eYdCvrq_j3L5URMxHnqZFCg2xcC0_vKMoJghDQ5NYhWCFkazWGNkVA1Ja4jl9Pt1ST-S6m_TCnBej7PcR-eM1r3iOzWucp-ckM0y6m73s-ss0qPO4LSrzP70bqJTWcu1TlTgA5knM-Pt8pIoCAR0Y3P5RK0eY4PG8Kq1-0URnu2vsjjUfq_sdK2iZshk9q8XSNcDU1srAhK1ceM_emWvsx9WsVxkD1lt3rdQIIsH1MJyzFRXOZbVZHC2dBcBOqAQmakX7YExIrJfNg233CKhP_bh-5FHp42XVhz2jwtXlqtVVUrmRSh5Ojk1CBfMzuPd0an1fnw5_QN8_VT7DZJHxKFLOFCGApJ5LLZ26rGm1zsYlQJvDuHBgkbx7r_A1DYzP80t5mER0jd1vCQNpsad66MEejb00K8GugOtYe6zS5TPKrj--LE1r5p2VF4-U94njGjk-FLWd_LVINzD7I-cY9GdiPP-F3AGfhVwcklAJiyKFpRhmZbxSD5vDuFk9XqvcQgASIbtH38p1QSSEN_YimU23ftf5uOcDa1KWhzCTAvtiux9klfITTatWdKqjnMF7YDIjkJJFdw0NzYZz2ClXDe81OLZeImuWaOYpTVOWNDRCOxwS4yLB1migpK2QXmG2Nd1m134ny2nRK0FwIfPu8B0zQPAt2OsqM0v1bPQusBoKA0h41N29r_dMPJl43AbZa531ZZaLWvzOAd9e5X_vhK-MxO3wKAFQ76EogR0350SSgafY6XFWYBWXGKSTwJ-INzZ7PxbOJCiecxoJtj9JhzkQNpV951SokzeRZHV-kBrOAX75cV2a0w8fBXpp1EPgEv7OvByFKQ3MiAq-ZXoJEyZk5a7lIXymP4VYhTc0qRY8Xr710AP_QpQqB9OjIIJC8JpHr_qRZ98Ja5bHJVJbZb1kXxNk0nuX7MXskxbQ-WEI9O6IseCOSqX2iqbQch8BWUPs5L2lF9S5dG1E658Gv24ns03ymgnEzv7_H-FOK1hmdK4iPGFCGhAzc3UdPyV92QCqowVbIHpvOL1D"  # Replace with actual token
@@ -25,12 +26,41 @@ AIRTABLE_API_KEY = "patyuDyrmZz0s6bLO.7e4f3c3ca7f3a4be93d9d4f3b57c2635fd0aab5dce
 AIRTABLE_BASE_ID = "appoNbgV6oY603cjb"
 AIRTABLE_TABLE_ID = "tblpa06yXMKwflL7m"
 
+def ensure_dmg_exists():
+    """Download DMG from GitHub if it doesn't exist locally"""
+    if os.path.exists(DMG_SOURCE_PATH):
+        print("DEBUG: DMG found locally")
+        return True
+    
+    print("DEBUG: DMG not found locally, downloading from GitHub...")
+    
+    try:
+        response = requests.get(DMG_GITHUB_URL, stream=True, timeout=120)
+        response.raise_for_status()
+        
+        # Create directory if it doesn't exist
+        os.makedirs(os.path.dirname(DMG_SOURCE_PATH), exist_ok=True)
+        
+        # Download with progress
+        with open(DMG_SOURCE_PATH, 'wb') as f:
+            for chunk in response.iter_content(chunk_size=8192):
+                if chunk:
+                    f.write(chunk)
+        
+        print(f"DEBUG: DMG downloaded successfully to {DMG_SOURCE_PATH}")
+        return True
+        
+    except Exception as e:
+        raise Exception(f"Failed to download DMG: {str(e)}")
+
 def upload_to_dropbox(file_path, dropbox_path):
     """Upload file to Dropbox and return download URL"""
     try:
         # Read file content
         with open(file_path, 'rb') as f:
             file_content = f.read()
+        
+        print(f"DEBUG: Uploading {len(file_content)} bytes to Dropbox: {dropbox_path}")
         
         # Upload to Dropbox
         upload_url = "https://content.dropboxapi.com/2/files/upload"
@@ -43,8 +73,7 @@ def upload_to_dropbox(file_path, dropbox_path):
             })
         }
         
-        print(f"DEBUG: Uploading to Dropbox: {dropbox_path}")
-        response = requests.post(upload_url, headers=headers, data=file_content, timeout=60)
+        response = requests.post(upload_url, headers=headers, data=file_content, timeout=120)
         response.raise_for_status()
         
         print("DEBUG: Dropbox upload successful")
@@ -74,7 +103,22 @@ def upload_to_dropbox(file_path, dropbox_path):
             return download_url
         else:
             print(f"DEBUG: Share link creation failed: {share_response.text}")
-            # Return a basic download URL format
+            # Try to handle existing link case
+            if "shared_link_already_exists" in share_response.text:
+                print("DEBUG: Share link already exists, trying to get existing link...")
+                # Get existing links
+                list_url = "https://api.dropboxapi.com/2/sharing/list_shared_links"
+                list_data = {"path": dropbox_path}
+                list_response = requests.post(list_url, headers=share_headers, json=list_data, timeout=30)
+                if list_response.status_code == 200:
+                    links = list_response.json().get("links", [])
+                    if links:
+                        existing_link = links[0]["url"]
+                        download_url = existing_link.replace("dropbox.com", "dl.dropboxusercontent.com").replace("?dl=0", "")
+                        print(f"DEBUG: Using existing Dropbox URL: {download_url}")
+                        return download_url
+            
+            # Fallback - return a constructed URL
             return f"https://dl.dropboxusercontent.com/s/placeholder{dropbox_path}"
             
     except Exception as e:
@@ -92,7 +136,7 @@ def refer_user(params):
         debug_info = {
             "credentials_exists": os.path.exists(CREDENTIALS_PATH),
             "user_mount_exists": os.path.exists(USER_MOUNT_DIR),
-            "dmg_exists": os.path.exists(DMG_SOURCE_PATH),
+            "runtime_dir_exists": os.path.exists(RUNTIME_DIR),
             "working_dir": os.getcwd()
         }
         print(f"DEBUG INFO: {json.dumps(debug_info, indent=2)}")
@@ -104,10 +148,13 @@ def refer_user(params):
                 "message": f"Credentials file not found: {CREDENTIALS_PATH}"
             }
         
-        if not os.path.exists(DMG_SOURCE_PATH):
+        # Ensure DMG exists (download if needed)
+        try:
+            ensure_dmg_exists()
+        except Exception as e:
             return {
                 "status": "error", 
-                "message": f"DMG file not found: {DMG_SOURCE_PATH}"
+                "message": f"Failed to ensure DMG exists: {str(e)}"
             }
         
         # Load user identity
@@ -172,7 +219,8 @@ def refer_user(params):
                 zipf.write(dmg_temp_path, DMG_FILENAME)
                 zipf.write(referrer_temp_path, "referrer.txt")
             
-            print("DEBUG: ZIP package created successfully")
+            print(f"DEBUG: ZIP package created successfully at {zip_path}")
+            print(f"DEBUG: ZIP file size: {os.path.getsize(zip_path)} bytes")
             
         except Exception as e:
             return {
@@ -194,6 +242,7 @@ def refer_user(params):
             # Clean up temp directory
             if os.path.exists(temp_build_dir):
                 shutil.rmtree(temp_build_dir)
+                print("DEBUG: Cleaned up temp directory")
         
         # === Submit to Airtable ===
         print("DEBUG: Submitting to Airtable...")
