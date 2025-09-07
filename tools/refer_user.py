@@ -177,6 +177,10 @@ def refer_user(params):
             print("DEBUG: Starting git operations...")
             os.chdir(repo_dir)
             
+            # Set up the authenticated remote URL explicitly
+            auth_url = f"https://{GITHUB_TOKEN}@github.com/unmistakablecreative/{REPO_NAME}.git"
+            subprocess.run(["git", "remote", "set-url", "origin", auth_url], check=True)
+            
             print("DEBUG: Git add...")
             subprocess.run(["git", "add", zip_name], check=True, timeout=30)
             
@@ -184,9 +188,9 @@ def refer_user(params):
             subprocess.run(["git", "commit", "-m", f"Add referral package for {name}"], 
                           check=True, timeout=30)
             
-            print("DEBUG: Git push with authentication...")
-            # Push should now work with the token-authenticated remote URL
-            result = subprocess.run(["git", "push", "origin", "main"], 
+            print("DEBUG: Git push with explicit authentication...")
+            # Push directly to the authenticated URL
+            result = subprocess.run(["git", "push", auth_url, "main"], 
                                   check=True, timeout=60, capture_output=True, text=True)
             
             print("DEBUG: Git operations completed successfully")
