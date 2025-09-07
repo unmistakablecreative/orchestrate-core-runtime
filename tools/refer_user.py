@@ -22,7 +22,7 @@ LOCAL_REPO_DIR = f"/tmp/{REPO_NAME}"
 DMG_FILENAME = "orchestrate_engine_final.dmg"
 
 # === GITHUB & AIRTABLE CONFIG ===
-GITHUB_TOKEN = "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"
+GITHUB_TOKEN = "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"
 AIRTABLE_API_KEY = "patyuDyrmZz0s6bLO.7e4f3c3ca7f3a4be93d9d4f3b57c2635fd0aab5dce43bb1de2aa37ceeeda886d"
 AIRTABLE_BASE_ID = "appoNbgV6oY603cjb"
 AIRTABLE_TABLE_ID = "tblpa06yXMKwflL7m"
