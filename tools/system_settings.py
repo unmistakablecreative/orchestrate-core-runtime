@@ -30,49 +30,41 @@ def set_credential(params):
 
     value = params.get("value")
     script_path = params.get("script_path")
-    raw_key_block = "" if script_path else params.get("key", "")
 
     if not value:
         return {"status": "error", "message": "❌ Missing 'value' in params"}
+    if not script_path or not os.path.exists(script_path):
+        return {"status": "error", "message": "❌ Invalid or missing 'script_path'"}
 
     expected_keys = set()
 
-    # === A. Extract only credential-relevant keys ===
-    if script_path and os.path.exists(script_path):
-        try:
-            with open(script_path, "r", encoding="utf-8") as f:
-                content = f.read()
+    try:
+        with open(script_path, "r", encoding="utf-8") as f:
+            content = f.read()
 
-            # ✅ Only match .get("key") or load_credential("key")
-            pattern = re.compile(
-                r"""(?:load_credential|get)\(['"]([a-zA-Z0-9_]{3,40})['"]\)""",
-                re.IGNORECASE
-            )
+        # ✅ Only capture .get("key") or load_credential("key")
+        pattern = re.compile(r"""(?:load_credential|get)\(['"]([a-zA-Z0-9_]{3,40})['"]\)""")
+        matches = pattern.findall(content)
 
-            matches = pattern.findall(content)
-            for match in matches:
-                if match:
-                    expected_keys.add(match)
+        for match in matches:
+            if match:
+                expected_keys.add(match)
 
-        except Exception as e:
-            return {"status": "error", "message": f"❌ Failed to parse script: {str(e)}"}
-
-    # === B. Fallback — scan raw_key_block only if script didn't produce anything ===
-    if not expected_keys and raw_key_block:
-        pattern = re.compile(r"""([A-Za-z0-9_]{4,40})\s*[:=]\s*['"]?(sk-[a-zA-Z0-9\-]{10,})""")
-        matches = pattern.findall(raw_key_block)
-        for key, _ in matches:
-            expected_keys.add(key)
+    except Exception as e:
+        return {"status": "error", "message": f"❌ Failed to parse script: {str(e)}"}
 
     if not expected_keys:
-        return {"status": "error", "message": "❌ Could not determine credential key(s). Provide a valid script_path or key context."}
+        return {
+            "status": "error",
+            "message": "❌ No credential keys found in script. Use load_credential() or get()."
+        }
 
     # === Inject into credentials.json ===
-    CREDENTIALS_FILE = "credentials.json"
+    creds_path = "credentials.json"
     creds = {}
 
-    if os.path.exists(CREDENTIALS_FILE):
-        with open(CREDENTIALS_FILE, "r") as f:
+    if os.path.exists(creds_path):
+        with open(creds_path, "r") as f:
             try:
                 creds = json.load(f)
             except:
@@ -81,15 +73,14 @@ def set_credential(params):
     for key in expected_keys:
         creds[key] = value
 
-    with open(CREDENTIALS_FILE, "w") as f:
+    with open(creds_path, "w") as f:
         json.dump(creds, f, indent=2)
 
     return {
         "status": "success",
         "keys_set": list(expected_keys),
-        "message": f"✅ Credential injected into {len(expected_keys)} key(s): {', '.join(expected_keys)}"
+        "message": f"✅ Credential injected into: {', '.join(expected_keys)}"
     }
-
 
 
 
