@@ -2,6 +2,7 @@ import os
 import json
 import requests
 import shutil
+import argparse
 from zipfile import ZipFile
 from datetime import datetime
 
@@ -15,6 +16,7 @@ AIRTABLE_TABLE_ID = "tblpa06yXMKwflL7m"
 CREDENTIALS_PATH = os.path.expanduser("~/Library/Application Support/OrchestrateEngine/state/system_identity.json")
 SECONDBRAIN_PATH = os.path.expanduser("~/Library/Application Support/OrchestrateEngine/state/secondbrain.json")
 OUTPUT_FOLDER = os.path.join(REPO_DIR)
+
 
 def refer_user(params):
     name = params.get("name")
@@ -90,15 +92,20 @@ def refer_user(params):
     }
 
 
+# === REQUIRED for Execution Hub ===
 if __name__ == "__main__":
-    import argparse
     parser = argparse.ArgumentParser()
-    parser.add_argument("--params", type=str, required=True)
+    parser.add_argument("action", help="The action to perform")
+    parser.add_argument("--params", required=True, help="JSON string with 'name' and 'email'")
     args = parser.parse_args()
-    try:
-        params = json.loads(args.params)
-        result = refer_user(params)
-        print(json.dumps(result, indent=2))
-    except Exception as e:
-        print(json.dumps({"status": "error", "message": str(e)}))
 
+    try:
+        if args.action == "refer_user":
+            parsed = json.loads(args.params)
+            result = refer_user(parsed)
+        else:
+            result = {"status": "error", "message": f"Unknown action: {args.action}"}
+    except Exception as e:
+        result = {"status": "error", "message": str(e)}
+
+    print(json.dumps(result, indent=2))
