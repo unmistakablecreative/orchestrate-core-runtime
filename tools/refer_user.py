@@ -26,9 +26,12 @@ def refer_user(params):
     if not name or not email:
         return {"status": "error", "message": "Missing name or email"}
     
-    # Debug path checking
+    # Debug path checking with more info
+    print(f"Detected user home: {USER_HOME}")
     print(f"Checking credentials path: {CREDENTIALS_PATH}")
     print(f"Path exists: {os.path.exists(CREDENTIALS_PATH)}")
+    print(f"Repo directory: {REPO_DIR}")
+    print(f"Repo exists: {os.path.exists(REPO_DIR)}")
     
     if not os.path.exists(CREDENTIALS_PATH):
         return {
