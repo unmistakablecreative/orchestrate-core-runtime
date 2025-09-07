@@ -189,9 +189,35 @@ def refer_user(params):
                           check=True, timeout=30)
             
             print("DEBUG: Git push with explicit authentication...")
-            # Push directly to the authenticated URL
-            result = subprocess.run(["git", "push", auth_url, "main"], 
-                                  check=True, timeout=60, capture_output=True, text=True)
+            # Try git push first
+            try:
+                result = subprocess.run(["git", "push", auth_url, "main"], 
+                                      check=True, timeout=60, capture_output=True, text=True)
+                print("DEBUG: Git push successful")
+            except subprocess.CalledProcessError as push_error:
+                print(f"DEBUG: Git push failed, trying GitHub API upload...")
+                
+                # Fallback: Upload file directly via GitHub API
+                import base64
+                
+                # Read the ZIP file
+                with open(zip_path, 'rb') as f:
+                    zip_content = base64.b64encode(f.read()).decode('utf-8')
+                
+                # GitHub API upload
+                api_url = f"https://api.github.com/repos/unmistakablecreative/{REPO_NAME}/contents/{zip_name}"
+                api_headers = {
+                    "Authorization": f"token {GITHUB_TOKEN}",
+                    "Content-Type": "application/json"
+                }
+                api_data = {
+                    "message": f"Add referral package for {name}",
+                    "content": zip_content
+                }
+                
+                api_response = requests.put(api_url, headers=api_headers, json=api_data, timeout=30)
+                api_response.raise_for_status()
+                print("DEBUG: GitHub API upload successful")
             
             print("DEBUG: Git operations completed successfully")
             
@@ -206,6 +232,11 @@ def refer_user(params):
             return {
                 "status": "error", 
                 "message": error_msg
+            }
+        except requests.exceptions.RequestException as e:
+            return {
+                "status": "error", 
+                "message": f"GitHub API upload failed: {str(e)}"
             }
         
         # GitHub download URL
