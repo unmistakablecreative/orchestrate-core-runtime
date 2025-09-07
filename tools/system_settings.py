@@ -24,17 +24,57 @@ def error(message):
 
 # === Credentials ===
 def set_credential(params):
-    key, value = params.get("key"), params.get("value")
-    if not key or not value:
-        error("Missing 'key' or 'value'")
+    import os
+    import json
+    import re
+
+    value = params.get("value")
+    script_path = params.get("script_path")
+    raw_key_block = params.get("key", "")
+
+    if not value:
+        error("Missing 'value'")
+
+    expected_keys = set()
+
+    # === A. Extract keys from script using `.get("KEY")` pattern ===
+    if script_path and os.path.exists(script_path):
+        try:
+            with open(script_path, "r", encoding="utf-8") as f:
+                content = f.read()
+            pattern = re.compile(r"\.get\(['\"]([A-Z0-9_]{4,40})['\"]")
+            matches = pattern.findall(content)
+            expected_keys.update(matches)
+        except Exception as e:
+            return {"status": "error", "message": f"Failed to parse script: {str(e)}"}
+
+    # === B. Fallback: Try to extract keys from pasted junk like `KEY: sk-xxx` ===
+    if not expected_keys and raw_key_block:
+        pattern = re.compile(r"""([A-Z0-9_]{4,40})\s*[:=]\s*['"]?(sk-[a-zA-Z0-9\-]{10,})""")
+        matches = pattern.findall(raw_key_block)
+        for key, _ in matches:
+            expected_keys.add(key)
+
+    if not expected_keys:
+        error("Could not determine credential key(s). Provide 'script_path' or valid formatted key string.")
+
+    # === Inject into credentials.json ===
     creds = {}
     if os.path.exists(CREDENTIALS_FILE):
         with open(CREDENTIALS_FILE, "r") as f:
             creds = json.load(f)
-    creds[key] = value
+
+    for key in expected_keys:
+        creds[key] = value
+
     with open(CREDENTIALS_FILE, "w") as f:
         json.dump(creds, f, indent=2)
-    return {"status": "success", "message": f"Credential '{key}' set."}
+
+    return {
+        "status": "success",
+        "keys_set": list(expected_keys),
+        "message": f"✅ Credential value injected into {len(expected_keys)} key(s)."
+    }
 
 
 def load_credential(key):
