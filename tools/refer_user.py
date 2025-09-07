@@ -4,8 +4,6 @@ import json
 import requests
 import shutil
 import argparse
-import subprocess
-import base64
 from zipfile import ZipFile
 from datetime import datetime
 
@@ -13,37 +11,74 @@ from datetime import datetime
 CREDENTIALS_PATH = "/container_state/system_identity.json"
 SECONDBRAIN_PATH = "/container_state/secondbrain.json"
 USER_MOUNT_DIR = "/orchestrate_user"
-TEMP_DIR = "/tmp"
+RUNTIME_DIR = "/opt/orchestrate-core-runtime"
 
-# === REPO CONFIG ===
-REPO_NAME = "orchestrate-user-referrals"
-REPO_URL = f"https://github.com/unmistakablecreative/{REPO_NAME}.git"
-LOCAL_REPO_DIR = f"/tmp/{REPO_NAME}"
+# === DMG CONFIG ===
 DMG_FILENAME = "orchestrate_engine_final.dmg"
+DMG_SOURCE_PATH = os.path.join(RUNTIME_DIR, DMG_FILENAME)
 
-# === GITHUB & AIRTABLE CONFIG ===
-GITHUB_TOKEN = "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"
+# === DROPBOX CONFIG ===
+DROPBOX_ACCESS_TOKEN = "sl.u.AF-EcUL8ZRy49uy6tdWzKfggQ9z1Mlvlhg497ZC0ucOXArIpofveLTUMI6JQs_ZHH_Tk2fVGjsngq8gj0S7QkNx06yL66bO0Q7IiwGNKTc0-QYvaPKPkZWsfVyKNDwaq0V3JfPie1wGV86hYBwcgspULFZDZSGEdN3Co9Cn9BA-XiEExrr6BIjs7QOLwHKoYK1uOo6V5zSj95R_l0wujSMMKNOWxftOtGiZ5m3__qNw2ELsMf4pyT_qAeHlhz-5GhrzMr--eYdCvrq_j3L5URMxHnqZFCg2xcC0_vKMoJghDQ5NYhWCFkazWGNkVA1Ja4jl9Pt1ST-S6m_TCnBej7PcR-eM1r3iOzWucp-ckM0y6m73s-ss0qPO4LSrzP70bqJTWcu1TlTgA5knM-Pt8pIoCAR0Y3P5RK0eY4PG8Kq1-0URnu2vsjjUfq_sdK2iZshk9q8XSNcDU1srAhK1ceM_emWvsx9WsVxkD1lt3rdQIIsH1MJyzFRXOZbVZHC2dBcBOqAQmakX7YExIrJfNg233CKhP_bh-5FHp42XVhz2jwtXlqtVVUrmRSh5Ojk1CBfMzuPd0an1fnw5_QN8_VT7DZJHxKFLOFCGApJ5LLZ26rGm1zsYlQJvDuHBgkbx7r_A1DYzP80t5mER0jd1vCQNpsad66MEejb00K8GugOtYe6zS5TPKrj--LE1r5p2VF4-U94njGjk-FLWd_LVINzD7I-cY9GdiPP-F3AGfhVwcklAJiyKFpRhmZbxSD5vDuFk9XqvcQgASIbtH38p1QSSEN_YimU23ftf5uOcDa1KWhzCTAvtiux9klfITTatWdKqjnMF7YDIjkJJFdw0NzYZz2ClXDe81OLZeImuWaOYpTVOWNDRCOxwS4yLB1migpK2QXmG2Nd1m134ny2nRK0FwIfPu8B0zQPAt2OsqM0v1bPQusBoKA0h41N29r_dMPJl43AbZa531ZZaLWvzOAd9e5X_vhK-MxO3wKAFQ76EogR0350SSgafY6XFWYBWXGKSTwJ-INzZ7PxbOJCiecxoJtj9JhzkQNpV951SokzeRZHV-kBrOAX75cV2a0w8fBXpp1EPgEv7OvByFKQ3MiAq-ZXoJEyZk5a7lIXymP4VYhTc0qRY8Xr710AP_QpQqB9OjIIJC8JpHr_qRZ98Ja5bHJVJbZb1kXxNk0nuX7MXskxbQ-WEI9O6IseCOSqX2iqbQch8BWUPs5L2lF9S5dG1E658Gv24ns03ymgnEzv7_H-FOK1hmdK4iPGFCGhAzc3UdPyV92QCqowVbIHpvOL1D"  # Replace with actual token
+
+# === AIRTABLE CONFIG ===
 AIRTABLE_API_KEY = "patyuDyrmZz0s6bLO.7e4f3c3ca7f3a4be93d9d4f3b57c2635fd0aab5dce43bb1de2aa37ceeeda886d"
 AIRTABLE_BASE_ID = "appoNbgV6oY603cjb"
 AIRTABLE_TABLE_ID = "tblpa06yXMKwflL7m"
 
-def setup_git_repo():
-    """Clone the git repository"""
-    if os.path.exists(LOCAL_REPO_DIR):
-        shutil.rmtree(LOCAL_REPO_DIR)
-    
-    print(f"DEBUG: Cloning repo...")
-    result = subprocess.run(["git", "clone", REPO_URL, LOCAL_REPO_DIR], 
-                          capture_output=True, text=True)
-    if result.returncode != 0:
-        raise Exception(f"Git clone failed: {result.stderr}")
-    
-    # Verify DMG exists in repo
-    dmg_path = os.path.join(LOCAL_REPO_DIR, DMG_FILENAME)
-    if not os.path.exists(dmg_path):
-        raise Exception(f"DMG file not found in repo: {dmg_path}")
-    
-    return LOCAL_REPO_DIR
+def upload_to_dropbox(file_path, dropbox_path):
+    """Upload file to Dropbox and return download URL"""
+    try:
+        # Read file content
+        with open(file_path, 'rb') as f:
+            file_content = f.read()
+        
+        # Upload to Dropbox
+        upload_url = "https://content.dropboxapi.com/2/files/upload"
+        headers = {
+            "Authorization": f"Bearer {DROPBOX_ACCESS_TOKEN}",
+            "Content-Type": "application/octet-stream",
+            "Dropbox-API-Arg": json.dumps({
+                "path": dropbox_path,
+                "mode": "overwrite"
+            })
+        }
+        
+        print(f"DEBUG: Uploading to Dropbox: {dropbox_path}")
+        response = requests.post(upload_url, headers=headers, data=file_content, timeout=60)
+        response.raise_for_status()
+        
+        print("DEBUG: Dropbox upload successful")
+        
+        # Create shareable link
+        share_url = "https://api.dropboxapi.com/2/sharing/create_shared_link_with_settings"
+        share_headers = {
+            "Authorization": f"Bearer {DROPBOX_ACCESS_TOKEN}",
+            "Content-Type": "application/json"
+        }
+        share_data = {
+            "path": dropbox_path,
+            "settings": {
+                "requested_visibility": "public"
+            }
+        }
+        
+        print("DEBUG: Creating Dropbox share link...")
+        share_response = requests.post(share_url, headers=share_headers, json=share_data, timeout=30)
+        
+        if share_response.status_code == 200:
+            share_result = share_response.json()
+            # Convert share URL to direct download URL
+            share_link = share_result["url"]
+            download_url = share_link.replace("dropbox.com", "dl.dropboxusercontent.com").replace("?dl=0", "")
+            print(f"DEBUG: Dropbox download URL: {download_url}")
+            return download_url
+        else:
+            print(f"DEBUG: Share link creation failed: {share_response.text}")
+            # Return a basic download URL format
+            return f"https://dl.dropboxusercontent.com/s/placeholder{dropbox_path}"
+            
+    except Exception as e:
+        raise Exception(f"Dropbox upload failed: {str(e)}")
 
 def refer_user(params):
     try:
@@ -57,6 +92,7 @@ def refer_user(params):
         debug_info = {
             "credentials_exists": os.path.exists(CREDENTIALS_PATH),
             "user_mount_exists": os.path.exists(USER_MOUNT_DIR),
+            "dmg_exists": os.path.exists(DMG_SOURCE_PATH),
             "working_dir": os.getcwd()
         }
         print(f"DEBUG INFO: {json.dumps(debug_info, indent=2)}")
@@ -66,6 +102,12 @@ def refer_user(params):
             return {
                 "status": "error", 
                 "message": f"Credentials file not found: {CREDENTIALS_PATH}"
+            }
+        
+        if not os.path.exists(DMG_SOURCE_PATH):
+            return {
+                "status": "error", 
+                "message": f"DMG file not found: {DMG_SOURCE_PATH}"
             }
         
         # Load user identity
@@ -99,24 +141,11 @@ def refer_user(params):
         
         print(f"DEBUG: Using referrer_name: {referrer_name}")
         
-        # === Setup git repository ===
-        try:
-            print("DEBUG: Setting up git repository...")
-            repo_dir = setup_git_repo()
-            dmg_source_path = os.path.join(repo_dir, DMG_FILENAME)
-            print(f"DEBUG: Repo ready at {repo_dir}")
-            print(f"DEBUG: DMG source: {dmg_source_path}")
-        except Exception as e:
-            return {
-                "status": "error", 
-                "message": f"Failed to setup git repository: {str(e)}"
-            }
-        
         # === Create referral package ===
         safe_name = name.lower().replace(" ", "_").replace(".", "_")
         zip_name = f"Orchestrate_Installer_for_{safe_name}.zip"
-        zip_path = os.path.join(repo_dir, zip_name)
         temp_build_dir = f"/tmp/referral_build_{safe_name}"
+        zip_path = os.path.join(temp_build_dir, zip_name)
         
         print(f"DEBUG: Creating package {zip_name}")
         
@@ -128,24 +157,21 @@ def refer_user(params):
         try:
             # Copy DMG to temp directory
             print("DEBUG: Copying DMG file...")
-            shutil.copy2(dmg_source_path, os.path.join(temp_build_dir, DMG_FILENAME))
+            dmg_temp_path = os.path.join(temp_build_dir, DMG_FILENAME)
+            shutil.copy2(DMG_SOURCE_PATH, dmg_temp_path)
             
             # Create referrer file
             print("DEBUG: Creating referrer.txt...")
-            with open(os.path.join(temp_build_dir, "referrer.txt"), "w") as f:
+            referrer_temp_path = os.path.join(temp_build_dir, "referrer.txt")
+            with open(referrer_temp_path, "w") as f:
                 f.write(referrer_id)
             
             # Create ZIP package
             print("DEBUG: Creating ZIP package...")
             with ZipFile(zip_path, 'w') as zipf:
-                for root, dirs, files in os.walk(temp_build_dir):
-                    for file in files:
-                        file_path = os.path.join(root, file)
-                        arcname = os.path.relpath(file_path, temp_build_dir)
-                        zipf.write(file_path, arcname)
+                zipf.write(dmg_temp_path, DMG_FILENAME)
+                zipf.write(referrer_temp_path, "referrer.txt")
             
-            # Clean up temp directory
-            shutil.rmtree(temp_build_dir)
             print("DEBUG: ZIP package created successfully")
             
         except Exception as e:
@@ -154,64 +180,20 @@ def refer_user(params):
                 "message": f"Failed to create referral package: {str(e)}"
             }
         
-        # === Upload to GitHub via API ===
+        # === Upload to Dropbox ===
         try:
-            print("DEBUG: Uploading to GitHub via API...")
-            print(f"DEBUG: Using token: {GITHUB_TOKEN}")
-            
-            # Read ZIP file and encode it
-            with open(zip_path, 'rb') as f:
-                file_content = f.read()
-            
-            encoded_content = base64.b64encode(file_content).decode('utf-8')
-            
-            # Prepare API request - exact same format as working curl
-            api_url = f"https://api.github.com/repos/unmistakablecreative/{REPO_NAME}/contents/{zip_name}"
-            
-            headers = {
-                "Authorization": f"Bearer {GITHUB_TOKEN}",
-                "Content-Type": "application/json"
-            }
-            
-            payload = {
-                "message": f"Add referral package for {name}",
-                "content": encoded_content
-            }
-            
-            print(f"DEBUG: API URL: {api_url}")
-            print(f"DEBUG: Full auth header: '{headers['Authorization']}'")
-            print(f"DEBUG: Content length: {len(encoded_content)}")
-            print(f"DEBUG: Payload keys: {list(payload.keys())}")
-            
-            # Make the API call
-            response = requests.put(api_url, headers=headers, json=payload, timeout=30)
-            
-            print(f"DEBUG: Response status: {response.status_code}")
-            print(f"DEBUG: Response headers: {dict(response.headers)}")
-            print(f"DEBUG: Response text: {response.text}")
-            
-            if response.status_code == 201:
-                print("DEBUG: GitHub API upload successful")
-            else:
-                return {
-                    "status": "error",
-                    "message": f"GitHub API upload failed: {response.status_code} {response.reason}",
-                    "response_text": response.text,
-                    "debug_info": {
-                        "url": api_url,
-                        "auth_header": headers["Authorization"],
-                        "content_size": len(encoded_content)
-                    }
-                }
+            dropbox_path = f"/referrals/{zip_name}"
+            download_url = upload_to_dropbox(zip_path, dropbox_path)
             
         except Exception as e:
             return {
                 "status": "error", 
-                "message": f"GitHub API upload exception: {str(e)}"
+                "message": f"Failed to upload to Dropbox: {str(e)}"
             }
-        
-        # GitHub download URL
-        zip_url = f"https://github.com/unmistakablecreative/{REPO_NAME}/raw/main/{zip_name}"
+        finally:
+            # Clean up temp directory
+            if os.path.exists(temp_build_dir):
+                shutil.rmtree(temp_build_dir)
         
         # === Submit to Airtable ===
         print("DEBUG: Submitting to Airtable...")
@@ -221,7 +203,7 @@ def refer_user(params):
                 "referrer_name": referrer_name,
                 "recipient_name": name,
                 "recipient_email": email,
-                "zip_url": zip_url
+                "zip_url": download_url
             }
         }
         
@@ -245,7 +227,7 @@ def refer_user(params):
         return {
             "status": "success",
             "message": f"Referral package created for {name} ({email})",
-            "zip_url": zip_url,
+            "download_url": download_url,
             "referrer_id": referrer_id,
             "referrer_name": referrer_name
         }
