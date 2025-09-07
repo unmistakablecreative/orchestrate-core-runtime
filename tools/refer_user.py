@@ -173,7 +173,13 @@ def refer_user(params):
                 "content": zip_content
             }
             
+            print(f"DEBUG: API URL: {api_url}")
+            print(f"DEBUG: API Headers: {api_headers}")
+            print(f"DEBUG: Content length: {len(zip_content)}")
+            
             api_response = requests.put(api_url, headers=api_headers, json=api_data, timeout=30)
+            print(f"DEBUG: Response status: {api_response.status_code}")
+            print(f"DEBUG: Response text: {api_response.text}")
             api_response.raise_for_status()
             print("DEBUG: GitHub API upload successful")
             
