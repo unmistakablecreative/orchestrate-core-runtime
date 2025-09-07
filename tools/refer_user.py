@@ -20,7 +20,8 @@ REPO_URL = f"https://github.com/unmistakablecreative/{REPO_NAME}.git"
 LOCAL_REPO_DIR = f"/tmp/{REPO_NAME}"
 DMG_FILENAME = "orchestrate_engine_final.dmg"
 
-# === AIRTABLE CONFIG ===
+# === GITHUB & AIRTABLE CONFIG ===
+GITHUB_TOKEN = "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"
 AIRTABLE_API_KEY = "patyuDyrmZz0s6bLO.7e4f3c3ca7f3a4be93d9d4f3b57c2635fd0aab5dce43bb1de2aa37ceeeda886d"
 AIRTABLE_BASE_ID = "appoNbgV6oY603cjb"
 AIRTABLE_TABLE_ID = "tblpa06yXMKwflL7m"
@@ -166,10 +167,6 @@ def refer_user(params):
             print("DEBUG: Starting git operations...")
             os.chdir(repo_dir)
             
-            # Configure git if needed
-            subprocess.run(["git", "config", "user.email", "action@github.com"], check=False)
-            subprocess.run(["git", "config", "user.name", "GitHub Action"], check=False)
-            
             print("DEBUG: Git add...")
             subprocess.run(["git", "add", zip_name], check=True, timeout=30)
             
@@ -177,10 +174,12 @@ def refer_user(params):
             subprocess.run(["git", "commit", "-m", f"Add referral package for {name}"], 
                           check=True, timeout=30)
             
-            print("DEBUG: Git push...")
-            subprocess.run(["git", "push", "origin", "main"], check=True, timeout=60)
+            print("DEBUG: Git push with authentication...")
+            # Push should now work with the token-authenticated remote URL
+            result = subprocess.run(["git", "push", "origin", "main"], 
+                                  check=True, timeout=60, capture_output=True, text=True)
             
-            print("DEBUG: Git operations completed")
+            print("DEBUG: Git operations completed successfully")
             
         except subprocess.TimeoutExpired as e:
             return {
@@ -188,9 +187,11 @@ def refer_user(params):
                 "message": f"Git operation timed out: {str(e)}"
             }
         except subprocess.CalledProcessError as e:
+            error_msg = f"Git operation failed: {e.stderr.decode() if e.stderr else str(e)}"
+            print(f"DEBUG: {error_msg}")
             return {
                 "status": "error", 
-                "message": f"Git operation failed: {e.stderr.decode() if e.stderr else str(e)}"
+                "message": error_msg
             }
         
         # GitHub download URL
