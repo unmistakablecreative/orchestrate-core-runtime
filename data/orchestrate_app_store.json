@@ -4,19 +4,19 @@
       "label": "Nylas Inbox",
       "description": "Read, send, and manage emails directly inside your system using structured API control.",
       "priority": 1,
-      "referral_unlock_cost": 16
+      "referral_unlock_cost": 10
     },
     "notion_tool": {
       "label": "Notion",
       "description": "Create pages, update tasks, or search workspace content using Orchestrate-powered flows.",
       "priority": 2,
-      "referral_unlock_cost": 2
+      "referral_unlock_cost": 3
     },
     "convertkit_tool": {
       "label": "ConvertKit",
       "description": "Create, update, and analyze email broadcasts and subscriber activity inside OrchestrateOS.",
       "priority": 3,
-      "referral_unlock_cost": 20
+      "referral_unlock_cost": 10
     },
     "gamma_tool": {
       "label": "Gamma",
