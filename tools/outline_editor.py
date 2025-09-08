@@ -290,29 +290,6 @@ def delete_collection(collection_id):
 
 
 
-def ask_outline_ai(query):
-    import requests
-    from system_settings import load_credential
-
-    token = load_credential('outline_api_key')
-    if not token:
-        return {'status': 'error', 'message': '❌ Missing Outline API token in credentials.json'}
-
-    url = "https://app.getoutline.com/api/documents.answerQuestion"
-    headers = {
-        "Authorization": f"Bearer {token}",
-        "Content-Type": "application/json"
-    }
-    payload = {"query": query}
-
-    res = requests.post(url, headers=headers, json=payload, verify=False)
-    if res.status_code != 200:
-        return {'status': 'error', 'message': res.text}
-
-    return {'status': 'success', 'data': res.json()}
-
-
-
 
 def main():
     import argparse, json
@@ -354,8 +331,6 @@ def main():
         result = update_collection(**params)
     elif args.action == 'delete_collection':
         result = delete_collection(**params)
-    elif args.action == 'ask_outline_ai':
-        result = ask_outline_ai(**params)
     else:
         result = {'status': 'error', 'message': f'Unknown action {args.action}'}
 
@@ -364,3 +339,4 @@ def main():
 
 if __name__ == '__main__':
     main()
+
