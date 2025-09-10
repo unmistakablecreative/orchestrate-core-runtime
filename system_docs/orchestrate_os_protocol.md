@@ -142,26 +142,61 @@ Example:
 All entries must include `"tags": ["insight"]` if they’re high-signal memory items.
 
 ---
+### 🔒 Credential Management
 
-## 🔒 Credential Management
+- ✅ All keys must be injected using `system_settings.set_credential`
+- ✅ The function auto-scans the target script for expected credential keys using safe patterns:
+  - `load_credential("key")`
+  - `creds.get("key")`
+  - `creds["key"]`
 
-- ✅ All keys go in `credentials.json`
-- ✅ Set using:
+- ✅ You only need to provide:
+```json
+{
+  "value": "your-api-key",
+  "script_path": "tools/my_tool.py"
+}
+```
+
+- 🧠 The system will:
+  - Scan the tool for valid credential key names (e.g. `openai_api_key`, `convertkit_token`)
+  - Filter out generic or unsafe keys like `"token"` or `"api_key"`
+  - Write the same value to all matched keys in `credentials.json`
+  - Fallback to writing inside the tool's directory if no system-level file exists
+
+- ❌ Never manually modify `credentials.json`
+- ❌ Do not guess the credential key — let the scanner validate it
+- ✅ Keys are stored in lowercase, namespaced style: `convertkit_api_key`, `openai_token`, etc.
+- ✅ Keys are normalized and checked for safety (length, structure, common provider names)
+
+---
+
+Example:
 
 ```json
 {
   "tool_name": "system_settings",
   "action": "set_credential",
   "params": {
-    "value": "sk-abc123",
-    "script_path": "tools/my_tool.py",
-    "key": "api_token"
+    "value": "sk-outline-abc123",
+    "script_path": "tools/outline_editor.py"
   }
 }
 ```
 
-- ❌ Never write directly to `credentials.json`
-- ✅ Keys are auto-normalized to lowercase
+Response:
+
+```json
+{
+  "status": "success",
+  "keys_set": ["outline_api_key"],
+  "message": "✅ Credential injected into: outline_api_key"
+}
+```
+
+---
+
+✅ This ensures no more hallucinated credential names or broken integrations. You inject once — the system handles the rest.
 
 ---
 
