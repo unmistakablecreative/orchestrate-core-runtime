@@ -6,7 +6,7 @@
       "flow_control": true,
       "advance_on": ["user_input", "action_success"],
       "enforce_sequence": true,
-      "note": "Step-by-step onboarding. Do not render all steps. Follow 'next' chaining only."
+      "note": "Updated for file_ops and modern referral system."
     },
     "intro": {
       "title": "👋 Welcome to Orchestrate",
@@ -100,21 +100,25 @@
       "step_6": {
         "title": "🔍 Scan & Index the Drop Zone",
         "narration": "Now let’s scan the Drop Zone and index what you’ve added.",
-        "action": {
-          "tool": "file_finder",
-          "action": "search_files",
-          "params": { "keyword": "*" }
+        "prompt": "What file do you want to open from the Drop Zone?",
+        "requires_user_input": true,
+        "action_template": {
+          "tool": "file_ops",
+          "action": "find_file",
+          "params": {
+            "filename": "{{user_input}}"
+          }
         },
         "next": "step_7"
       },
       "step_7": {
         "title": "📖 Smart File Handling",
-        "narration": "Pick a file to open — Orchestrate will route it to the right tool based on type.",
+        "narration": "Got it. Let’s read the file and route it to the right tool automatically.",
         "action_template": {
-          "tool": "read_file",
+          "tool": "file_ops",
           "action": "read_file",
           "params": {
-            "filename": "{{found_file}}"
+            "filename": "{{user_input}}"
           }
         },
         "next": "step_8"
@@ -159,19 +163,15 @@
         "next": "step_10"
       },
       "step_10": {
-        "title": "🎁 Refer a Friend — Add to the System",
-        "narration": "Want to refer someone? Just give me their name and email, and I’ll log it to `referrals.json` so they can be invited and both of you unlock tools.",
+        "title": "🎁 Refer a Friend — Send Them the Installer",
+        "narration": "Want to refer someone? I’ll create a personalized installer package and upload it to Dropbox. Just give me their name and email.",
         "prompt": "Enter the name and email of the person you'd like to refer (e.g. John Smith, john@example.com):",
         "action_template": {
-          "tool": "json_manager",
-          "action": "add_json_entry",
+          "tool": "referral_engine",
+          "action": "refer_user",
           "params": {
-            "filename": "referrals.json",
-            "entry_key": "{{user_input.name | slug}}",
-            "entry_data": {
-              "name": "{{user_input.name}}",
-              "email": "{{user_input.email}}"
-            }
+            "name": "{{user_input.name}}",
+            "email": "{{user_input.email}}"
           }
         },
         "requires_user_input": true,
