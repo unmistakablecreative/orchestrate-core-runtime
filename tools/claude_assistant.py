@@ -81,7 +81,7 @@ def assign_task(params):
     if create_output_doc:
         context["hint"] = "Create an outline document for this task using execution_hub.py with outline_editor.create_doc"
 
-    queue_file = os.path.join(os.getcwd(), "data/claude_task_queue.json")
+    queue_file = "/orchestrate_user/claude_task_queue.json"
     os.makedirs(os.path.dirname(queue_file), exist_ok=True)
 
     # Load queue
@@ -180,7 +180,7 @@ def check_task_status(params):
         return {"status": "error", "message": "❌ Missing required field: task_id"}
 
     # Check queue
-    queue_file = os.path.join(os.getcwd(), "data/claude_task_queue.json")
+    queue_file = "/orchestrate_user/claude_task_queue.json"
     if os.path.exists(queue_file):
         with open(queue_file, 'r', encoding='utf-8') as f:
             queue = json.load(f)
@@ -195,7 +195,7 @@ def check_task_status(params):
                 }
 
     # Check results
-    results_file = os.path.join(os.getcwd(), "data/claude_task_results.json")
+    results_file = "/orchestrate_user/claude_task_results.json"
     if os.path.exists(results_file):
         try:
             with open(results_file, 'r', encoding='utf-8') as f:
@@ -233,7 +233,7 @@ def get_task_result(params):
     if not task_id:
         return {"status": "error", "message": "❌ Missing required field: task_id"}
 
-    results_file = os.path.join(os.getcwd(), "data/claude_task_results.json")
+    results_file = "/orchestrate_user/claude_task_results.json"
 
     if not os.path.exists(results_file):
         return {
@@ -268,7 +268,7 @@ def get_all_results(params):
 
     No parameters needed.
     """
-    results_file = os.path.join(os.getcwd(), "data/claude_task_results.json")
+    results_file = "/orchestrate_user/claude_task_results.json"
 
     if not os.path.exists(results_file):
         return {
@@ -337,7 +337,7 @@ def cancel_task(params):
     if not task_id:
         return {"status": "error", "message": "❌ Missing required field: task_id"}
 
-    queue_file = os.path.join(os.getcwd(), "data/claude_task_queue.json")
+    queue_file = "/orchestrate_user/claude_task_queue.json"
 
     if not os.path.exists(queue_file):
         return {"status": "error", "message": "❌ No task queue found"}
@@ -401,7 +401,7 @@ def update_task(params):
     if not any([new_description, new_priority, new_context]):
         return {"status": "error", "message": "❌ Must provide at least one field to update (description, priority, or context)"}
 
-    queue_file = os.path.join(os.getcwd(), "data/claude_task_queue.json")
+    queue_file = "/orchestrate_user/claude_task_queue.json"
 
     if not os.path.exists(queue_file):
         return {"status": "error", "message": "❌ No task queue found"}
@@ -464,7 +464,7 @@ def process_queue(params):
     2. Execute each task
     3. Call log_task_completion when done
     """
-    queue_file = os.path.join(os.getcwd(), "data/claude_task_queue.json")
+    queue_file = "/orchestrate_user/claude_task_queue.json"
 
     if not os.path.exists(queue_file):
         return {
@@ -523,7 +523,7 @@ def mark_task_in_progress(params):
     if not task_id:
         return {"status": "error", "message": "❌ Missing required field: task_id"}
 
-    queue_file = os.path.join(os.getcwd(), "data/claude_task_queue.json")
+    queue_file = "/orchestrate_user/claude_task_queue.json"
 
     if not os.path.exists(queue_file):
         return {"status": "error", "message": "❌ No task queue found"}
@@ -682,7 +682,7 @@ def log_task_completion(params):
         return {"status": "error", "message": "❌ Missing required field: status"}
 
     # Update queue status
-    queue_file = os.path.join(os.getcwd(), "data/claude_task_queue.json")
+    queue_file = "/orchestrate_user/claude_task_queue.json"
     if os.path.exists(queue_file):
         try:
             with open(queue_file, 'r', encoding='utf-8') as f:
@@ -699,7 +699,7 @@ def log_task_completion(params):
             print(f"Warning: Could not update queue: {e}", file=sys.stderr)
 
     # Write result
-    results_file = os.path.join(os.getcwd(), "data/claude_task_results.json")
+    results_file = "/orchestrate_user/claude_task_results.json"
 
     # Load existing results
     if os.path.exists(results_file):
@@ -869,7 +869,7 @@ def get_task_results(params):
     output_format = params.get("format", "json")
     limit = params.get("limit", 10)
 
-    results_file = os.path.join(os.getcwd(), "data/claude_task_results.json")
+    results_file = "/orchestrate_user/claude_task_results.json"
 
     if not os.path.exists(results_file):
         if output_format == "table":
