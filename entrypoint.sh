@@ -118,6 +118,13 @@ echo ""
 echo "📄 Instruction file content:"
 cat "$GPT_FILE"
 
+# Copy queue watcher to host directory
+if [ -f "claude_queue_watcher.py" ]; then
+  cp claude_queue_watcher.py /orchestrate_user/claude_queue_watcher.py
+  chmod +x /orchestrate_user/claude_queue_watcher.py
+  echo "✅ Queue watcher installed"
+fi
+
 # Launch tunnel + FastAPI
 ngrok config add-authtoken "$NGROK_TOKEN"
 ngrok http --domain="$NGROK_DOMAIN" 8000 > /dev/null &
